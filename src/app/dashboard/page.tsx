@@ -20,14 +20,34 @@ export default function DashboardPage() {
   const totalBalance =
     accounts?.reduce((acc, account) => acc + account.balance, 0) || 0;
 
-  const totalIncome =
+  // Get current month's transactions
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const monthName = now.toLocaleDateString("id-ID", { month: "long" });
+
+  const monthlyIncome =
     transactions
-      ?.filter((t) => t.type === "income")
+      ?.filter((t) => {
+        const txDate = new Date(t.date);
+        return (
+          t.type === "income" &&
+          txDate.getMonth() === currentMonth &&
+          txDate.getFullYear() === currentYear
+        );
+      })
       .reduce((acc, t) => acc + t.amount, 0) || 0;
 
-  const totalExpense =
+  const monthlyExpense =
     transactions
-      ?.filter((t) => t.type === "expense")
+      ?.filter((t) => {
+        const txDate = new Date(t.date);
+        return (
+          t.type === "expense" &&
+          txDate.getMonth() === currentMonth &&
+          txDate.getFullYear() === currentYear
+        );
+      })
       .reduce((acc, t) => acc + t.amount, 0) || 0;
 
   if (profileLoading || accountsLoading || transactionsLoading) {
@@ -72,9 +92,13 @@ export default function DashboardPage() {
                 <p className="text-primary-foreground/80 text-sm font-medium mb-1">
                   Total Saldo
                 </p>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                <h2 className="text-3xl md:text-4xl font-bold mb-2">
                   {formatCurrency(totalBalance, profile?.currency)}
                 </h2>
+
+                <p className="text-primary-foreground/70 text-xs font-medium mb-4">
+                  Laporan bulan {monthName}
+                </p>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
@@ -87,7 +111,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <p className="font-semibold text-lg">
-                      {formatCurrency(totalIncome, profile?.currency)}
+                      {formatCurrency(monthlyIncome, profile?.currency)}
                     </p>
                   </div>
                   <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
@@ -100,7 +124,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <p className="font-semibold text-lg">
-                      {formatCurrency(totalExpense, profile?.currency)}
+                      {formatCurrency(monthlyExpense, profile?.currency)}
                     </p>
                   </div>
                 </div>
