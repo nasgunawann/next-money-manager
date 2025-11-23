@@ -17,7 +17,7 @@ export function MobileNav() {
   ];
 
   const rightLinks = [
-    { href: "/budget", label: "Anggaran", icon: PieChart },
+    { href: "/reports", label: "Laporan", icon: PieChart },
     { href: "/profile", label: "Profil", icon: User },
   ];
 

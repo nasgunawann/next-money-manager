@@ -14,7 +14,7 @@ export function DesktopSidebar() {
   const links = [
     { href: "/dashboard", label: "Beranda", icon: Home },
     { href: "/transactions", label: "Transaksi", icon: Wallet },
-    { href: "/budget", label: "Anggaran", icon: PieChart },
+    { href: "/reports", label: "Laporan", icon: PieChart },
     { href: "/profile", label: "Profil", icon: User },
     { href: "/settings", label: "Pengaturan", icon: Settings },
   ];
