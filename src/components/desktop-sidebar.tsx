@@ -6,6 +6,7 @@ import { Home, PieChart, Wallet, User, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
 
 export function DesktopSidebar() {
   const pathname = usePathname();
@@ -18,6 +19,14 @@ export function DesktopSidebar() {
     { href: "/profile", label: "Profil", icon: User },
     { href: "/settings", label: "Pengaturan", icon: Settings },
   ];
+
+  // Prefetch all navigation links for faster navigation
+  useEffect(() => {
+    links.forEach((link) => {
+      router.prefetch(link.href);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -42,13 +51,20 @@ export function DesktopSidebar() {
               key={link.href}
               href={link.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                "group flex items-center gap-3 px-4 py-3 rounded-lg",
+                "transition-all duration-150 ease-out",
+                "transform hover:scale-[1.02] active:scale-[0.98]",
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                  ? "bg-sidebar-accent text-sidebar-primary font-medium shadow-sm"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
-              <Icon className="h-5 w-5" />
+              <Icon
+                className={cn(
+                  "h-5 w-5 transition-transform duration-200",
+                  isActive ? "scale-110" : "group-hover:scale-110"
+                )}
+              />
               {link.label}
             </Link>
           );
@@ -58,7 +74,7 @@ export function DesktopSidebar() {
       <div className="p-4 border-t border-sidebar-border">
         <Button
           variant="ghost"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-150"
           onClick={handleLogout}
         >
           <LogOut className="mr-2 h-4 w-4" />

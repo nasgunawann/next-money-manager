@@ -40,7 +40,10 @@ export async function middleware(request: NextRequest) {
   // Protected routes
   if (
     request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/onboarding")
+    request.nextUrl.pathname.startsWith("/onboarding") ||
+    request.nextUrl.pathname.startsWith("/profile") ||
+    request.nextUrl.pathname.startsWith("/transactions") ||
+    request.nextUrl.pathname.startsWith("/reports")
   ) {
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));
