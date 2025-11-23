@@ -124,14 +124,17 @@ export function AddTransactionDialog({
         if (tx2Error) throw tx2Error;
 
         // Update Balances
-        await supabase.rpc("increment_balance", {
+        const { error: rpcError1 } = await supabase.rpc("increment_balance", {
           account_id: accountId,
           amount: -numericAmount,
         });
-        await supabase.rpc("increment_balance", {
+        if (rpcError1) throw rpcError1;
+
+        const { error: rpcError2 } = await supabase.rpc("increment_balance", {
           account_id: targetAccountId,
           amount: numericAmount,
         });
+        if (rpcError2) throw rpcError2;
       } else {
         // Handle Income/Expense
         const { error } = await supabase.from("transactions").insert({
@@ -149,10 +152,11 @@ export function AddTransactionDialog({
         // Update Balance
         const balanceChange =
           type === "income" ? numericAmount : -numericAmount;
-        await supabase.rpc("increment_balance", {
+        const { error: rpcError } = await supabase.rpc("increment_balance", {
           account_id: accountId,
           amount: balanceChange,
         });
+        if (rpcError) throw rpcError;
       }
 
       await queryClient.invalidateQueries({ queryKey: ["transactions"] });
