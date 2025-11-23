@@ -2,21 +2,35 @@
 
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts } from "@/hooks/use-accounts";
-import { formatCurrency } from "@/lib/utils";
+import { useTransactions } from "@/hooks/use-transactions";
+import { formatCurrency, cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
+import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 
 export default function DashboardPage() {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
+  const { data: transactions, isLoading: transactionsLoading } =
+    useTransactions();
 
   const totalBalance =
     accounts?.reduce((acc, account) => acc + account.balance, 0) || 0;
 
-  if (profileLoading || accountsLoading) {
+  const totalIncome =
+    transactions
+      ?.filter((t) => t.type === "income")
+      .reduce((acc, t) => acc + t.amount, 0) || 0;
+
+  const totalExpense =
+    transactions
+      ?.filter((t) => t.type === "expense")
+      .reduce((acc, t) => acc + t.amount, 0) || 0;
+
+  if (profileLoading || accountsLoading || transactionsLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -42,11 +56,11 @@ export default function DashboardPage() {
               Ringkasan keuangan Anda hari ini.
             </p>
           </div>
-          <AddAccountDialog>
+          <AddTransactionDialog>
             <Button>
               <Plus className="mr-2 h-4 w-4" /> Tambah Transaksi
             </Button>
-          </AddAccountDialog>
+          </AddTransactionDialog>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -72,7 +86,9 @@ export default function DashboardPage() {
                         Pemasukan
                       </span>
                     </div>
-                    <p className="font-semibold text-lg">Rp 0</p>
+                    <p className="font-semibold text-lg">
+                      {formatCurrency(totalIncome, profile?.currency)}
+                    </p>
                   </div>
                   <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-1">
@@ -83,7 +99,9 @@ export default function DashboardPage() {
                         Pengeluaran
                       </span>
                     </div>
-                    <p className="font-semibold text-lg">Rp 0</p>
+                    <p className="font-semibold text-lg">
+                      {formatCurrency(totalExpense, profile?.currency)}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -155,28 +173,92 @@ export default function DashboardPage() {
               <h3 className="font-semibold text-foreground mb-4 text-lg">
                 Transaksi Terakhir
               </h3>
-              <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border">
-                <div className="bg-muted w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Wallet className="h-6 w-6 text-muted-foreground" />
+              {transactions && transactions.length > 0 ? (
+                <div className="space-y-3">
+                  {transactions.slice(0, 5).map((transaction) => (
+                    <Card
+                      key={transaction.id}
+                      className="border-none shadow-sm hover:bg-accent/50 transition-colors"
+                    >
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              "h-10 w-10 rounded-full flex items-center justify-center",
+                              transaction.type === "income"
+                                ? "bg-green-100 text-green-600"
+                                : transaction.type === "expense"
+                                ? "bg-red-100 text-red-600"
+                                : "bg-blue-100 text-blue-600"
+                            )}
+                          >
+                            {transaction.type === "income" ? (
+                              <ArrowDownLeft className="h-5 w-5" />
+                            ) : transaction.type === "expense" ? (
+                              <ArrowUpRight className="h-5 w-5" />
+                            ) : (
+                              <Wallet className="h-5 w-5" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground text-sm">
+                              {transaction.description ||
+                                transaction.category?.name ||
+                                "Transaksi"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(transaction.date).toLocaleDateString(
+                                "id-ID",
+                                { day: "numeric", month: "short" }
+                              )}{" "}
+                              • {transaction.account?.name}
+                            </p>
+                          </div>
+                        </div>
+                        <p
+                          className={cn(
+                            "font-semibold text-sm",
+                            transaction.type === "income"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          )}
+                        >
+                          {transaction.type === "income" ? "+" : "-"}{" "}
+                          {formatCurrency(
+                            transaction.amount,
+                            profile?.currency
+                          )}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-                <p className="text-muted-foreground text-sm">
-                  Belum ada transaksi
-                </p>
-                <Button variant="link" className="text-primary mt-2">
-                  Mulai mencatat
-                </Button>
-              </div>
+              ) : (
+                <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border">
+                  <div className="bg-muted w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Wallet className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Belum ada transaksi
+                  </p>
+                  <AddTransactionDialog>
+                    <Button variant="link" className="text-primary mt-2">
+                      Mulai mencatat
+                    </Button>
+                  </AddTransactionDialog>
+                </div>
+              )}
             </section>
           </div>
         </div>
 
         {/* Floating Action Button (Mobile Only) */}
         <div className="fixed bottom-20 right-6 md:hidden z-40">
-          <AddAccountDialog>
+          <AddTransactionDialog>
             <Button size="icon" className="h-14 w-14 rounded-full shadow-xl">
               <Plus className="h-6 w-6" />
             </Button>
-          </AddAccountDialog>
+          </AddTransactionDialog>
         </div>
       </div>
     </AppLayout>
