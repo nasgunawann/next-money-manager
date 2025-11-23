@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
+import { AddAccountDialog } from "@/components/add-account-dialog";
 
 export default function DashboardPage() {
   const { data: profile, isLoading: profileLoading } = useProfile();
@@ -41,9 +42,11 @@ export default function DashboardPage() {
               Ringkasan keuangan Anda hari ini.
             </p>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> Tambah Transaksi
-          </Button>
+          <AddAccountDialog>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" /> Tambah Transaksi
+            </Button>
+          </AddAccountDialog>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -133,13 +136,15 @@ export default function DashboardPage() {
                   </Card>
                 ))}
 
-                <Button
-                  variant="outline"
-                  className="w-full border-dashed border-2 h-auto py-4 text-muted-foreground hover:text-foreground hover:border-primary/50 flex flex-col gap-2"
-                >
-                  <Plus className="h-6 w-6" />
-                  <span>Tambah Akun Baru</span>
-                </Button>
+                <AddAccountDialog>
+                  <Button
+                    variant="outline"
+                    className="w-full border-dashed border-2 h-auto py-4 text-muted-foreground hover:text-foreground hover:border-primary/50 flex flex-col gap-2"
+                  >
+                    <Plus className="h-6 w-6" />
+                    <span>Tambah Akun Baru</span>
+                  </Button>
+                </AddAccountDialog>
               </div>
             </section>
           </div>
@@ -167,9 +172,11 @@ export default function DashboardPage() {
 
         {/* Floating Action Button (Mobile Only) */}
         <div className="fixed bottom-20 right-6 md:hidden z-40">
-          <Button size="icon" className="h-14 w-14 rounded-full shadow-xl">
-            <Plus className="h-6 w-6" />
-          </Button>
+          <AddAccountDialog>
+            <Button size="icon" className="h-14 w-14 rounded-full shadow-xl">
+              <Plus className="h-6 w-6" />
+            </Button>
+          </AddAccountDialog>
         </div>
       </div>
     </AppLayout>
