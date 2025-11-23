@@ -122,24 +122,24 @@ export default function DashboardPage() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 {accounts?.map((account) => (
                   <Card
                     key={account.id}
                     className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card"
                   >
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
                         <div
-                          className="h-10 w-10 rounded-full flex items-center justify-center text-white"
+                          className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
                           style={{
                             backgroundColor: account.color || "#94a3b8",
                           }}
                         >
-                          <Wallet className="h-5 w-5" />
+                          <Wallet className="h-6 w-6" />
                         </div>
-                        <div>
-                          <p className="font-medium text-foreground">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-foreground truncate">
                             {account.name}
                           </p>
                           <p className="text-xs text-muted-foreground capitalize">
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                           </p>
                         </div>
                       </div>
-                      <p className="font-semibold text-foreground">
+                      <p className="font-semibold text-lg text-foreground">
                         {formatCurrency(account.balance, profile?.currency)}
                       </p>
                     </CardContent>
@@ -250,15 +250,6 @@ export default function DashboardPage() {
               )}
             </section>
           </div>
-        </div>
-
-        {/* Floating Action Button (Mobile Only) */}
-        <div className="fixed bottom-20 right-6 md:hidden z-40">
-          <AddTransactionDialog>
-            <Button size="icon" className="h-14 w-14 rounded-full shadow-xl">
-              <Plus className="h-6 w-6" />
-            </Button>
-          </AddTransactionDialog>
         </div>
       </div>
     </AppLayout>
