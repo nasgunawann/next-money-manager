@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
 import { useProfile } from "@/hooks/use-profile";
-import { useAccounts } from "@/hooks/use-accounts";
+import { useAccounts, Account } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,12 +12,15 @@ import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
+import { AccountDetailDialog } from "@/components/account-detail-dialog";
 
 export default function DashboardPage() {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
   const { data: transactions, isLoading: transactionsLoading } =
     useTransactions();
+
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   const totalBalance =
     accounts?.reduce((acc, account) => acc + account.balance, 0) || 0;
@@ -137,20 +142,23 @@ export default function DashboardPage() {
                 <h3 className="font-semibold text-foreground text-lg">
                   Akun Saya
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
-                >
-                  Lihat Semua
-                </Button>
+                <Link href="/accounts">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
+                  >
+                    Lihat Semua
+                  </Button>
+                </Link>
               </div>
 
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 {accounts?.map((account) => (
                   <Card
                     key={account.id}
-                    className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card"
+                    className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
+                    onClick={() => setSelectedAccount(account)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3 mb-3">
@@ -276,6 +284,12 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <AccountDetailDialog
+        account={selectedAccount}
+        open={!!selectedAccount}
+        onOpenChange={(open) => !open && setSelectedAccount(null)}
+      />
     </AppLayout>
   );
 }

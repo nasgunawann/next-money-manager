@@ -346,12 +346,7 @@ export function AddTransactionDialog({
   }
 
   return (
-    <Drawer
-      open={open ?? isOpen}
-      onOpenChange={handleOpenChange}
-      modal={true}
-      dismissible={false}
-    >
+    <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange} modal={true}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
