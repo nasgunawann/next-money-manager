@@ -248,9 +248,9 @@ export function AccountDetailDialog({
             <AlertDialogHeader>
               <AlertDialogTitle>Hapus Sumber Dana?</AlertDialogTitle>
               <AlertDialogDescription>
-                Apakah Anda yakin ingin menghapus "{account.name}"? Tindakan ini
-                tidak dapat dibatalkan. Sumber dana yang memiliki transaksi
-                tidak dapat dihapus.
+                Apakah Anda yakin ingin menghapus &quot;{account.name}&quot;?
+                Tindakan ini tidak dapat dibatalkan. Sumber dana yang memiliki
+                transaksi tidak dapat dihapus.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -302,9 +302,9 @@ export function AccountDetailDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Sumber Dana?</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus "{account.name}"? Tindakan ini
-              tidak dapat dibatalkan. Sumber dana yang memiliki transaksi tidak
-              dapat dihapus.
+              Apakah Anda yakin ingin menghapus &quot;{account.name}&quot;?
+              Tindakan ini tidak dapat dibatalkan. Sumber dana yang memiliki
+              transaksi tidak dapat dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -312,7 +312,7 @@ export function AccountDetailDialog({
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destruct ive-foreground hover:bg-destructive/90"
             >
               {isDeleting ? (
                 <>

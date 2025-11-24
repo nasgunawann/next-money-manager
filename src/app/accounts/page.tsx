@@ -26,8 +26,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LucideIcon } from "lucide-react";
 
-const ACCOUNT_ICONS: Record<string, any> = {
+const ACCOUNT_ICONS: Record<string, LucideIcon> = {
   cash: Banknote,
   bank: CreditCard,
   ewallet: Smartphone,
