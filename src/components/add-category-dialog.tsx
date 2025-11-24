@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProfile } from "@/hooks/use-profile";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -145,10 +146,13 @@ export function AddCategoryDialog({
       if (error) throw error;
 
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
+      toast.success("Kategori berhasil dibuat");
       handleOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating category:", error);
-      alert("Gagal membuat kategori. Silakan coba lagi.");
+      toast.error(
+        error.message || "Gagal membuat kategori. Silakan coba lagi."
+      );
     } finally {
       setIsLoading(false);
     }
