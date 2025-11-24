@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Loader2, CalendarIcon, Settings } from "lucide-react";
 import { format } from "date-fns";
@@ -56,7 +56,6 @@ export function AddTransactionDialog({
   const [isOpen, setIsOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const queryClient = useQueryClient();
-  const { data: profile } = useProfile();
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
 
@@ -177,7 +176,7 @@ export function AddTransactionDialog({
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
       <Tabs
         value={type}
-        onValueChange={(v: string) => setType(v as any)}
+        onValueChange={(v: string) => setType(v as "income" | "expense" | "transfer")}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-3">

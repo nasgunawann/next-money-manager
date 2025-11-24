@@ -32,7 +32,6 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -67,7 +66,7 @@ import {
 } from "lucide-react";
 
 // Icon mapping
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   utensils: Utensils,
   bus: Bus,
   "shopping-bag": ShoppingBag,
@@ -116,8 +115,8 @@ export function ManageCategoriesDialog({
       await deleteCategory(deleteCategoryId);
       toast.success("Kategori berhasil dihapus");
       setDeleteCategoryId(null);
-    } catch (error: any) {
-      toast.error(error.message || "Gagal menghapus kategori");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal menghapus kategori");
     }
   };
 

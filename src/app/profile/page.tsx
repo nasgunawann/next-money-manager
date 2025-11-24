@@ -88,8 +88,6 @@ export default function ProfilePage() {
       })
       .reduce((acc, t) => acc + t.amount, 0) || 0;
 
-  const totalTransactions = transactions?.length || 0;
-
   const handleEditClick = () => {
     if (profile) {
       setFullName(profile.full_name || "");
@@ -107,8 +105,8 @@ export default function ProfilePage() {
       });
       toast.success("Profil berhasil diperbarui");
       setIsEditOpen(false);
-    } catch (error: any) {
-      toast.error(error.message || "Gagal memperbarui profil");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal memperbarui profil");
     }
   };
 
@@ -123,8 +121,8 @@ export default function ProfilePage() {
         theme: newTheme,
       });
       toast.success("Tema berhasil diubah");
-    } catch (error: any) {
-      toast.error(error.message || "Gagal mengubah tema");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal mengubah tema");
       // Revert theme change on error
       setTheme(previousTheme);
     } finally {

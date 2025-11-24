@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -98,8 +97,8 @@ export default function OnboardingPage() {
       if (categoriesError) throw categoriesError;
 
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat menyiapkan profil");
     } finally {
       setLoading(false);
     }

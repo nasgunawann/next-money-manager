@@ -6,7 +6,6 @@ import { useTransactions, Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,11 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Wallet,
   ArrowUpRight,
   ArrowDownLeft,
   Search,
-  Filter,
   ArrowRightLeft,
 } from "lucide-react";
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";

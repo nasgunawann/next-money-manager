@@ -41,8 +41,8 @@ export default function SignupPage() {
       if (error) throw error;
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar");
     } finally {
       setLoading(false);
     }
@@ -57,8 +57,8 @@ export default function SignupPage() {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar dengan Google");
     }
   };
 

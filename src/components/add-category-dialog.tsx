@@ -148,10 +148,10 @@ export function AddCategoryDialog({
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Kategori berhasil dibuat");
       handleOpenChange(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating category:", error);
       toast.error(
-        error.message || "Gagal membuat kategori. Silakan coba lagi."
+        error instanceof Error ? error.message : "Gagal membuat kategori. Silakan coba lagi."
       );
     } finally {
       setIsLoading(false);
