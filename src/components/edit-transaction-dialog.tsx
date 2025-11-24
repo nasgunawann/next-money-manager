@@ -151,10 +151,10 @@ export function EditTransactionDialog({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Akun</Label>
+          <Label>Sumber dana</Label>
           <Select value={accountId} onValueChange={setAccountId} required>
             <SelectTrigger>
-              <SelectValue placeholder="Pilih Akun" />
+              <SelectValue placeholder="Pilih Sumber dana" />
             </SelectTrigger>
             <SelectContent>
               {accounts?.map((acc) => (

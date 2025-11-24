@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts } from "@/hooks/use-accounts";
 import { useCategories } from "@/hooks/use-categories";
+import { ManageCategoriesDialog } from "@/components/manage-categories-dialog";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Loader2, CalendarIcon } from "lucide-react";
+import { Loader2, CalendarIcon, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -206,10 +207,10 @@ export function AddTransactionDialog({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Akun {type === "transfer" ? "Asal" : ""}</Label>
+          <Label>Sumber dana {type === "transfer" ? "Asal" : ""}</Label>
           <Select value={accountId} onValueChange={setAccountId} required>
             <SelectTrigger>
-              <SelectValue placeholder="Pilih Akun" />
+              <SelectValue placeholder="Pilih Sumber dana" />
             </SelectTrigger>
             <SelectContent>
               {accounts?.map((acc) => (
@@ -223,14 +224,14 @@ export function AddTransactionDialog({
 
         {type === "transfer" ? (
           <div className="space-y-2">
-            <Label>Akun Tujuan</Label>
+            <Label>Sumber dana Tujuan</Label>
             <Select
               value={targetAccountId}
               onValueChange={setTargetAccountId}
               required
             >
               <SelectTrigger>
-                <SelectValue placeholder="Pilih Akun" />
+                <SelectValue placeholder="Pilih Sumber dana" />
               </SelectTrigger>
               <SelectContent>
                 {accounts
@@ -245,7 +246,20 @@ export function AddTransactionDialog({
           </div>
         ) : (
           <div className="space-y-2">
-            <Label>Kategori</Label>
+            <div className="flex items-center gap-2">
+              <Label>Kategori</Label>
+              <ManageCategoriesDialog>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs"
+                >
+                  <Settings className="h-3 w-3 mr-1" />
+                  Kelola
+                </Button>
+              </ManageCategoriesDialog>
+            </div>
             <Select value={categoryId} onValueChange={setCategoryId} required>
               <SelectTrigger>
                 <SelectValue placeholder="Pilih Kategori" />
@@ -332,7 +346,12 @@ export function AddTransactionDialog({
   }
 
   return (
-    <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
+    <Drawer
+      open={open ?? isOpen}
+      onOpenChange={handleOpenChange}
+      modal={true}
+      dismissible={false}
+    >
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
