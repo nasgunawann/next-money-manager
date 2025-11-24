@@ -37,6 +37,15 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Redirect root to login (or dashboard if logged in)
+  if (request.nextUrl.pathname === "/") {
+    if (user) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    } else {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
   // Protected routes
   if (
     request.nextUrl.pathname.startsWith("/dashboard") ||
