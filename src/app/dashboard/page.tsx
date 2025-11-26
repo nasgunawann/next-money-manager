@@ -212,11 +212,11 @@ export default function DashboardPage() {
                       key={transaction.id}
                       className="border-none shadow-sm hover:bg-accent/50 transition-colors"
                     >
-                      <CardContent className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                      <CardContent className="p-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div
                             className={cn(
-                              "h-10 w-10 rounded-full flex items-center justify-center",
+                              "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
                               transaction.type === "income"
                                 ? "bg-green-100 text-green-600"
                                 : transaction.type === "expense"
@@ -232,13 +232,13 @@ export default function DashboardPage() {
                               <Wallet className="h-5 w-5" />
                             )}
                           </div>
-                          <div>
-                            <p className="font-medium text-foreground text-sm">
+                          <div className="min-w-0">
+                            <p className="font-medium text-foreground text-sm truncate">
                               {transaction.description ||
                                 transaction.category?.name ||
                                 "Transaksi"}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate">
                               {new Date(transaction.date).toLocaleDateString(
                                 "id-ID",
                                 { day: "numeric", month: "short" }
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                         </div>
                         <p
                           className={cn(
-                            "font-semibold text-sm",
+                            "font-semibold text-sm whitespace-nowrap text-right shrink-0",
                             transaction.type === "income"
                               ? "text-green-600"
                               : "text-red-600"

@@ -165,8 +165,8 @@ export default function TransactionsPage() {
                 className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
                 onClick={() => handleTransactionClick(transaction)}
               >
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div
                       className={cn(
                         "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
@@ -185,7 +185,7 @@ export default function TransactionsPage() {
                         <ArrowRightLeft className="h-5 w-5" />
                       )}
                     </div>
-                    <div className="overflow-hidden">
+                    <div className="min-w-0">
                       <p className="font-medium text-foreground text-sm truncate">
                         {transaction.description ||
                           transaction.category?.name ||
@@ -201,7 +201,7 @@ export default function TransactionsPage() {
                   </div>
                   <p
                     className={cn(
-                      "font-semibold text-sm whitespace-nowrap ml-2",
+                      "font-semibold text-sm whitespace-nowrap ml-2 text-right shrink-0",
                       transaction.type === "income"
                         ? "text-green-600 dark:text-green-400"
                         : transaction.type === "expense"
