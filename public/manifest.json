@@ -3,7 +3,7 @@
   "short_name": "MoneyManager",
   "description": "Manage your finances with ease",
   "start_url": "/",
-  "display": "fullscreen",
+  "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
