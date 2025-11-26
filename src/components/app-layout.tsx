@@ -6,10 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { useProfile } from "@/hooks/use-profile";
+import { cn } from "@/lib/utils";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { data: profile } = useProfile();
   const firstName = profile?.full_name?.split(" ")[0];
 
@@ -61,6 +63,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer);
   }, [pathname]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 32);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <DesktopSidebar />
@@ -77,12 +88,26 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="md:pl-64 pb-16 md:pb-0 transition-all duration-300">
-        <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
-            <h1 className="text-lg font-semibold text-foreground md:text-xl">
+        <header
+          className={cn(
+            "sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-all duration-300"
+          )}
+        >
+          <div
+            className={cn(
+              "max-w-7xl mx-auto px-4 md:px-8",
+              isScrolled ? "py-2" : "py-4"
+            )}
+          >
+            <h1
+              className={cn(
+                "font-semibold text-foreground transition-all duration-300",
+                isScrolled ? "text-base md:text-lg" : "text-lg md:text-xl"
+              )}
+            >
               {headerContent.title}
             </h1>
-            {headerContent.subtitle && (
+            {headerContent.subtitle && !isScrolled && (
               <p className="text-sm text-muted-foreground mt-1">
                 {headerContent.subtitle}
               </p>
