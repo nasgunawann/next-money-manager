@@ -5,16 +5,19 @@ import { DesktopSidebar } from "@/components/desktop-sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
+import { useProfile } from "@/hooks/use-profile";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isNavigating, setIsNavigating] = useState(false);
+  const { data: profile } = useProfile();
+  const firstName = profile?.full_name?.split(" ")[0];
+
   const headerContent = useMemo(() => {
     const menuItems = [
       {
         href: "/dashboard",
-        title: "Dashboard",
-        subtitle: "Ringkasan keuangan Anda hari ini.",
+        title: firstName ? `Halo, ${firstName}` : "Dashboard",
       },
       {
         href: "/transactions",
@@ -50,7 +53,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
     const match = menuItems.find((item) => pathname?.startsWith(item.href));
     return match ?? { title: "MoneyManager" };
-  }, [pathname]);
+  }, [pathname, firstName]);
 
   useEffect(() => {
     setIsNavigating(true);

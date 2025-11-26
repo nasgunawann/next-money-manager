@@ -66,20 +66,12 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className="p-4 md:p-8 space-y-6">
-        <div className="flex flex-col gap-3 md:flex-row md:justify-end md:items-center">
-          <div className="md:hidden">
-            <p className="text-sm text-muted-foreground">Halo,</p>
-            <p className="text-xl font-semibold text-foreground">
-              {profile?.full_name?.split(" ")[0]}
-            </p>
-          </div>
-          <div className="flex justify-end">
-            <AddTransactionDialog>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Tambah Transaksi
-              </Button>
-            </AddTransactionDialog>
-          </div>
+        <div className="hidden md:flex justify-end">
+          <AddTransactionDialog>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" /> Tambah Transaksi
+            </Button>
+          </AddTransactionDialog>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
