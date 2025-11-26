@@ -65,10 +65,22 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let ticking = false;
+    const ENTER_COLLAPSED = 96;
+    const EXIT_COLLAPSED = 48;
 
     const updateScrollState = () => {
-      const shouldShrink = window.scrollY > 64;
-      setIsScrolled((prev) => (prev === shouldShrink ? prev : shouldShrink));
+      const scrollY = window.scrollY;
+
+      setIsScrolled((prev) => {
+        if (prev && scrollY < EXIT_COLLAPSED) {
+          return false;
+        }
+        if (!prev && scrollY > ENTER_COLLAPSED) {
+          return true;
+        }
+        return prev;
+      });
+
       ticking = false;
     };
 
