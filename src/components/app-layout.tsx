@@ -64,11 +64,24 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 32);
+    let ticking = false;
+
+    const updateScrollState = () => {
+      const shouldShrink = window.scrollY > 64;
+      setIsScrolled((prev) => (prev === shouldShrink ? prev : shouldShrink));
+      ticking = false;
     };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateScrollState);
+        ticking = true;
+      }
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    updateScrollState();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
