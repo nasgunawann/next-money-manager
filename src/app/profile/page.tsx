@@ -149,14 +149,7 @@ export default function ProfilePage() {
   return (
     <AppLayout>
       <div className="p-4 md:p-8 space-y-6 pb-24 md:pb-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Profil Saya</h1>
-            <p className="text-muted-foreground">
-              Kelola informasi profil dan pengaturan akun Anda.
-            </p>
-          </div>
+        <div className="flex justify-end">
           <Button onClick={handleEditClick} variant="outline">
             <Edit className="mr-2 h-4 w-4" />
             Edit Profil

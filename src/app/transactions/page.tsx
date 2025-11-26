@@ -85,16 +85,6 @@ export default function TransactionsPage() {
   return (
     <AppLayout>
       <div className="p-4 md:p-8 space-y-6 pb-24 md:pb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Riwayat Transaksi
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola semua pemasukan dan pengeluaran Anda.
-            </p>
-          </div>
-        </div>
 
         {/* Filters */}
         <Card className="bg-card border-border shadow-sm">

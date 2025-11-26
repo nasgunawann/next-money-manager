@@ -9,21 +9,47 @@ import { useState, useEffect, useMemo } from "react";
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isNavigating, setIsNavigating] = useState(false);
-  const headerTitle = useMemo(() => {
+  const headerContent = useMemo(() => {
     const menuItems = [
-      { href: "/dashboard", label: "Beranda" },
-      { href: "/transactions", label: "Transaksi" },
-      { href: "/accounts", label: "Sumber Dana" },
-      { href: "/reports", label: "Laporan" },
-      { href: "/profile", label: "Profil" },
-      { href: "/settings", label: "Pengaturan" },
-      { href: "/onboarding", label: "Onboarding" },
+      {
+        href: "/dashboard",
+        title: "Dashboard",
+        subtitle: "Ringkasan keuangan Anda hari ini.",
+      },
+      {
+        href: "/transactions",
+        title: "Riwayat Transaksi",
+        subtitle: "Kelola semua pemasukan dan pengeluaran Anda.",
+      },
+      {
+        href: "/accounts",
+        title: "Sumber Dana",
+        subtitle: "Pantau setiap akun dan saldo Anda.",
+      },
+      {
+        href: "/reports",
+        title: "Analisis Pengeluaran",
+        subtitle: "Visualisasikan distribusi pengeluaran bulanan.",
+      },
+      {
+        href: "/profile",
+        title: "Profil Saya",
+        subtitle: "Kelola informasi profil dan pengaturan akun.",
+      },
+      {
+        href: "/settings",
+        title: "Pengaturan",
+        subtitle: "Atur preferensi aplikasi Anda.",
+      },
+      {
+        href: "/onboarding",
+        title: "Onboarding",
+        subtitle: "Lengkapi langkah awal sebelum mulai menggunakan aplikasi.",
+      },
     ];
 
-    const match = menuItems.find((item) =>
-      pathname?.startsWith(item.href)
-    );
-    return match?.label ?? "MoneyManager";
+    const match = menuItems.find((item) => pathname?.startsWith(item.href));
+    return match ?? { title: "MoneyManager" };
   }, [pathname]);
 
   useEffect(() => {
@@ -51,8 +77,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
             <h1 className="text-lg font-semibold text-foreground md:text-xl">
-              {headerTitle}
+              {headerContent.title}
             </h1>
+            {headerContent.subtitle && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {headerContent.subtitle}
+              </p>
+            )}
           </div>
         </header>
 

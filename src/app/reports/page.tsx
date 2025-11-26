@@ -101,13 +101,6 @@ export default function ReportsPage() {
   return (
     <AppLayout>
       <div className="p-4 md:p-8 max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <h1 className="text-xl font-bold text-foreground">
-            Analisis Pengeluaran
-          </h1>
-        </div>
-
         {/* Month Navigation */}
         <div className="flex items-center justify-center gap-6 py-4 mb-6">
           <button
