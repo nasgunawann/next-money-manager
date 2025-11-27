@@ -38,7 +38,6 @@ export default function DashboardPage() {
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
-  const monthName = now.toLocaleDateString("id-ID", { month: "long" });
 
   const monthlyIncome =
     transactions
