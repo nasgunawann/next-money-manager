@@ -14,6 +14,8 @@ import {
   IconArrowUpRight,
   IconArrowDownLeft,
   IconArrowsLeftRight,
+  IconCircleArrowDownRight,
+  IconCircleArrowUpRight,
 } from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
@@ -70,9 +72,92 @@ export default function DashboardPage() {
     );
   }
 
+  const OverviewPill = ({
+    label,
+    amount,
+    currency,
+    icon: Icon,
+    accentBg,
+    accentText,
+  }: {
+    label: string;
+    amount: number;
+    currency?: string;
+    icon: React.ComponentType<{ className?: string }>;
+    accentBg: string;
+    accentText: string;
+  }) => (
+    <div className="flex-1 flex items-center justify-between gap-3 px-4 py-3">
+      <div className="flex items-center gap-3">
+        <div
+          className={cn(
+            "rounded-full p-2 flex items-center justify-center shadow-sm",
+            accentBg
+          )}
+        >
+          <Icon className={cn("h-4 w-4", accentText)} />
+        </div>
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-white/75">
+            {label}
+          </p>
+          <p className="text-lg font-semibold">
+            {formatCurrency(amount, currency)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAccountCard = (account: Account) => {
+    const AccountIcon = getAccountIconComponent(account.icon, account.type);
+    return (
+      <Card
+        key={account.id}
+        className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
+        onClick={() => setSelectedAccount(account)}
+      >
+        <CardContent>
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
+              style={{
+                backgroundColor: account.color || "#94a3b8",
+              }}
+            >
+              <AccountIcon className="h-6 w-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-foreground truncate">
+                {account.name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {formatAccountType(account.type)}
+              </p>
+            </div>
+          </div>
+          <p className="font-semibold text-lg text-foreground">
+            {formatCurrency(account.balance, profile?.currency)}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const addAccountCard = (
+    <AddAccountDialog key="add-account">
+      <Card className="border border-dashed border-primary/40 bg-card text-muted-foreground hover:border-primary/80 transition-colors cursor-pointer h-full">
+        <CardContent className="p-4 flex flex-col items-center justify-center gap-2">
+          <IconPlus className="h-6 w-6" />
+          <span>Tambah Akun Baru</span>
+        </CardContent>
+      </Card>
+    </AddAccountDialog>
+  );
+
   return (
     <AppLayout>
-      <div className="p-4 md:p-8 space-y-6">
+      <div className="p-4 md:p-8 space-y-5">
         <div className="hidden md:flex justify-end">
           <AddTransactionDialog>
             <Button>
@@ -81,50 +166,47 @@ export default function DashboardPage() {
           </AddTransactionDialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Left Column (Balance & Accounts) */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Total Balance Card */}
-            <Card className="bg-primary text-primary-foreground border-none shadow-lg">
-              <CardContent className="p-6 md:p-8">
-                <p className="text-primary-foreground/80 text-sm font-medium mb-1">
-                  Total Saldo
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold mb-2">
-                  {formatCurrency(totalBalance, profile?.currency)}
-                </h2>
-
-                <p className="text-primary-foreground/70 text-xs font-medium mb-4">
-                  Laporan bulan {monthName}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="bg-green-400/20 p-1 rounded">
-                        <IconArrowDownLeft className="h-4 w-4 text-green-300" />
-                      </div>
-                      <span className="text-xs text-primary-foreground/80">
-                        Pemasukan
-                      </span>
-                    </div>
-                    <p className="font-semibold text-lg">
-                      {formatCurrency(monthlyIncome, profile?.currency)}
-                    </p>
+          <div className="md:col-span-2 space-y-5">
+            {/* Overview Hero */}
+            <Card className="relative overflow-hidden border-none bg-linear-to-br from-[#4663f1] via-[#3552d8] to-[#1f37a7] text-white shadow-2xl">
+              <CardContent className="p-5 md:p-7 space-y-4">
+                <div className="flex flex-col gap-1">
+                  <p className="text-[11px] font-semibold tracking-wide text-white/80 uppercase">
+                    Total Saldo
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-4xl md:text-4xl font-bold tracking-tight">
+                      {formatCurrency(totalBalance, profile?.currency)}
+                    </h2>
                   </div>
-                  <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="bg-red-400/20 p-1 rounded">
-                        <IconArrowUpRight className="h-4 w-4 text-red-300" />
-                      </div>
-                      <span className="text-xs text-primary-foreground/80">
-                        Pengeluaran
-                      </span>
-                    </div>
-                    <p className="font-semibold text-lg">
-                      {formatCurrency(monthlyExpense, profile?.currency)}
-                    </p>
-                  </div>
+                  <p className="text-xs opacity-80">
+                    Laporan bulan ini |{" "}
+                    {new Date().toLocaleDateString("id-ID", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+
+                <div className="bg-white/12 rounded-[26px] backdrop-blur flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/15 overflow-hidden shadow-inner border border-white/10">
+                  <OverviewPill
+                    label="Pendapatan"
+                    amount={monthlyIncome}
+                    currency={profile?.currency}
+                    icon={IconCircleArrowDownRight}
+                    accentBg="bg-emerald-100/90"
+                    accentText="text-emerald-600"
+                  />
+                  <OverviewPill
+                    label="Pengeluaran"
+                    amount={monthlyExpense}
+                    currency={profile?.currency}
+                    icon={IconCircleArrowUpRight}
+                    accentBg="bg-rose-100/90"
+                    accentText="text-rose-600"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -146,54 +228,26 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                {accounts?.map((account) => {
-                  const AccountIcon = getAccountIconComponent(
-                    account.icon,
-                    account.type
-                  );
-                  return (
-                    <Card
-                      key={account.id}
-                      className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
-                      onClick={() => setSelectedAccount(account)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div
-                            className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
-                            style={{
-                              backgroundColor: account.color || "#94a3b8",
-                            }}
-                          >
-                            <AccountIcon className="h-6 w-6" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-foreground truncate">
-                              {account.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatAccountType(account.type)}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="font-semibold text-lg text-foreground">
-                          {formatCurrency(account.balance, profile?.currency)}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+              {/* Mobile carousel */}
+              <div className="relative -mx-4 md:hidden">
+                <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-8 no-scrollbar carousel-smooth">
+                  {accounts?.map((account) => (
+                    <div key={account.id} className="snap-center shrink-0 w-64">
+                      {renderAccountCard(account)}
+                    </div>
+                  ))}
+                  <div className="snap-center shrink-0 w-64">
+                    {addAccountCard}
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-8 fade-edge-left" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-8 fade-edge-right" />
+              </div>
 
-                <AddAccountDialog>
-                  <Button
-                    variant="outline"
-                    className="w-full border-dashed border-2 h-auto py-4 text-muted-foreground hover:text-foreground hover:border-primary/50 flex flex-col gap-2"
-                  >
-                    <IconPlus className="h-6 w-6" />
-                    <span>Tambah Akun Baru</span>
-                  </Button>
-                </AddAccountDialog>
+              {/* Desktop grid */}
+              <div className="hidden md:grid grid-cols-2 gap-4">
+                {accounts?.map((account) => renderAccountCard(account))}
+                {addAccountCard}
               </div>
             </section>
           </div>

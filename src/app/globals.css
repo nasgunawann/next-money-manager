@@ -119,4 +119,36 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fade-edge-left {
+    background: linear-gradient(
+      to right,
+      var(--background) 0%,
+      color-mix(in oklch, var(--background) 80%, transparent) 60%,
+      transparent 100%
+    );
+  }
+
+  .fade-edge-right {
+    background: linear-gradient(
+      to left,
+      var(--background) 0%,
+      color-mix(in oklch, var(--background) 80%, transparent) 60%,
+      transparent 100%
+    );
+  }
+
+  .carousel-smooth {
+    scroll-behavior: smooth;
+    scroll-snap-stop: always;
+  }
 }

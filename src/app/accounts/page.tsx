@@ -51,7 +51,7 @@ export default function AccountsPage() {
     <AppLayout>
       <div className="p-4 md:p-8 space-y-4">
         {/* Total Balance Card */}
-        <Card className="bg-linear-to-br from-background to-muted/20">
+        <Card className="bg-gradient-to-br from-background to-muted/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
