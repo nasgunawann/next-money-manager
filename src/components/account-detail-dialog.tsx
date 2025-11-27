@@ -63,6 +63,7 @@ export function AccountDetailDialog({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!account) return null;
 
@@ -82,7 +83,7 @@ export function AccountDetailDialog({
         .eq("account_id", account.id);
 
       if (count && count > 0) {
-        alert(
+        setErrorMessage(
           "Tidak dapat menghapus sumber dana yang memiliki transaksi. Hapus transaksi terlebih dahulu."
         );
         setShowDeleteAlert(false);
@@ -102,12 +103,33 @@ export function AccountDetailDialog({
       onOpenChange(false); // Close the detail dialog
     } catch (error) {
       console.error("Error deleting account:", error);
-      alert("Gagal menghapus sumber dana");
+      setErrorMessage("Gagal menghapus sumber dana");
     } finally {
       setIsDeleting(false);
       setShowDeleteAlert(false);
     }
   };
+
+  const errorDialog = (
+    <AlertDialog
+      open={!!errorMessage}
+      onOpenChange={(open) => {
+        if (!open) setErrorMessage(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Terjadi Kesalahan</AlertDialogTitle>
+          <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorMessage(null)}>
+            Mengerti
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   const Content = (
     <div className="space-y-6">
@@ -272,6 +294,7 @@ export function AccountDetailDialog({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        {errorDialog}
       </>
     );
   }
@@ -326,6 +349,7 @@ export function AccountDetailDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {errorDialog}
     </>
   );
 }

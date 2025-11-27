@@ -20,6 +20,15 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,6 +78,7 @@ export function AddAccountDialog({
   const [balance, setBalance] = useState("");
   const [color, setColor] = useState(COLORS[6]); // Default Blue
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleOpenChange = (val: boolean) => {
     setIsOpen(val);
@@ -105,11 +115,32 @@ export function AddAccountDialog({
       handleOpenChange(false);
     } catch (error) {
       console.error("Error creating account:", error);
-      alert("Gagal membuat akun. Silakan coba lagi.");
+      setErrorMessage("Gagal membuat akun. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const errorDialog = (
+    <AlertDialog
+      open={!!errorMessage}
+      onOpenChange={(open) => {
+        if (!open) setErrorMessage(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Terjadi Kesalahan</AlertDialogTitle>
+          <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorMessage(null)}>
+            Mengerti
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
@@ -190,33 +221,39 @@ export function AddAccountDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Akun Baru</DialogTitle>
-            <DialogDescription>
-              Buat akun baru untuk melacak keuangan Anda.
-            </DialogDescription>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
+          <DialogTrigger asChild>{children}</DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Tambah Akun Baru</DialogTitle>
+              <DialogDescription>
+                Buat akun baru untuk melacak keuangan Anda.
+              </DialogDescription>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+        {errorDialog}
+      </>
     );
   }
 
   return (
-    <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle>Tambah Akun Baru</DrawerTitle>
-          <DrawerDescription>
-            Buat akun baru untuk melacak keuangan Anda.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
+        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Tambah Akun Baru</DrawerTitle>
+            <DrawerDescription>
+              Buat akun baru untuk melacak keuangan Anda.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+      {errorDialog}
+    </>
   );
 }

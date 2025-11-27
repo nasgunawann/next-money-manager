@@ -20,6 +20,15 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,6 +78,7 @@ export function AddTransactionDialog({
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleOpenChange = (val: boolean) => {
     setIsOpen(val);
@@ -163,13 +173,34 @@ export function AddTransactionDialog({
       handleOpenChange(false);
     } catch (error) {
       console.error("Error creating transaction:", error);
-      alert("Gagal menyimpan transaksi. Silakan coba lagi.");
+      setErrorMessage("Gagal menyimpan transaksi. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const filteredCategories = categories?.filter((c) => c.type === type);
+
+  const errorDialog = (
+    <AlertDialog
+      open={!!errorMessage}
+      onOpenChange={(open) => {
+        if (!open) setErrorMessage(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Terjadi Kesalahan</AlertDialogTitle>
+          <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorMessage(null)}>
+            Mengerti
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
@@ -331,27 +362,33 @@ export function AddTransactionDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Transaksi</DialogTitle>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
+          <DialogTrigger asChild>{children}</DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Tambah Transaksi</DialogTitle>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+        {errorDialog}
+      </>
     );
   }
 
   return (
-    <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange} modal={true}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle>Tambah Transaksi</DrawerTitle>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange} modal={true}>
+        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Tambah Transaksi</DrawerTitle>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+      {errorDialog}
+    </>
   );
 }

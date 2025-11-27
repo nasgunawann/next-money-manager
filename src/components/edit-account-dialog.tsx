@@ -18,6 +18,15 @@ import {
   DrawerTitle,
   DrawerClose,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription as AlertDialogDesc,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,10 +71,11 @@ export function EditAccountDialog({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const queryClient = useQueryClient();
 
-  const [name, setName] = useState("");
-  const [type, setType] = useState("cash");
-  const [color, setColor] = useState(COLORS[6]);
-  const [isLoading, setIsLoading] = useState(false);
+const [name, setName] = useState("");
+const [type, setType] = useState("cash");
+const [color, setColor] = useState(COLORS[6]);
+const [isLoading, setIsLoading] = useState(false);
+const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (account) {
@@ -96,11 +106,32 @@ export function EditAccountDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating account:", error);
-      alert("Gagal memperbarui akun. Silakan coba lagi.");
+      setErrorMessage("Gagal memperbarui akun. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const errorDialog = (
+    <AlertDialog
+      open={!!errorMessage}
+      onOpenChange={(open) => {
+        if (!open) setErrorMessage(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Terjadi Kesalahan</AlertDialogTitle>
+          <AlertDialogDesc>{errorMessage}</AlertDialogDesc>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorMessage(null)}>
+            Mengerti
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
@@ -167,35 +198,41 @@ export function EditAccountDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Sumber Dana</DialogTitle>
-            <DialogDescription>
-              Perbarui informasi sumber dana Anda.
-            </DialogDescription>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Sumber Dana</DialogTitle>
+              <DialogDescription>
+                Perbarui informasi sumber dana Anda.
+              </DialogDescription>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+        {errorDialog}
+      </>
     );
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader className="text-left relative">
-          <DrawerTitle>Edit Sumber Dana</DrawerTitle>
-          <DrawerDescription>
-            Perbarui informasi sumber dana Anda.
-          </DrawerDescription>
-          <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DrawerClose>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <DrawerHeader className="text-left relative">
+            <DrawerTitle>Edit Sumber Dana</DrawerTitle>
+            <DrawerDescription>
+              Perbarui informasi sumber dana Anda.
+            </DrawerDescription>
+            <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DrawerClose>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+      {errorDialog}
+    </>
   );
 }

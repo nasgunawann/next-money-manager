@@ -16,6 +16,16 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,6 +73,7 @@ export function EditTransactionDialog({
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (transaction) {
@@ -101,12 +112,6 @@ export function EditTransactionDialog({
 
   const handleDelete = async () => {
     if (!transaction) return;
-    if (
-      !confirm(
-        "Apakah Anda yakin ingin menghapus transaksi ini? Saldo akun akan dikembalikan."
-      )
-    )
-      return;
 
     setIsDeleting(true);
     try {
@@ -118,11 +123,52 @@ export function EditTransactionDialog({
       toast.error("Gagal menghapus transaksi");
     } finally {
       setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
   const filteredCategories = categories?.filter(
     (c) => c.type === transaction?.type
+  );
+
+  const deleteConfirmDialog = (
+    <AlertDialog
+      open={showDeleteConfirm}
+      onOpenChange={(open) => {
+        if (!open && !isDeleting) {
+          setShowDeleteConfirm(false);
+        } else {
+          setShowDeleteConfirm(open);
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Hapus Transaksi?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tindakan ini akan menghapus transaksi dan mengembalikan saldo akun
+            terkait. Apakah Anda yakin ingin melanjutkan?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Menghapus...
+              </>
+            ) : (
+              "Hapus"
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 
   const FormContent = (
@@ -224,7 +270,7 @@ export function EditTransactionDialog({
           type="button"
           variant="destructive"
           className="flex-1"
-          onClick={handleDelete}
+          onClick={() => setShowDeleteConfirm(true)}
           disabled={isDeleting || isLoading}
         >
           {isDeleting ? (
@@ -251,25 +297,31 @@ export function EditTransactionDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Edit Transaksi</DialogTitle>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Transaksi</DialogTitle>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+        {deleteConfirmDialog}
+      </>
     );
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle>Edit Transaksi</DrawerTitle>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Edit Transaksi</DrawerTitle>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+      {deleteConfirmDialog}
+    </>
   );
 }
