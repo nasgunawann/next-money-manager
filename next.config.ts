@@ -4,8 +4,8 @@ import withSerwistInit from "@serwist/next";
 const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
+  disable: true, // Service worker disabled for testing
+  register: false,
 });
 
 const nextConfig: NextConfig = {
