@@ -21,16 +21,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,30 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  IconLoader2,
-  IconToolsKitchen2,
-  IconBus,
-  IconShoppingBag,
-  IconMovie,
-  IconReceipt2,
-  IconHeartbeat,
-  IconSchool,
-  IconPigMoney,
-  IconCash,
-  IconWallet,
-  IconGift,
-  IconTrendingUp,
-  IconDots,
-  IconBriefcase,
-  IconCoffee,
-  IconDeviceMobile,
-  IconWifi,
-  IconHome,
-  IconCar,
-  IconPlane,
-} from "@tabler/icons-react";
+import { IconLoader2 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { CATEGORY_ICON_OPTIONS } from "@/constants/category-icons";
 
 const COLORS = [
   "#ef4444",
@@ -82,29 +51,6 @@ const COLORS = [
   "#64748b",
 ];
 
-const ICONS = [
-  { name: "utensils", icon: IconToolsKitchen2 },
-  { name: "bus", icon: IconBus },
-  { name: "shopping-bag", icon: IconShoppingBag },
-  { name: "film", icon: IconMovie },
-  { name: "receipt", icon: IconReceipt2 },
-  { name: "heart-pulse", icon: IconHeartbeat },
-  { name: "graduation-cap", icon: IconSchool },
-  { name: "piggy-bank", icon: IconPigMoney },
-  { name: "banknote", icon: IconCash },
-  { name: "wallet", icon: IconWallet },
-  { name: "gift", icon: IconGift },
-  { name: "trending-up", icon: IconTrendingUp },
-  { name: "briefcase", icon: IconBriefcase },
-  { name: "coffee", icon: IconCoffee },
-  { name: "smartphone", icon: IconDeviceMobile },
-  { name: "wifi", icon: IconWifi },
-  { name: "home", icon: IconHome },
-  { name: "car", icon: IconCar },
-  { name: "plane", icon: IconPlane },
-  { name: "more-horizontal", icon: IconDots },
-];
-
 export function AddCategoryDialog({
   children,
   open,
@@ -114,7 +60,7 @@ export function AddCategoryDialog({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+const [isOpen, setIsOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const queryClient = useQueryClient();
   const { data: profile } = useProfile();
@@ -125,21 +71,17 @@ export function AddCategoryDialog({
   const [color, setColor] = useState(COLORS[0]);
   const [icon, setIcon] = useState("more-horizontal");
   const [isLoading, setIsLoading] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
 
   const resetForm = () => {
     setName("");
     setType("expense");
     setColor(COLORS[0]);
     setIcon("more-horizontal");
-    setIsDirty(false);
   };
 
   const closeDialog = () => {
     setIsOpen(false);
     onOpenChange?.(false);
-    setShowUnsavedAlert(false);
     setTimeout(resetForm, 300);
   };
 
@@ -147,15 +89,9 @@ export function AddCategoryDialog({
     if (val) {
       setIsOpen(true);
       onOpenChange?.(true);
-      return;
+    } else {
+      closeDialog();
     }
-
-    if (isDirty) {
-      setShowUnsavedAlert(true);
-      return;
-    }
-
-    closeDialog();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -176,7 +112,6 @@ export function AddCategoryDialog({
 
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Kategori berhasil dibuat");
-      setIsDirty(false);
       handleOpenChange(false);
     } catch (error) {
       console.error("Error creating category:", error);
@@ -198,7 +133,6 @@ export function AddCategoryDialog({
           value={name}
           onChange={(e) => {
             setName(e.target.value);
-            setIsDirty(true);
           }}
           required
         />
@@ -210,7 +144,6 @@ export function AddCategoryDialog({
           value={type}
           onValueChange={(val) => {
             setType(val);
-            setIsDirty(true);
           }}
         >
           <SelectTrigger id="cat-type">
@@ -226,21 +159,20 @@ export function AddCategoryDialog({
       <div className="space-y-2">
         <Label>Ikon</Label>
         <div className="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-1">
-          {ICONS.map((item) => {
+          {CATEGORY_ICON_OPTIONS.map((item) => {
             const IconComp = item.icon;
             return (
               <button
-                key={item.name}
+                key={item.key}
                 type="button"
                 className={cn(
                   "flex items-center justify-center p-2 rounded-md hover:bg-accent transition-colors",
-                  icon === item.name
+                  icon === item.key
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "text-muted-foreground"
                 )}
                 onClick={() => {
-                  setIcon(item.name);
-                  setIsDirty(true);
+                  setIcon(item.key);
                 }}
               >
                 <IconComp className="h-5 w-5" />
@@ -264,10 +196,9 @@ export function AddCategoryDialog({
                   : "hover:scale-105"
               )}
               style={{ backgroundColor: c }}
-              onClick={() => {
-                setColor(c);
-                setIsDirty(true);
-              }}
+                onClick={() => {
+                  setColor(c);
+                }}
             />
           ))}
         </div>
@@ -303,31 +234,6 @@ export function AddCategoryDialog({
             {FormContent}
           </DialogContent>
         </Dialog>
-        <AlertDialog
-          open={showUnsavedAlert}
-          onOpenChange={(open) => {
-            if (!open) setShowUnsavedAlert(false);
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Batalkan pengisian?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Formulir kategori belum disimpan. Keluar sekarang akan menghapus
-                data yang sudah diisi.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={closeDialog}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Buang Perubahan
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </>
     );
   }
@@ -346,31 +252,6 @@ export function AddCategoryDialog({
           <div className="pb-8">{FormContent}</div>
         </DrawerContent>
       </Drawer>
-      <AlertDialog
-        open={showUnsavedAlert}
-        onOpenChange={(open) => {
-          if (!open) setShowUnsavedAlert(false);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Batalkan pengisian?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Formulir kategori belum disimpan. Keluar sekarang akan menghapus
-              data yang sudah diisi.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={closeDialog}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Buang Perubahan
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

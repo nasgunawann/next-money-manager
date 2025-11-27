@@ -31,27 +31,9 @@ import {
   IconLoader2,
   IconTrendingUp,
   IconTrendingDown,
-  IconToolsKitchen2,
-  IconBus,
-  IconShoppingBag,
-  IconMovie,
-  IconReceipt2,
-  IconHeartbeat,
-  IconSchool,
-  IconPigMoney,
-  IconCash,
-  IconWallet,
-  IconGift,
-  IconBriefcase,
-  IconCoffee,
-  IconDeviceMobile,
-  IconWifi,
-  IconHome,
-  IconCar,
-  IconPlane,
-  IconDots,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
+import { getCategoryIconComponent } from "@/constants/category-icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,30 +44,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-// Icon mapping
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  utensils: IconToolsKitchen2,
-  bus: IconBus,
-  "shopping-bag": IconShoppingBag,
-  film: IconMovie,
-  receipt: IconReceipt2,
-  "heart-pulse": IconHeartbeat,
-  "graduation-cap": IconSchool,
-  "piggy-bank": IconPigMoney,
-  banknote: IconCash,
-  wallet: IconWallet,
-  gift: IconGift,
-  "trending-up": IconTrendingUp,
-  briefcase: IconBriefcase,
-  coffee: IconCoffee,
-  smartphone: IconDeviceMobile,
-  wifi: IconWifi,
-  home: IconHome,
-  car: IconCar,
-  plane: IconPlane,
-  "more-horizontal": IconDots,
-};
-
 export function ManageCategoriesDialog({
   children,
   open,
@@ -158,7 +116,7 @@ export function ManageCategoriesDialog({
           {expenseCategories.length > 0 ? (
             <div className="grid grid-cols-1 gap-2">
               {expenseCategories.map((category) => {
-                const IconComponent = ICON_MAP[category.icon] || IconTag;
+                const IconComponent = getCategoryIconComponent(category.icon);
                 return (
                   <Card key={category.id} className="p-3">
                     <CardContent className="p-0 flex items-center justify-between">
@@ -201,7 +159,7 @@ export function ManageCategoriesDialog({
           {incomeCategories.length > 0 ? (
             <div className="grid grid-cols-1 gap-2">
               {incomeCategories.map((category) => {
-                const IconComponent = ICON_MAP[category.icon] || IconTag;
+                const IconComponent = getCategoryIconComponent(category.icon);
                 return (
                   <Card key={category.id} className="p-3">
                     <CardContent className="p-0 flex items-center justify-between">
