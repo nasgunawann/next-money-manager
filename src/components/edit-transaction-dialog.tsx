@@ -437,9 +437,8 @@ export function EditTransactionDialog({
           <div>
             <DrawerTitle>Pilih Kategori</DrawerTitle>
             <DrawerDescription>
-              Pilih kategori {transaction?.type === "income"
-                ? "pemasukan"
-                : "pengeluaran"}{" "}
+              Pilih kategori{" "}
+              {transaction?.type === "income" ? "pemasukan" : "pengeluaran"}{" "}
               atau buat kategori baru.
             </DrawerDescription>
           </div>
@@ -503,10 +502,8 @@ export function EditTransactionDialog({
             })
           ) : (
             <div className="text-center text-muted-foreground text-sm py-8">
-              Belum ada kategori {transaction?.type === "income"
-                ? "pemasukan"
-                : "pengeluaran"}
-              .
+              Belum ada kategori{" "}
+              {transaction?.type === "income" ? "pemasukan" : "pengeluaran"}.
             </div>
           )}
         </div>
