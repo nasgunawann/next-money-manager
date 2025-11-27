@@ -1,9 +1,4 @@
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  type QueryObserverOptions,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 
 export interface Transaction {
@@ -19,18 +14,7 @@ export interface Transaction {
   category?: { name: string; icon: string; color: string };
 }
 
-type TransactionsQueryOptions = Pick<
-  QueryObserverOptions<
-    Transaction[],
-    Error,
-    Transaction[],
-    Transaction[],
-    ["transactions"]
-  >,
-  "staleTime" | "gcTime"
->;
-
-export function useTransactions(options?: TransactionsQueryOptions) {
+export function useTransactions() {
   const queryClient = useQueryClient();
 
   const query = useQuery({
@@ -50,9 +34,6 @@ export function useTransactions(options?: TransactionsQueryOptions) {
       if (error) throw error;
       return data as Transaction[];
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
-    ...options,
   });
 
   const createMutation = useMutation({
