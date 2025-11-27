@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { useTransactions, Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
@@ -15,29 +15,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  IconArrowUpRight,
-  IconArrowDownLeft,
-  IconSearch,
-  IconArrowsLeftRight,
-} from "@tabler/icons-react";
+  ArrowUpRight,
+  ArrowDownLeft,
+  Search,
+  ArrowRightLeft,
+} from "lucide-react";
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
-import {
-  format,
-  isToday,
-  isYesterday,
-  parseISO,
-  startOfDay,
-} from "date-fns";
+import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
 export default function TransactionsPage() {
   const { data: profile } = useProfile();
-  const { data: transactionsData, isLoading } = useTransactions();
-  const transactions = useMemo(
-    () => transactionsData ?? [],
-    [transactionsData]
-  );
-  const hasTransactions = transactions.length > 0;
+  const { data: transactions, isLoading } = useTransactions();
 
   // Filters
   const [search, setSearch] = useState("");
@@ -59,53 +48,20 @@ export default function TransactionsPage() {
     setIsEditOpen(true);
   };
 
-  const filteredTransactions = useMemo(
-    () =>
-      transactions.filter((t) => {
-        const matchesSearch =
-          t.description?.toLowerCase().includes(search.toLowerCase()) ||
-          t.category?.name.toLowerCase().includes(search.toLowerCase()) ||
-          t.account?.name.toLowerCase().includes(search.toLowerCase());
+  const filteredTransactions = transactions?.filter((t) => {
+    const matchesSearch =
+      t.description?.toLowerCase().includes(search.toLowerCase()) ||
+      t.category?.name.toLowerCase().includes(search.toLowerCase()) ||
+      t.account?.name.toLowerCase().includes(search.toLowerCase());
 
-        const matchesType = typeFilter === "all" || t.type === typeFilter;
+    const matchesType = typeFilter === "all" || t.type === typeFilter;
 
-        const txDate = new Date(t.date);
-        const matchesMonth = txDate.getMonth().toString() === selectedMonth;
-        const matchesYear = txDate.getFullYear().toString() === selectedYear;
+    const txDate = new Date(t.date);
+    const matchesMonth = txDate.getMonth().toString() === selectedMonth;
+    const matchesYear = txDate.getFullYear().toString() === selectedYear;
 
-        return matchesSearch && matchesType && matchesMonth && matchesYear;
-      }),
-    [transactions, search, typeFilter, selectedMonth, selectedYear]
-  );
-
-  const groupedTransactions = useMemo(() => {
-    const groups = filteredTransactions.reduce(
-      (acc, tx) => {
-        const dateKey = format(startOfDay(new Date(tx.date)), "yyyy-MM-dd");
-        if (!acc[dateKey]) {
-          acc[dateKey] = [];
-        }
-        acc[dateKey].push(tx);
-        return acc;
-      },
-      {} as Record<string, Transaction[]>
-    );
-
-    return Object.keys(groups)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-      .map((key) => ({
-        key,
-        label: renderDateLabel(key),
-        items: groups[key],
-      }));
-  }, [filteredTransactions]);
-
-  function renderDateLabel(key: string) {
-    const date = parseISO(key);
-    if (isToday(date)) return "Hari ini";
-    if (isYesterday(date)) return "Kemarin";
-    return format(date, "dd MMMM yyyy", { locale: id });
-  }
+    return matchesSearch && matchesType && matchesMonth && matchesYear;
+  });
 
   const months = [
     "Januari",
@@ -129,13 +85,23 @@ export default function TransactionsPage() {
   return (
     <AppLayout>
       <div className="p-4 md:p-8 space-y-6 pb-24 md:pb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Riwayat Transaksi
+            </h1>
+            <p className="text-muted-foreground">
+              Kelola semua pemasukan dan pengeluaran Anda.
+            </p>
+          </div>
+        </div>
 
         {/* Filters */}
         <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
-                <IconSearch className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Cari transaksi..."
                   className="pl-9"
@@ -187,85 +153,76 @@ export default function TransactionsPage() {
         </Card>
 
         {/* Transaction List */}
-        <div className="space-y-6">
-          {!hasTransactions && isLoading ? (
+        <div className="space-y-3">
+          {isLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : groupedTransactions.length ? (
-            groupedTransactions.map((group) => (
-              <div key={group.key} className="space-y-3">
-                <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
-                  {group.label}
-                </p>
-                <div className="space-y-3">
-                  {group.items.map((transaction) => (
-                    <Card
-                      key={transaction.id}
-                      className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => handleTransactionClick(transaction)}
+          ) : filteredTransactions && filteredTransactions.length > 0 ? (
+            filteredTransactions.map((transaction) => (
+              <Card
+                key={transaction.id}
+                className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
+                onClick={() => handleTransactionClick(transaction)}
+              >
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                        transaction.type === "income"
+                          ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                          : transaction.type === "expense"
+                          ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                          : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                      )}
                     >
-                      <CardContent className="p-4 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div
-                            className={cn(
-                              "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
-                              transaction.type === "income"
-                                ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                                : transaction.type === "expense"
-                                ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                                : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                            )}
-                          >
-                            {transaction.type === "income" ? (
-                              <IconArrowDownLeft className="h-5 w-5" />
-                            ) : transaction.type === "expense" ? (
-                              <IconArrowUpRight className="h-5 w-5" />
-                            ) : (
-                              <IconArrowsLeftRight className="h-5 w-5" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-foreground text-sm truncate">
-                              {transaction.description ||
-                                transaction.category?.name ||
-                                "Transaksi"}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {format(new Date(transaction.date), "HH:mm", {
-                                locale: id,
-                              })}{" "}
-                              • {transaction.account?.name}
-                            </p>
-                          </div>
-                        </div>
-                        <p
-                          className={cn(
-                            "font-semibold text-sm whitespace-nowrap ml-2 text-right shrink-0",
-                            transaction.type === "income"
-                              ? "text-green-600 dark:text-green-400"
-                              : transaction.type === "expense"
-                              ? "text-red-600 dark:text-red-400"
-                              : "text-blue-600 dark:text-blue-400"
-                          )}
-                        >
-                          {transaction.type === "income"
-                            ? "+"
-                            : transaction.type === "expense"
-                            ? "-"
-                            : ""}{" "}
-                          {formatCurrency(transaction.amount, profile?.currency)}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
+                      {transaction.type === "income" ? (
+                        <ArrowDownLeft className="h-5 w-5" />
+                      ) : transaction.type === "expense" ? (
+                        <ArrowUpRight className="h-5 w-5" />
+                      ) : (
+                        <ArrowRightLeft className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="font-medium text-foreground text-sm truncate">
+                        {transaction.description ||
+                          transaction.category?.name ||
+                          "Transaksi"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {format(new Date(transaction.date), "dd MMM yyyy", {
+                          locale: id,
+                        })}{" "}
+                        • {transaction.account?.name}
+                      </p>
+                    </div>
+                  </div>
+                  <p
+                    className={cn(
+                      "font-semibold text-sm whitespace-nowrap ml-2",
+                      transaction.type === "income"
+                        ? "text-green-600 dark:text-green-400"
+                        : transaction.type === "expense"
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-blue-600 dark:text-blue-400"
+                    )}
+                  >
+                    {transaction.type === "income"
+                      ? "+"
+                      : transaction.type === "expense"
+                      ? "-"
+                      : ""}{" "}
+                    {formatCurrency(transaction.amount, profile?.currency)}
+                  </p>
+                </CardContent>
+              </Card>
             ))
           ) : (
             <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border">
               <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <IconSearch className="h-8 w-8 text-muted-foreground" />
+                <Search className="h-8 w-8 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-medium text-foreground">
                 Tidak ada transaksi
