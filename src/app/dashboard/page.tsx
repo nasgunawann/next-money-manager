@@ -8,7 +8,13 @@ import { useTransactions } from "@/hooks/use-transactions";
 import { formatCurrency, cn, formatAccountType } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Wallet, ArrowUpRight, ArrowDownLeft, ArrowRightLeft } from "lucide-react";
+import {
+  IconPlus,
+  IconWallet,
+  IconArrowUpRight,
+  IconArrowDownLeft,
+  IconArrowsLeftRight,
+} from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
@@ -69,7 +75,7 @@ export default function DashboardPage() {
         <div className="hidden md:flex justify-end">
           <AddTransactionDialog>
             <Button>
-              <Plus className="mr-2 h-4 w-4" /> Tambah Transaksi
+              <IconPlus className="mr-2 h-4 w-4" /> Tambah Transaksi
             </Button>
           </AddTransactionDialog>
         </div>
@@ -95,7 +101,7 @@ export default function DashboardPage() {
                   <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="bg-green-400/20 p-1 rounded">
-                        <ArrowDownLeft className="h-4 w-4 text-green-300" />
+                        <IconArrowDownLeft className="h-4 w-4 text-green-300" />
                       </div>
                       <span className="text-xs text-primary-foreground/80">
                         Pemasukan
@@ -108,7 +114,7 @@ export default function DashboardPage() {
                   <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="bg-red-400/20 p-1 rounded">
-                        <ArrowUpRight className="h-4 w-4 text-red-300" />
+                        <IconArrowUpRight className="h-4 w-4 text-red-300" />
                       </div>
                       <span className="text-xs text-primary-foreground/80">
                         Pengeluaran
@@ -154,7 +160,7 @@ export default function DashboardPage() {
                             backgroundColor: account.color || "#94a3b8",
                           }}
                         >
-                          <Wallet className="h-6 w-6" />
+                          <IconWallet className="h-6 w-6" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-medium text-foreground truncate">
@@ -177,7 +183,7 @@ export default function DashboardPage() {
                     variant="outline"
                     className="w-full border-dashed border-2 h-auto py-4 text-muted-foreground hover:text-foreground hover:border-primary/50 flex flex-col gap-2"
                   >
-                    <Plus className="h-6 w-6" />
+                    <IconPlus className="h-6 w-6" />
                     <span>Tambah Akun Baru</span>
                   </Button>
                 </AddAccountDialog>
@@ -211,11 +217,11 @@ export default function DashboardPage() {
                             )}
                           >
                             {transaction.type === "income" ? (
-                              <ArrowDownLeft className="h-5 w-5" />
+                              <IconArrowDownLeft className="h-5 w-5" />
                             ) : transaction.type === "expense" ? (
-                              <ArrowUpRight className="h-5 w-5" />
+                              <IconArrowUpRight className="h-5 w-5" />
                             ) : (
-                              <ArrowRightLeft className="h-5 w-5" />
+                              <IconArrowsLeftRight className="h-5 w-5" />
                             )}
                           </div>
                           <div className="min-w-0">
@@ -254,7 +260,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border">
                   <div className="bg-muted w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Wallet className="h-6 w-6 text-muted-foreground" />
+                    <IconWallet className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <p className="text-muted-foreground text-sm">
                     Belum ada transaksi

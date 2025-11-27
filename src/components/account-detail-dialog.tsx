@@ -33,14 +33,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Wallet,
-  Edit,
-  Trash2,
-  X,
-  ArrowUpRight,
-  ArrowDownLeft,
-  Loader2,
-} from "lucide-react";
+  IconWallet,
+  IconPencil,
+  IconTrash,
+  IconX,
+  IconArrowUpRight,
+  IconArrowDownLeft,
+  IconLoader2,
+} from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
 import { EditAccountDialog } from "@/components/edit-account-dialog";
 
@@ -139,7 +139,7 @@ export function AccountDetailDialog({
           className="h-16 w-16 rounded-full flex items-center justify-center text-white shrink-0"
           style={{ backgroundColor: account.color || "#94a3b8" }}
         >
-          <Wallet className="h-8 w-8" />
+          <IconWallet className="h-8 w-8" />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{account.name}</h3>
@@ -159,7 +159,7 @@ export function AccountDetailDialog({
           className="w-full"
           onClick={() => setShowEditDialog(true)}
         >
-          <Edit className="h-4 w-4 mr-2" />
+          <IconPencil className="h-4 w-4 mr-2" />
           Edit
         </Button>
         <Button
@@ -167,7 +167,7 @@ export function AccountDetailDialog({
           className="w-full text-destructive hover:text-destructive"
           onClick={() => setShowDeleteAlert(true)}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <IconTrash className="h-4 w-4 mr-2" />
           Hapus
         </Button>
       </div>
@@ -195,11 +195,11 @@ export function AccountDetailDialog({
                       )}
                     >
                       {transaction.type === "income" ? (
-                        <ArrowDownLeft className="h-4 w-4" />
+                        <IconArrowDownLeft className="h-4 w-4" />
                       ) : transaction.type === "expense" ? (
-                        <ArrowUpRight className="h-4 w-4" />
+                        <IconArrowUpRight className="h-4 w-4" />
                       ) : (
-                        <Wallet className="h-4 w-4" />
+                        <IconWallet className="h-4 w-4" />
                       )}
                     </div>
                     <div>
@@ -233,7 +233,7 @@ export function AccountDetailDialog({
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground text-sm">
-            <Wallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <IconWallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p>Belum ada transaksi</p>
           </div>
         )}
@@ -278,7 +278,7 @@ export function AccountDetailDialog({
               >
                 {isDeleting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
                     Menghapus...
                   </>
                 ) : (
@@ -300,7 +300,7 @@ export function AccountDetailDialog({
           <DrawerHeader className="text-left relative">
             <DrawerTitle>Detail Sumber Dana</DrawerTitle>
             <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-              <X className="h-4 w-4" />
+              <IconX className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </DrawerClose>
           </DrawerHeader>
@@ -333,7 +333,7 @@ export function AccountDetailDialog({
             >
               {isDeleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
                   Menghapus...
                 </>
               ) : (

@@ -7,7 +7,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 
 export default function ReportsPage() {
   const { data: profile } = useProfile();
@@ -107,7 +107,7 @@ export default function ReportsPage() {
             onClick={handlePrevMonth}
             className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <IconChevronLeft className="w-5 h-5" />
           </button>
           <div className="text-center min-w-[200px]">
             <h2 className="text-4xl font-bold text-foreground">
@@ -121,7 +121,7 @@ export default function ReportsPage() {
             onClick={handleNextMonth}
             className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
           >
-            <ChevronRight className="w-5 h-5" />
+            <IconChevronRight className="w-5 h-5" />
           </button>
         </div>
 

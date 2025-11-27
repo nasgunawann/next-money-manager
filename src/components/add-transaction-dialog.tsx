@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Loader2, CalendarIcon, Settings } from "lucide-react";
+import { IconLoader2, IconCalendar, IconSettings } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -357,7 +357,7 @@ export function AddTransactionDialog({
                   size="sm"
                   className="h-7 text-xs"
                 >
-                  <Settings className="h-3 w-3 mr-1" />
+                  <IconSettings className="h-3 w-3 mr-1" />
                   Kelola
                 </Button>
               </ManageCategoriesDialog>
@@ -398,7 +398,7 @@ export function AddTransactionDialog({
                 !date && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
+              <IconCalendar className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : <span>Pilih tanggal</span>}
             </Button>
           </PopoverTrigger>
@@ -435,7 +435,7 @@ export function AddTransactionDialog({
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               Menyimpan...
             </>
           ) : (

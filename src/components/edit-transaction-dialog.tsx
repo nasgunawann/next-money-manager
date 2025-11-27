@@ -38,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Loader2, CalendarIcon, Trash2 } from "lucide-react";
+import { IconLoader2, IconCalendar, IconTrash } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -239,7 +239,7 @@ export function EditTransactionDialog({
                 !date && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
+              <IconCalendar className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : <span>Pilih tanggal</span>}
             </Button>
           </PopoverTrigger>
@@ -274,9 +274,9 @@ export function EditTransactionDialog({
           disabled={isDeleting || isLoading}
         >
           {isDeleting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <IconLoader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Trash2 className="h-4 w-4 mr-2" />
+            <IconTrash className="h-4 w-4 mr-2" />
           )}
           Hapus
         </Button>
@@ -286,7 +286,7 @@ export function EditTransactionDialog({
           disabled={isLoading || isDeleting}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <IconLoader2 className="h-4 w-4 animate-spin" />
           ) : (
             "Simpan Perubahan"
           )}

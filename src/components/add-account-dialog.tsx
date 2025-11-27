@@ -41,7 +41,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 const COLORS = [
@@ -283,7 +283,7 @@ export function AddAccountDialog({
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               Menyimpan...
             </>
           ) : (

@@ -15,11 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowUpRight,
-  ArrowDownLeft,
-  Search,
-  ArrowRightLeft,
-} from "lucide-react";
+  IconArrowUpRight,
+  IconArrowDownLeft,
+  IconSearch,
+  IconArrowsLeftRight,
+} from "@tabler/icons-react";
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -91,7 +91,7 @@ export default function TransactionsPage() {
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <IconSearch className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Cari transaksi..."
                   className="pl-9"
@@ -168,11 +168,11 @@ export default function TransactionsPage() {
                       )}
                     >
                       {transaction.type === "income" ? (
-                        <ArrowDownLeft className="h-5 w-5" />
+                        <IconArrowDownLeft className="h-5 w-5" />
                       ) : transaction.type === "expense" ? (
-                        <ArrowUpRight className="h-5 w-5" />
+                        <IconArrowUpRight className="h-5 w-5" />
                       ) : (
-                        <ArrowRightLeft className="h-5 w-5" />
+                        <IconArrowsLeftRight className="h-5 w-5" />
                       )}
                     </div>
                     <div className="min-w-0">
@@ -212,7 +212,7 @@ export default function TransactionsPage() {
           ) : (
             <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border">
               <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="h-8 w-8 text-muted-foreground" />
+                <IconSearch className="h-8 w-8 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-medium text-foreground">
                 Tidak ada transaksi

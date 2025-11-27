@@ -43,28 +43,28 @@ import {
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
-  Loader2,
-  Utensils,
-  Bus,
-  ShoppingBag,
-  Film,
-  Receipt,
-  HeartPulse,
-  GraduationCap,
-  PiggyBank,
-  Banknote,
-  Wallet,
-  Gift,
-  TrendingUp,
-  MoreHorizontal,
-  Briefcase,
-  Coffee,
-  Smartphone,
-  Wifi,
-  Home,
-  Car,
-  Plane,
-} from "lucide-react";
+  IconLoader2,
+  IconToolsKitchen2,
+  IconBus,
+  IconShoppingBag,
+  IconMovie,
+  IconReceipt2,
+  IconHeartbeat,
+  IconSchool,
+  IconPigMoney,
+  IconCash,
+  IconWallet,
+  IconGift,
+  IconTrendingUp,
+  IconDots,
+  IconBriefcase,
+  IconCoffee,
+  IconDeviceMobile,
+  IconWifi,
+  IconHome,
+  IconCar,
+  IconPlane,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 const COLORS = [
@@ -83,26 +83,26 @@ const COLORS = [
 ];
 
 const ICONS = [
-  { name: "utensils", icon: Utensils },
-  { name: "bus", icon: Bus },
-  { name: "shopping-bag", icon: ShoppingBag },
-  { name: "film", icon: Film },
-  { name: "receipt", icon: Receipt },
-  { name: "heart-pulse", icon: HeartPulse },
-  { name: "graduation-cap", icon: GraduationCap },
-  { name: "piggy-bank", icon: PiggyBank },
-  { name: "banknote", icon: Banknote },
-  { name: "wallet", icon: Wallet },
-  { name: "gift", icon: Gift },
-  { name: "trending-up", icon: TrendingUp },
-  { name: "briefcase", icon: Briefcase },
-  { name: "coffee", icon: Coffee },
-  { name: "smartphone", icon: Smartphone },
-  { name: "wifi", icon: Wifi },
-  { name: "home", icon: Home },
-  { name: "car", icon: Car },
-  { name: "plane", icon: Plane },
-  { name: "more-horizontal", icon: MoreHorizontal },
+  { name: "utensils", icon: IconToolsKitchen2 },
+  { name: "bus", icon: IconBus },
+  { name: "shopping-bag", icon: IconShoppingBag },
+  { name: "film", icon: IconMovie },
+  { name: "receipt", icon: IconReceipt2 },
+  { name: "heart-pulse", icon: IconHeartbeat },
+  { name: "graduation-cap", icon: IconSchool },
+  { name: "piggy-bank", icon: IconPigMoney },
+  { name: "banknote", icon: IconCash },
+  { name: "wallet", icon: IconWallet },
+  { name: "gift", icon: IconGift },
+  { name: "trending-up", icon: IconTrendingUp },
+  { name: "briefcase", icon: IconBriefcase },
+  { name: "coffee", icon: IconCoffee },
+  { name: "smartphone", icon: IconDeviceMobile },
+  { name: "wifi", icon: IconWifi },
+  { name: "home", icon: IconHome },
+  { name: "car", icon: IconCar },
+  { name: "plane", icon: IconPlane },
+  { name: "more-horizontal", icon: IconDots },
 ];
 
 export function AddCategoryDialog({
@@ -277,7 +277,7 @@ export function AddCategoryDialog({
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               Menyimpan...
             </>
           ) : (

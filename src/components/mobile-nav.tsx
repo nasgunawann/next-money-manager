@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, PieChart, Wallet, User, Plus } from "lucide-react";
+import {
+  IconHome,
+  IconChartPie,
+  IconWallet,
+  IconUser,
+  IconPlus,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { AddTransactionDialog } from "./add-transaction-dialog";
 import { useState, useEffect } from "react";
@@ -13,13 +19,13 @@ export function MobileNav() {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   const leftLinks = [
-    { href: "/dashboard", label: "Beranda", icon: Home },
-    { href: "/transactions", label: "Transaksi", icon: Wallet },
+    { href: "/dashboard", label: "Beranda", icon: IconHome },
+    { href: "/transactions", label: "Transaksi", icon: IconWallet },
   ];
 
   const rightLinks = [
-    { href: "/reports", label: "Laporan", icon: PieChart },
-    { href: "/profile", label: "Profil", icon: User },
+    { href: "/reports", label: "Laporan", icon: IconChartPie },
+    { href: "/profile", label: "Profil", icon: IconUser },
   ];
 
   const allLinks = [...leftLinks, ...rightLinks];
@@ -54,7 +60,7 @@ export function MobileNav() {
               >
                 <Icon
                   className={cn(
-                    "h-5 w-5 transition-all duration-200",
+                    "h-6 w-6 transition-all duration-200",
                     isActive && "scale-110"
                   )}
                 />
@@ -84,7 +90,7 @@ export function MobileNav() {
               >
                 <Icon
                   className={cn(
-                    "h-5 w-5 transition-all duration-200",
+                    "h-6 w-6 transition-all duration-200",
                     isActive && "scale-110"
                   )}
                 />
@@ -98,7 +104,7 @@ export function MobileNav() {
             onClick={() => setIsAddOpen(true)}
             className="absolute left-1/2 -translate-x-1/2 -top-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center"
           >
-            <Plus className="h-6 w-6" />
+            <IconPlus className="h-6 w-6" />
           </button>
         </div>
       </nav>

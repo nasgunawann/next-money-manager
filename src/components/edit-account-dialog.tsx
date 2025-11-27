@@ -38,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Loader2, X } from "lucide-react";
+import { IconLoader2, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import type { Account } from "@/hooks/use-accounts";
 
@@ -185,7 +185,7 @@ const [errorMessage, setErrorMessage] = useState<string | null>(null);
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               Memperbarui...
             </>
           ) : (
@@ -224,8 +224,8 @@ const [errorMessage, setErrorMessage] = useState<string | null>(null);
             <DrawerDescription>
               Perbarui informasi sumber dana Anda.
             </DrawerDescription>
-            <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-              <X className="h-4 w-4" />
+          <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+            <IconX className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </DrawerClose>
           </DrawerHeader>
