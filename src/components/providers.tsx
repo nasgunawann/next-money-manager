@@ -73,8 +73,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      queryClient.clear();
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Only clear cache on actual login/logout events, not on token refresh or initial session
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        queryClient.clear();
+      }
     });
 
     return () => {
