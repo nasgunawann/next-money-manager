@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/app-layout";
 import { useTransactions, Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
@@ -21,7 +21,6 @@ import {
   IconArrowsLeftRight,
 } from "@tabler/icons-react";
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   format,
   isToday,
@@ -60,47 +59,53 @@ export default function TransactionsPage() {
     setIsEditOpen(true);
   };
 
-  const filteredTransactions = transactions.filter((t) => {
-    const matchesSearch =
-      t.description?.toLowerCase().includes(search.toLowerCase()) ||
-      t.category?.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.account?.name.toLowerCase().includes(search.toLowerCase());
+  const filteredTransactions = useMemo(
+    () =>
+      transactions.filter((t) => {
+        const matchesSearch =
+          t.description?.toLowerCase().includes(search.toLowerCase()) ||
+          t.category?.name.toLowerCase().includes(search.toLowerCase()) ||
+          t.account?.name.toLowerCase().includes(search.toLowerCase());
 
-    const matchesType = typeFilter === "all" || t.type === typeFilter;
+        const matchesType = typeFilter === "all" || t.type === typeFilter;
 
-    const txDate = new Date(t.date);
-    const matchesMonth = txDate.getMonth().toString() === selectedMonth;
-    const matchesYear = txDate.getFullYear().toString() === selectedYear;
+        const txDate = new Date(t.date);
+        const matchesMonth = txDate.getMonth().toString() === selectedMonth;
+        const matchesYear = txDate.getFullYear().toString() === selectedYear;
 
-    return matchesSearch && matchesType && matchesMonth && matchesYear;
-  });
-
-  const groupedTransactions = filteredTransactions.reduce(
-    (acc, tx) => {
-      const dateKey = format(startOfDay(new Date(tx.date)), "yyyy-MM-dd");
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(tx);
-      return acc;
-    },
-    {} as Record<string, Transaction[]>
+        return matchesSearch && matchesType && matchesMonth && matchesYear;
+      }),
+    [transactions, search, typeFilter, selectedMonth, selectedYear]
   );
 
-  const sortedGroupKeys = Object.keys(groupedTransactions).sort((a, b) =>
-    new Date(b).getTime() - new Date(a).getTime()
-  );
+  const groupedTransactions = useMemo(() => {
+    const groups = filteredTransactions.reduce(
+      (acc, tx) => {
+        const dateKey = format(startOfDay(new Date(tx.date)), "yyyy-MM-dd");
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(tx);
+        return acc;
+      },
+      {} as Record<string, Transaction[]>
+    );
 
-  const renderDateLabel = (key: string) => {
+    return Object.keys(groups)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+      .map((key) => ({
+        key,
+        label: renderDateLabel(key),
+        items: groups[key],
+      }));
+  }, [filteredTransactions]);
+
+  function renderDateLabel(key: string) {
     const date = parseISO(key);
-    if (isToday(date)) {
-      return "Hari ini";
-    }
-    if (isYesterday(date)) {
-      return "Kemarin";
-    }
+    if (isToday(date)) return "Hari ini";
+    if (isYesterday(date)) return "Kemarin";
     return format(date, "dd MMMM yyyy", { locale: id });
-  };
+  }
 
   const months = [
     "Januari",
@@ -183,88 +188,76 @@ export default function TransactionsPage() {
 
         {/* Transaction List */}
         <div className="space-y-6">
-          {!filteredTransactions.length && isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((key) => (
-                <Card key={key} className="border-none shadow-sm">
-                  <CardContent className="p-4 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <Skeleton className="h-10 w-10 rounded-full" />
-                      <div className="space-y-2 w-full">
-                        <Skeleton className="h-4 w-40" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                    </div>
-                    <Skeleton className="h-4 w-16" />
-                  </CardContent>
-                </Card>
-              ))}
+          {isLoading && !transactions.length ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : filteredTransactions.length > 0 ? (
-            sortedGroupKeys.map((dateKey) => (
-              <div key={dateKey} className="space-y-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
-                    {renderDateLabel(dateKey)}
-                  </p>
-                </div>
+          ) : groupedTransactions.length ? (
+            groupedTransactions.map((group) => (
+              <div key={group.key} className="space-y-3">
+                <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                  {group.label}
+                </p>
                 <div className="space-y-3">
-                  {groupedTransactions[dateKey].map((transaction) => (
-              <Card
-                key={transaction.id}
-                className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
-                onClick={() => handleTransactionClick(transaction)}
-              >
-                <CardContent className="p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div
-                      className={cn(
-                        "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
-                        transaction.type === "income"
-                          ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                          : transaction.type === "expense"
-                          ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                          : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                      )}
+                  {group.items.map((transaction) => (
+                    <Card
+                      key={transaction.id}
+                      className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => handleTransactionClick(transaction)}
                     >
-                      {transaction.type === "income" ? (
-                        <IconArrowDownLeft className="h-5 w-5" />
-                      ) : transaction.type === "expense" ? (
-                        <IconArrowUpRight className="h-5 w-5" />
-                      ) : (
-                        <IconArrowsLeftRight className="h-5 w-5" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-foreground text-sm truncate">
-                        {transaction.description ||
-                          transaction.category?.name ||
-                          "Transaksi"}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                              {transaction.account?.name}
-                      </p>
-                    </div>
-                  </div>
-                  <p
-                    className={cn(
-                      "font-semibold text-sm whitespace-nowrap ml-2 text-right shrink-0",
-                      transaction.type === "income"
-                        ? "text-green-600 dark:text-green-400"
-                        : transaction.type === "expense"
-                        ? "text-red-600 dark:text-red-400"
-                        : "text-blue-600 dark:text-blue-400"
-                    )}
-                  >
-                    {transaction.type === "income"
-                      ? "+"
-                      : transaction.type === "expense"
-                      ? "-"
-                      : ""}{" "}
-                    {formatCurrency(transaction.amount, profile?.currency)}
-                  </p>
-                </CardContent>
-              </Card>
+                      <CardContent className="p-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div
+                            className={cn(
+                              "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                              transaction.type === "income"
+                                ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                                : transaction.type === "expense"
+                                ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                                : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                            )}
+                          >
+                            {transaction.type === "income" ? (
+                              <IconArrowDownLeft className="h-5 w-5" />
+                            ) : transaction.type === "expense" ? (
+                              <IconArrowUpRight className="h-5 w-5" />
+                            ) : (
+                              <IconArrowsLeftRight className="h-5 w-5" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-foreground text-sm truncate">
+                              {transaction.description ||
+                                transaction.category?.name ||
+                                "Transaksi"}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {format(new Date(transaction.date), "HH:mm", {
+                                locale: id,
+                              })}{" "}
+                              • {transaction.account?.name}
+                            </p>
+                          </div>
+                        </div>
+                        <p
+                          className={cn(
+                            "font-semibold text-sm whitespace-nowrap ml-2 text-right shrink-0",
+                            transaction.type === "income"
+                              ? "text-green-600 dark:text-green-400"
+                              : transaction.type === "expense"
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-blue-600 dark:text-blue-400"
+                          )}
+                        >
+                          {transaction.type === "income"
+                            ? "+"
+                            : transaction.type === "expense"
+                            ? "-"
+                            : ""}{" "}
+                          {formatCurrency(transaction.amount, profile?.currency)}
+                        </p>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </div>
