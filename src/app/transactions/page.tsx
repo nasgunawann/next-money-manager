@@ -32,10 +32,7 @@ import { id } from "date-fns/locale";
 
 export default function TransactionsPage() {
   const { data: profile } = useProfile();
-  const { data: transactionsData, isLoading } = useTransactions({
-    staleTime: 0,
-    gcTime: 0,
-  });
+  const { data: transactionsData, isLoading } = useTransactions();
   const transactions = useMemo(
     () => transactionsData ?? [],
     [transactionsData]
