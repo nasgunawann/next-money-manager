@@ -70,6 +70,18 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      queryClient.clear();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryClient]);
+
   return (
     <NextThemesProvider
       attribute="class"

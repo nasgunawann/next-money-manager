@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
+import useSessionGuard from "@/hooks/use-session-guard";
 
 type HeaderMenuItem = {
   href?: string;
@@ -20,6 +21,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const { data: profile } = useProfile();
   const firstName = profile?.full_name?.split(" ")[0];
+  const sessionGuard = useSessionGuard();
 
   const headerContent = useMemo(() => {
     const menuItems: HeaderMenuItem[] = [
@@ -106,6 +108,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  if (sessionGuard.isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!sessionGuard.isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <DesktopSidebar />
@@ -124,7 +138,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="md:pl-64 pb-16 md:pb-0 transition-all duration-300">
         <header
           className={cn(
-            "sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-all duration-300"
+            "sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 transition-all duration-300"
           )}
         >
           <div

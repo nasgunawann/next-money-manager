@@ -23,7 +23,10 @@ import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
 import { getAccountIconComponent } from "@/constants/account-icons";
 
+import useSessionGuard from "@/hooks/use-session-guard";
+
 export default function DashboardPage() {
+  const sessionGuard = useSessionGuard();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
   const { data: transactions, isLoading: transactionsLoading } =
@@ -63,7 +66,12 @@ export default function DashboardPage() {
       })
       .reduce((acc, t) => acc + t.amount, 0) || 0;
 
-  if (profileLoading || accountsLoading || transactionsLoading) {
+  if (
+    sessionGuard.isLoading ||
+    profileLoading ||
+    accountsLoading ||
+    transactionsLoading
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -153,6 +161,10 @@ export default function DashboardPage() {
       </Card>
     </AddAccountDialog>
   );
+
+  if (!sessionGuard.isAuthenticated) {
+    return null;
+  }
 
   return (
     <AppLayout>
