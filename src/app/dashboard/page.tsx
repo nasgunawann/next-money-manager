@@ -221,23 +221,34 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                <div className="bg-white/12 rounded-[26px] backdrop-blur flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/15 overflow-hidden shadow-inner border border-white/10">
-                  <OverviewPill
-                    label="Pendapatan"
-                    amount={monthlyIncome}
-                    currency={profile?.currency}
-                    icon={IconCircleArrowDownRight}
-                    accentBg="bg-emerald-100/90"
-                    accentText="text-emerald-600"
-                  />
-                  <OverviewPill
-                    label="Pengeluaran"
-                    amount={monthlyExpense}
-                    currency={profile?.currency}
-                    icon={IconCircleArrowUpRight}
-                    accentBg="bg-rose-100/90"
-                    accentText="text-rose-600"
-                  />
+                <div className="rounded-[24px] bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 shadow-inner border border-white/10">
+                  <div className="flex items-center gap-2 justify-self-start">
+                    <div className="rounded-full bg-emerald-100/90 p-2">
+                      <IconArrowDownLeft className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/70 uppercase tracking-wide">
+                        Pendapatan
+                      </p>
+                      <p className="text-sm font-semibold text-white leading-tight">
+                        {formatCurrency(monthlyIncome, profile?.currency)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-10 w-px bg-white/20 self-stretch" />
+                  <div className="flex items-center gap-2 justify-self-end text-right">
+                    <div className="rounded-full bg-rose-100/90 p-2">
+                      <IconArrowUpRight className="h-4 w-4 text-rose-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/70 uppercase tracking-wide">
+                        Pengeluaran
+                      </p>
+                      <p className="text-sm font-semibold text-white leading-tight">
+                        {formatCurrency(monthlyExpense, profile?.currency)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
