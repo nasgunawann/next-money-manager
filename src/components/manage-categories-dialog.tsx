@@ -113,13 +113,20 @@ export function ManageCategoriesDialog({
       toast.success("Kategori berhasil dihapus");
       setDeleteCategoryId(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal menghapus kategori");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menghapus kategori"
+      );
     }
   };
 
-  const userCategories = categories?.filter((cat) => cat.user_id === profile?.id) || [];
-  const incomeCategories = userCategories.filter((cat) => cat.type === "income");
-  const expenseCategories = userCategories.filter((cat) => cat.type === "expense");
+  const userCategories =
+    categories?.filter((cat) => cat.user_id === profile?.id) || [];
+  const incomeCategories = userCategories.filter(
+    (cat) => cat.type === "income"
+  );
+  const expenseCategories = userCategories.filter(
+    (cat) => cat.type === "expense"
+  );
 
   const Content = (
     <div className="space-y-4">
@@ -151,7 +158,7 @@ export function ManageCategoriesDialog({
           {expenseCategories.length > 0 ? (
             <div className="grid grid-cols-1 gap-2">
               {expenseCategories.map((category) => {
-                const IconComponent = ICON_MAP[category.icon] || Tag;
+                const IconComponent = ICON_MAP[category.icon] || IconTag;
                 return (
                   <Card key={category.id} className="p-3">
                     <CardContent className="p-0 flex items-center justify-between">
@@ -164,17 +171,19 @@ export function ManageCategoriesDialog({
                         </div>
                         <div>
                           <p className="font-medium">{category.name}</p>
-                          <p className="text-xs text-muted-foreground">Kustom</p>
+                          <p className="text-xs text-muted-foreground">
+                            Kustom
+                          </p>
                         </div>
                       </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDeleteCategoryId(category.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <IconTrash className="h-4 w-4" />
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeleteCategoryId(category.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <IconTrash className="h-4 w-4" />
+                      </Button>
                     </CardContent>
                   </Card>
                 );
@@ -192,7 +201,7 @@ export function ManageCategoriesDialog({
           {incomeCategories.length > 0 ? (
             <div className="grid grid-cols-1 gap-2">
               {incomeCategories.map((category) => {
-                const IconComponent = ICON_MAP[category.icon] || Tag;
+                const IconComponent = ICON_MAP[category.icon] || IconTag;
                 return (
                   <Card key={category.id} className="p-3">
                     <CardContent className="p-0 flex items-center justify-between">
@@ -205,7 +214,9 @@ export function ManageCategoriesDialog({
                         </div>
                         <div>
                           <p className="font-medium">{category.name}</p>
-                          <p className="text-xs text-muted-foreground">Kustom</p>
+                          <p className="text-xs text-muted-foreground">
+                            Kustom
+                          </p>
                         </div>
                       </div>
                       <Button
@@ -214,7 +225,7 @@ export function ManageCategoriesDialog({
                         onClick={() => setDeleteCategoryId(category.id)}
                         className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <IconTrash className="h-4 w-4" />
                       </Button>
                     </CardContent>
                   </Card>
@@ -223,7 +234,7 @@ export function ManageCategoriesDialog({
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <Tag className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <IconTag className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p>Belum ada kategori pemasukan buatan Anda</p>
             </div>
           )}
@@ -238,8 +249,9 @@ export function ManageCategoriesDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Kategori?</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.
-              Kategori yang sedang digunakan dalam transaksi tidak dapat dihapus.
+              Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak
+              dapat dibatalkan. Kategori yang sedang digunakan dalam transaksi
+              tidak dapat dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -296,4 +308,3 @@ export function ManageCategoriesDialog({
     </Drawer>
   );
 }
-

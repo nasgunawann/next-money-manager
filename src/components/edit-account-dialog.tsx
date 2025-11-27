@@ -30,17 +30,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { IconLoader2, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import type { Account } from "@/hooks/use-accounts";
+import { ACCOUNT_ICON_OPTIONS } from "@/constants/account-icons";
 
 const COLORS = [
   "#ef4444",
@@ -57,6 +51,8 @@ const COLORS = [
   "#64748b",
 ];
 
+const DEFAULT_ICON_OPTION = ACCOUNT_ICON_OPTIONS[0];
+
 interface EditAccountDialogProps {
   account: Account | null;
   open: boolean;
@@ -71,17 +67,23 @@ export function EditAccountDialog({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const queryClient = useQueryClient();
 
-const [name, setName] = useState("");
-const [type, setType] = useState("cash");
-const [color, setColor] = useState(COLORS[6]);
-const [isLoading, setIsLoading] = useState(false);
-const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [type, setType] = useState(DEFAULT_ICON_OPTION.type);
+  const [color, setColor] = useState(COLORS[6]);
+  const [iconKey, setIconKey] = useState(DEFAULT_ICON_OPTION.key);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (account) {
       setName(account.name);
       setType(account.type);
       setColor(account.color || COLORS[6]);
+      const availableKeys = ACCOUNT_ICON_OPTIONS.map((option) => option.key);
+      const preferredKey = account.icon && availableKeys.includes(account.icon)
+        ? account.icon
+        : account.type;
+      setIconKey(preferredKey || DEFAULT_ICON_OPTION.key);
     }
   }, [account]);
 
@@ -97,6 +99,7 @@ const [errorMessage, setErrorMessage] = useState<string | null>(null);
           name,
           type,
           color,
+          icon: iconKey,
         })
         .eq("id", account.id);
 
@@ -147,18 +150,32 @@ const [errorMessage, setErrorMessage] = useState<string | null>(null);
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="edit-type">Tipe</Label>
-        <Select value={type} onValueChange={setType}>
-          <SelectTrigger id="edit-type">
-            <SelectValue placeholder="Pilih tipe" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="cash">Tunai</SelectItem>
-            <SelectItem value="bank">Bank</SelectItem>
-            <SelectItem value="ewallet">E-Wallet</SelectItem>
-            <SelectItem value="savings">Tabungan</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label>Ikon &amp; Tipe</Label>
+        <div className="grid grid-cols-4 gap-2">
+          {ACCOUNT_ICON_OPTIONS.map((option) => {
+            const IconComponent = option.icon;
+            const isActive = iconKey === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-md border p-2 text-xs transition-colors text-center",
+                  isActive
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border hover:bg-muted"
+                )}
+                onClick={() => {
+                  setIconKey(option.key);
+                  setType(option.type);
+                }}
+              >
+                <IconComponent className="h-5 w-5" />
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-2">

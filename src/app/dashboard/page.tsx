@@ -19,6 +19,7 @@ import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
+import { getAccountIconComponent } from "@/constants/account-icons";
 
 export default function DashboardPage() {
   const { data: profile, isLoading: profileLoading } = useProfile();
@@ -146,37 +147,43 @@ export default function DashboardPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 md:gap-4">
-                {accounts?.map((account) => (
-                  <Card
-                    key={account.id}
-                    className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
-                    onClick={() => setSelectedAccount(account)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div
-                          className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
-                          style={{
-                            backgroundColor: account.color || "#94a3b8",
-                          }}
-                        >
-                          <IconWallet className="h-6 w-6" />
+                {accounts?.map((account) => {
+                  const AccountIcon = getAccountIconComponent(
+                    account.icon,
+                    account.type
+                  );
+                  return (
+                    <Card
+                      key={account.id}
+                      className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
+                      onClick={() => setSelectedAccount(account)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div
+                            className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
+                            style={{
+                              backgroundColor: account.color || "#94a3b8",
+                            }}
+                          >
+                            <AccountIcon className="h-6 w-6" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-foreground truncate">
+                              {account.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatAccountType(account.type)}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-foreground truncate">
-                            {account.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatAccountType(account.type)}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="font-semibold text-lg text-foreground">
-                        {formatCurrency(account.balance, profile?.currency)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <p className="font-semibold text-lg text-foreground">
+                          {formatCurrency(account.balance, profile?.currency)}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
 
                 <AddAccountDialog>
                   <Button

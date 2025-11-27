@@ -1,22 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { ComponentType } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
 import { formatCurrency, formatAccountType } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  IconPlus,
-  IconWallet,
-  IconCreditCard,
-  IconDeviceMobile,
-  IconCash,
-  IconPigMoney,
-  IconSearch,
-} from "@tabler/icons-react";
+import { IconPlus, IconWallet, IconSearch } from "@tabler/icons-react";
+import { getAccountIconComponent } from "@/constants/account-icons";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
@@ -27,13 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-const ACCOUNT_ICONS: Record<string, ComponentType<{ className?: string }>> = {
-  cash: IconCash,
-  bank: IconCreditCard,
-  ewallet: IconDeviceMobile,
-  savings: IconPigMoney,
-};
-
 export default function AccountsPage() {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
@@ -113,7 +98,7 @@ export default function AccountsPage() {
         {filteredAccounts && filteredAccounts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {filteredAccounts.map((account) => {
-              const Icon = ACCOUNT_ICONS[account.type] || IconWallet;
+              const Icon = getAccountIconComponent(account.icon, account.type);
               return (
                 <Card
                   key={account.id}

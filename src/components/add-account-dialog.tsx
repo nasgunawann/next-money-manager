@@ -33,16 +33,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { IconLoader2 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { ACCOUNT_ICON_OPTIONS } from "@/constants/account-icons";
 
 const COLORS = [
   "#ef4444", // Red
@@ -58,6 +52,8 @@ const COLORS = [
   "#ec4899", // Pink
   "#64748b", // Slate
 ];
+
+const DEFAULT_ICON_OPTION = ACCOUNT_ICON_OPTIONS[0];
 
 export function AddAccountDialog({
   children,
@@ -75,9 +71,10 @@ export function AddAccountDialog({
 
   // Form State
   const [name, setName] = useState("");
-  const [type, setType] = useState("cash");
+  const [type, setType] = useState(DEFAULT_ICON_OPTION.type);
   const [balance, setBalance] = useState("");
   const [color, setColor] = useState(COLORS[6]); // Default Blue
+  const [iconKey, setIconKey] = useState(DEFAULT_ICON_OPTION.key);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -85,9 +82,10 @@ export function AddAccountDialog({
 
   const resetForm = () => {
     setName("");
-    setType("cash");
+    setType(DEFAULT_ICON_OPTION.type);
     setBalance("");
     setColor(COLORS[6]);
+    setIconKey(DEFAULT_ICON_OPTION.key);
     setIsDirty(false);
   };
 
@@ -113,11 +111,6 @@ export function AddAccountDialog({
     closeDialog();
   };
 
-  const handleFieldChange = (setter: (value: string) => void) => (value: string) => {
-    setter(value);
-    setIsDirty(true);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !balance) return;
@@ -130,7 +123,7 @@ export function AddAccountDialog({
         type,
         balance: parseFloat(balance),
         color,
-        icon: "wallet", // Default icon for now
+        icon: iconKey,
       });
 
       if (error) throw error;
@@ -218,41 +211,48 @@ export function AddAccountDialog({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="type">Tipe</Label>
-          <Select
-            value={type}
-            onValueChange={(value) => {
-              setType(value);
-              setIsDirty(true);
-            }}
-          >
-            <SelectTrigger id="type">
-              <SelectValue placeholder="Pilih tipe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cash">Tunai</SelectItem>
-              <SelectItem value="bank">Bank</SelectItem>
-              <SelectItem value="ewallet">E-Wallet</SelectItem>
-              <SelectItem value="savings">Tabungan</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="balance">Saldo Awal</Label>
+        <Input
+          id="balance"
+          type="number"
+          placeholder="0"
+          value={balance}
+          onChange={(e) => {
+            setBalance(e.target.value);
+            setIsDirty(true);
+          }}
+          required
+        />
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="balance">Saldo Awal</Label>
-          <Input
-            id="balance"
-            type="number"
-            placeholder="0"
-            value={balance}
-            onChange={(e) => {
-              setBalance(e.target.value);
-              setIsDirty(true);
-            }}
-            required
-          />
+      <div className="space-y-2">
+        <Label>Ikon &amp; Tipe</Label>
+        <div className="grid grid-cols-4 gap-2">
+          {ACCOUNT_ICON_OPTIONS.map((option) => {
+            const IconComponent = option.icon;
+            const isActive = iconKey === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-md border p-2 text-xs transition-colors",
+                  isActive
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border hover:bg-muted"
+                )}
+                onClick={() => {
+                  setIconKey(option.key);
+                  setType(option.type);
+                  setIsDirty(true);
+                }}
+              >
+                <IconComponent className="h-5 w-5" />
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

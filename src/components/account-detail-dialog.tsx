@@ -40,9 +40,11 @@ import {
   IconArrowUpRight,
   IconArrowDownLeft,
   IconLoader2,
+  IconArrowsLeftRight,
 } from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
 import { EditAccountDialog } from "@/components/edit-account-dialog";
+import { getAccountIconComponent } from "@/constants/account-icons";
 
 interface AccountDetailDialogProps {
   account: Account | null;
@@ -66,6 +68,8 @@ export function AccountDetailDialog({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!account) return null;
+
+  const AccountIcon = getAccountIconComponent(account.icon, account.type);
 
   // Get transactions for this account
   const accountTransactions =
@@ -139,7 +143,7 @@ export function AccountDetailDialog({
           className="h-16 w-16 rounded-full flex items-center justify-center text-white shrink-0"
           style={{ backgroundColor: account.color || "#94a3b8" }}
         >
-          <IconWallet className="h-8 w-8" />
+          <AccountIcon className="h-8 w-8" />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{account.name}</h3>
@@ -199,7 +203,7 @@ export function AccountDetailDialog({
                       ) : transaction.type === "expense" ? (
                         <IconArrowUpRight className="h-4 w-4" />
                       ) : (
-                        <IconWallet className="h-4 w-4" />
+                        <IconArrowsLeftRight className="h-4 w-4" />
                       )}
                     </div>
                     <div>
