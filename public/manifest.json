@@ -1,7 +1,7 @@
 {
-  "name": "Student Money Manager",
-  "short_name": "MoneyManager",
-  "description": "Manage your finances with ease",
+  "name": "Kasflow — By Nanasgunung",
+  "short_name": "Kasflow",
+  "description": "Pencatatan transaksi dan pengendalian anggaran harian.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
