@@ -11,7 +11,7 @@ export default function useSessionGuard() {
   useEffect(() => {
     let isMounted = true;
 
-    const syncState = (nextStatus: AuthStatus) => {
+    const applyStatus = (nextStatus: AuthStatus) => {
       if (!isMounted) return;
       setStatus(nextStatus);
       if (nextStatus === "unauthenticated") {
@@ -19,14 +19,31 @@ export default function useSessionGuard() {
       }
     };
 
+    const localUser = supabase.auth.getUser()
+      .then(({ data }) => {
+        if (!isMounted) return;
+        if (data.user) {
+          setStatus("authenticated");
+        } else {
+          setStatus("unauthenticated");
+          router.replace("/login");
+        }
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setStatus("unauthenticated");
+        router.replace("/login");
+      });
+
     supabase.auth.getSession().then(({ data }) => {
-      syncState(data.session ? "authenticated" : "unauthenticated");
+      if (!isMounted) return;
+      applyStatus(data.session ? "authenticated" : "unauthenticated");
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      syncState(session ? "authenticated" : "unauthenticated");
+      applyStatus(session ? "authenticated" : "unauthenticated");
     });
 
     return () => {
