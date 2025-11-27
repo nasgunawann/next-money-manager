@@ -79,7 +79,32 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       storageKey="theme"
     >
       <ThemeSync />
+      <ServiceWorkerRegistrar />
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </NextThemesProvider>
   );
+}
+
+function ServiceWorkerRegistrar() {
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !("serviceWorker" in navigator) ||
+      process.env.NODE_ENV !== "production"
+    ) {
+      return;
+    }
+
+    const register = async () => {
+      try {
+        await navigator.serviceWorker.register("/sw.js");
+      } catch (error) {
+        console.error("Failed to register service worker:", error);
+      }
+    };
+
+    register();
+  }, []);
+
+  return null;
 }
