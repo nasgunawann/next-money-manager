@@ -19,12 +19,15 @@ export interface Transaction {
   category?: { name: string; icon: string; color: string };
 }
 
-type TransactionsQueryOptions = QueryObserverOptions<
-  Transaction[],
-  Error,
-  Transaction[],
-  Transaction[],
-  ["transactions"]
+type TransactionsQueryOptions = Pick<
+  QueryObserverOptions<
+    Transaction[],
+    Error,
+    Transaction[],
+    Transaction[],
+    ["transactions"]
+  >,
+  "staleTime" | "gcTime"
 >;
 
 export function useTransactions(options?: TransactionsQueryOptions) {
