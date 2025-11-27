@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAccounts } from "@/hooks/use-accounts";
+import type { Account } from "@/hooks/use-accounts";
+import type { Transaction } from "@/hooks/use-transactions";
 import { useCategories } from "@/hooks/use-categories";
 import { ManageCategoriesDialog } from "@/components/manage-categories-dialog";
 import { AddAccountDialog } from "@/components/add-account-dialog";
@@ -52,6 +54,7 @@ import {
   formatNumericInput,
   sanitizeNumericInput,
   numericInputToNumber,
+  generateTempId,
 } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -149,6 +152,13 @@ export function AddTransactionDialog({
     closeDialog();
   };
 
+  const filteredCategories = categories?.filter((c) => c.type === type);
+  const selectedAccount = accounts?.find((acc) => acc.id === accountId);
+  const selectedTargetAccount = accounts?.find(
+    (acc) => acc.id === targetAccountId
+  );
+  const selectedCategory = categories?.find((cat) => cat.id === categoryId);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const numericAmount = numericInputToNumber(amount);
@@ -157,35 +167,111 @@ export function AddTransactionDialog({
     if (type !== "transfer" && !categoryId) return;
 
     setIsLoading(true);
+
+    const previousTransactions =
+      queryClient.getQueryData<Transaction[]>(["transactions"]);
+    const previousAccounts =
+      queryClient.getQueryData<Account[]>(["accounts"]);
+    const isoDate = date.toISOString();
+    const optimisticId = generateTempId();
+
+    const optimisticTransaction: Transaction | null =
+      type !== "transfer"
+        ? {
+            id: optimisticId,
+            account_id: accountId,
+            category_id: categoryId,
+            amount: numericAmount,
+            type,
+            date: isoDate,
+            description: description || "",
+            related_transaction_id: null,
+            account: selectedAccount
+              ? {
+                  name: selectedAccount.name,
+                  icon: selectedAccount.icon,
+                  color: selectedAccount.color,
+                }
+              : undefined,
+            category:
+              selectedCategory && type !== "transfer"
+                ? {
+                    name: selectedCategory.name,
+                    icon: selectedCategory.icon,
+                    color: selectedCategory.color,
+                  }
+                : undefined,
+          }
+        : null;
+
+    if (optimisticTransaction) {
+      queryClient.setQueryData<Transaction[]>(["transactions"], (old = []) => [
+        optimisticTransaction,
+        ...old,
+      ]);
+    }
+
+    const applyAccountDelta = (targetId: string, delta: number) => {
+      queryClient.setQueryData<Account[]>(["accounts"], (old = []) =>
+        old.map((account) =>
+          account.id === targetId
+            ? { ...account, balance: account.balance + delta }
+            : account
+        )
+      );
+    };
+
+    if (type === "income") {
+      applyAccountDelta(accountId, numericAmount);
+    } else if (type === "expense") {
+      applyAccountDelta(accountId, -numericAmount);
+    } else if (type === "transfer" && targetAccountId) {
+      applyAccountDelta(accountId, -numericAmount);
+      applyAccountDelta(targetAccountId, numericAmount);
+    }
+
+    const resetOptimisticState = () => {
+      if (optimisticTransaction) {
+        if (previousTransactions !== undefined) {
+          queryClient.setQueryData(["transactions"], previousTransactions);
+        } else {
+          queryClient.removeQueries({ queryKey: ["transactions"], exact: true });
+        }
+      }
+      if (previousAccounts !== undefined) {
+        queryClient.setQueryData(["accounts"], previousAccounts);
+      } else {
+        queryClient.removeQueries({ queryKey: ["accounts"], exact: true });
+      }
+    };
+
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error("Not authenticated");
 
-      if (type === "transfer") {
-        // Handle Transfer: Deduct from Source, Add to Target
-        // 1. Expense from Source
+      let createdTransaction: Transaction | null = null;
+
+      if (type === "transfer" && targetAccountId) {
         const { error: tx1Error } = await supabase.from("transactions").insert({
           user_id: user.id,
           account_id: accountId,
           amount: numericAmount,
           type: "transfer",
-          date: date.toISOString(),
+          date: isoDate,
           description: `Transfer ke Akun Lain: ${description}`,
         });
         if (tx1Error) throw tx1Error;
 
-        // 2. Income to Target
         const { error: tx2Error } = await supabase.from("transactions").insert({
           user_id: user.id,
           account_id: targetAccountId,
           amount: numericAmount,
           type: "transfer",
-          date: date.toISOString(),
+          date: isoDate,
           description: `Transfer dari Akun Lain: ${description}`,
         });
         if (tx2Error) throw tx2Error;
 
-        // Update Balances
         const { error: rpcError1 } = await supabase.rpc("increment_balance", {
           account_id: accountId,
           amount: -numericAmount,
@@ -198,20 +284,29 @@ export function AddTransactionDialog({
         });
         if (rpcError2) throw rpcError2;
       } else {
-        // Handle Income/Expense
-        const { error } = await supabase.from("transactions").insert({
-          user_id: user.id,
-          account_id: accountId,
-          category_id: categoryId,
-          amount: numericAmount,
-          type,
-          date: date.toISOString(),
-          description,
-        });
+        const { data: insertedTx, error } = await supabase
+          .from("transactions")
+          .insert({
+            user_id: user.id,
+            account_id: accountId,
+            category_id: categoryId,
+            amount: numericAmount,
+            type,
+            date: isoDate,
+            description,
+          })
+          .select(
+            `
+            *,
+            account:accounts(name, icon, color),
+            category:categories(name, icon, color)
+          `
+          )
+          .single();
 
-        if (error) throw error;
+        if (error || !insertedTx) throw error;
+        createdTransaction = insertedTx as Transaction;
 
-        // Update Balance
         const balanceChange =
           type === "income" ? numericAmount : -numericAmount;
         const { error: rpcError } = await supabase.rpc("increment_balance", {
@@ -221,6 +316,16 @@ export function AddTransactionDialog({
         if (rpcError) throw rpcError;
       }
 
+      if (optimisticTransaction && createdTransaction) {
+        queryClient.setQueryData<Transaction[]>(["transactions"], (old = []) =>
+          old.map((transaction) =>
+            transaction.id === optimisticTransaction.id
+              ? createdTransaction!
+              : transaction
+          )
+        );
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["transactions"] });
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
       setIsDirty(false);
@@ -228,17 +333,11 @@ export function AddTransactionDialog({
     } catch (error) {
       console.error("Error creating transaction:", error);
       setErrorMessage("Gagal menyimpan transaksi. Silakan coba lagi.");
+      resetOptimisticState();
     } finally {
       setIsLoading(false);
     }
   };
-
-  const filteredCategories = categories?.filter((c) => c.type === type);
-  const selectedAccount = accounts?.find((acc) => acc.id === accountId);
-  const selectedTargetAccount = accounts?.find(
-    (acc) => acc.id === targetAccountId
-  );
-  const selectedCategory = categories?.find((cat) => cat.id === categoryId);
 
   const handleSelectAccount = (id: string) => {
     setAccountId(id);

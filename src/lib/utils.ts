@@ -40,3 +40,10 @@ export function numericInputToNumber(value: string) {
   const digits = sanitizeNumericInput(value);
   return digits ? parseInt(digits, 10) : 0;
 }
+
+export function generateTempId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `temp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}

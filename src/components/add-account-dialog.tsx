@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProfile } from "@/hooks/use-profile";
+import type { Account } from "@/hooks/use-accounts";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,7 @@ import {
   formatNumericInput,
   sanitizeNumericInput,
   numericInputToNumber,
+  generateTempId,
 } from "@/lib/utils";
 import { ACCOUNT_ICON_OPTIONS } from "@/constants/account-icons";
 
@@ -122,17 +124,45 @@ export function AddAccountDialog({
     const numericBalance = numericInputToNumber(balance);
 
     setIsLoading(true);
-    try {
-      const { error } = await supabase.from("accounts").insert({
-        user_id: profile?.id,
-        name,
-        type,
-        balance: numericBalance,
-        color,
-        icon: iconKey,
-      });
+    const previousAccounts =
+      queryClient.getQueryData<Account[]>(["accounts"]);
+    const optimisticAccount: Account = {
+      id: generateTempId(),
+      name,
+      type,
+      balance: numericBalance,
+      color,
+      icon: iconKey,
+    };
 
-      if (error) throw error;
+    queryClient.setQueryData<Account[]>(["accounts"], (old = []) => [
+      optimisticAccount,
+      ...old,
+    ]);
+
+    try {
+      const { data: createdAccount, error } = await supabase
+        .from("accounts")
+        .insert({
+          user_id: profile?.id,
+          name,
+          type,
+          balance: numericBalance,
+          color,
+          icon: iconKey,
+        })
+        .select()
+        .single();
+
+      if (error || !createdAccount) throw error;
+
+      queryClient.setQueryData<Account[]>(["accounts"], (old = []) =>
+        old.map((account) =>
+          account.id === optimisticAccount.id
+            ? (createdAccount as Account)
+            : account
+        )
+      );
 
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
       setIsDirty(false);
@@ -140,6 +170,7 @@ export function AddAccountDialog({
     } catch (error) {
       console.error("Error creating account:", error);
       setErrorMessage("Gagal membuat akun. Silakan coba lagi.");
+      queryClient.setQueryData(["accounts"], previousAccounts);
     } finally {
       setIsLoading(false);
     }
