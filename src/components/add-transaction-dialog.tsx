@@ -152,10 +152,10 @@ export function AddTransactionDialog({
     closeDialog();
   };
 
-  const filteredCategories =
-    type === "transfer"
-      ? []
-      : categories?.filter((c) => c.type === type) ?? [];
+  const isTransfer = type === "transfer";
+  const filteredCategories = isTransfer
+    ? []
+    : categories?.filter((c) => c.type === type) ?? [];
   const selectedAccount = accounts?.find((acc) => acc.id === accountId);
   const selectedTargetAccount = accounts?.find(
     (acc) => acc.id === targetAccountId
@@ -166,8 +166,8 @@ export function AddTransactionDialog({
     e.preventDefault();
     const numericAmount = numericInputToNumber(amount);
     if (!numericAmount || !accountId || !date) return;
-    if (type === "transfer" && !targetAccountId) return;
-    if (type !== "transfer" && !categoryId) return;
+    if (isTransfer && !targetAccountId) return;
+    if (!isTransfer && !categoryId) return;
 
     setIsLoading(true);
 
@@ -178,34 +178,33 @@ export function AddTransactionDialog({
     const isoDate = date.toISOString();
     const optimisticId = generateTempId();
 
-    const optimisticTransaction: Transaction | null =
-      type !== "transfer"
-        ? {
-            id: optimisticId,
-            account_id: accountId,
-            category_id: categoryId,
-            amount: numericAmount,
-            type,
-            date: isoDate,
-            description: description || "",
-            related_transaction_id: null,
-            account: selectedAccount
+    const optimisticTransaction: Transaction | null = !isTransfer
+      ? {
+          id: optimisticId,
+          account_id: accountId,
+          category_id: categoryId,
+          amount: numericAmount,
+          type,
+          date: isoDate,
+          description: description || "",
+          related_transaction_id: null,
+          account: selectedAccount
+            ? {
+                name: selectedAccount.name,
+                icon: selectedAccount.icon,
+                color: selectedAccount.color,
+              }
+            : undefined,
+          category:
+            selectedCategory && !isTransfer
               ? {
-                  name: selectedAccount.name,
-                  icon: selectedAccount.icon,
-                  color: selectedAccount.color,
+                  name: selectedCategory.name,
+                  icon: selectedCategory.icon,
+                  color: selectedCategory.color,
                 }
               : undefined,
-            category:
-              selectedCategory && type !== "transfer"
-                ? {
-                    name: selectedCategory.name,
-                    icon: selectedCategory.icon,
-                    color: selectedCategory.color,
-                  }
-                : undefined,
-          }
-        : null;
+        }
+      : null;
 
     if (optimisticTransaction) {
       queryClient.setQueryData<Transaction[]>(["transactions"], (old = []) => [
@@ -228,7 +227,7 @@ export function AddTransactionDialog({
       applyAccountDelta(accountId, numericAmount);
     } else if (type === "expense") {
       applyAccountDelta(accountId, -numericAmount);
-    } else if (type === "transfer" && targetAccountId) {
+    } else if (isTransfer && targetAccountId) {
       applyAccountDelta(accountId, -numericAmount);
       applyAccountDelta(targetAccountId, numericAmount);
     }
@@ -254,7 +253,7 @@ export function AddTransactionDialog({
 
       let createdTransaction: Transaction | null = null;
 
-      if (type === "transfer" && targetAccountId) {
+      if (isTransfer && targetAccountId) {
         const { error: tx1Error } = await supabase.from("transactions").insert({
           user_id: user.id,
           account_id: accountId,
@@ -290,13 +289,13 @@ export function AddTransactionDialog({
         const { data: insertedTx, error } = await supabase
           .from("transactions")
           .insert({
-            user_id: user.id,
-            account_id: accountId,
-            category_id: categoryId,
-            amount: numericAmount,
-            type,
+          user_id: user.id,
+          account_id: accountId,
+          category_id: categoryId,
+          amount: numericAmount,
+          type,
             date: isoDate,
-            description,
+          description,
           })
           .select(
             `
