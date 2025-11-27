@@ -8,6 +8,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 
+type HeaderMenuItem = {
+  href?: string;
+  title: string;
+  subtitle?: string;
+};
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -16,7 +22,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const firstName = profile?.full_name?.split(" ")[0];
 
   const headerContent = useMemo(() => {
-    const menuItems = [
+    const menuItems: HeaderMenuItem[] = [
       {
         href: "/dashboard",
         title: firstName ? `Halo, ${firstName}` : "Dashboard",
@@ -53,7 +59,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       },
     ];
 
-    const match = menuItems.find((item) => pathname?.startsWith(item.href));
+    const match = menuItems.find((item) => {
+      if (!item.href) return false;
+      return pathname?.startsWith(item.href);
+    });
     return match ?? { title: "MoneyManager" };
   }, [pathname, firstName]);
 
