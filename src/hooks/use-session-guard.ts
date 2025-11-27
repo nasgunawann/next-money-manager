@@ -23,6 +23,7 @@ export default function useSessionGuard() {
       }
     };
 
+    // Only check user once on mount (reads from local storage, fast)
     supabase.auth
       .getUser()
       .then(({ data }) => {
@@ -32,15 +33,7 @@ export default function useSessionGuard() {
         applyStatus("unauthenticated");
       });
 
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
-        applyStatus(data.session ? "authenticated" : "unauthenticated");
-      })
-      .catch(() => {
-        applyStatus("unauthenticated");
-      });
-
+    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
