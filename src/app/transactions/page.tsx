@@ -32,12 +32,9 @@ import { id } from "date-fns/locale";
 
 export default function TransactionsPage() {
   const { data: profile } = useProfile();
-  const {
-    data: transactionsData,
-    isLoading,
-    isFetching,
-  } = useTransactions();
+  const { data: transactionsData, isLoading, isFetching } = useTransactions();
   const transactions = transactionsData ?? [];
+  const hasTransactions = transactions.length > 0;
 
   // Filters
   const [search, setSearch] = useState("");
@@ -188,7 +185,7 @@ export default function TransactionsPage() {
 
         {/* Transaction List */}
         <div className="space-y-6">
-          {isLoading && !transactions.length ? (
+          {!hasTransactions && isLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
