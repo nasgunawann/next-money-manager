@@ -97,43 +97,6 @@ export default function DashboardPage() {
     );
   }
 
-  const OverviewPill = ({
-    label,
-    amount,
-    currency,
-    icon: Icon,
-    accentBg,
-    accentText,
-  }: {
-    label: string;
-    amount: number;
-    currency?: string;
-    icon: React.ComponentType<{ className?: string }>;
-    accentBg: string;
-    accentText: string;
-  }) => (
-    <div className="flex-1 flex items-center justify-between gap-3 px-4 py-3">
-      <div className="flex items-center gap-3">
-        <div
-          className={cn(
-            "rounded-full p-2 flex items-center justify-center shadow-sm",
-            accentBg
-          )}
-        >
-          <Icon className={cn("h-4 w-4", accentText)} />
-        </div>
-        <div>
-          <p className="text-[11px] uppercase tracking-wide text-white/75">
-            {label}
-          </p>
-          <p className="text-lg font-semibold">
-            {formatCurrency(amount, currency)}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-
   const renderAccountCard = (account: Account) => {
     const AccountIcon = getAccountIconComponent(account.icon, account.type);
     return (
