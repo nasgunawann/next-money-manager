@@ -2,40 +2,31 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-let cachedAuthStatus: boolean | null = null;
+type AuthStatus = "unknown" | "authenticated" | "unauthenticated";
 
 export default function useSessionGuard() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(cachedAuthStatus === null);
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    cachedAuthStatus ?? false
-  );
+  const [status, setStatus] = useState<AuthStatus>("unknown");
 
   useEffect(() => {
     let isMounted = true;
 
-    const syncState = (authed: boolean) => {
-      cachedAuthStatus = authed;
+    const syncState = (nextStatus: AuthStatus) => {
       if (!isMounted) return;
-      setIsAuthenticated(authed);
-      setIsLoading(false);
-      if (!authed) {
+      setStatus(nextStatus);
+      if (nextStatus === "unauthenticated") {
         router.replace("/login");
       }
     };
 
-    if (cachedAuthStatus === null) {
-      supabase.auth.getSession().then(({ data }) => {
-        syncState(!!data.session);
-      });
-    } else if (!cachedAuthStatus) {
-      router.replace("/login");
-    }
+    supabase.auth.getSession().then(({ data }) => {
+      syncState(data.session ? "authenticated" : "unauthenticated");
+    });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      syncState(!!session);
+      syncState(session ? "authenticated" : "unauthenticated");
     });
 
     return () => {
@@ -44,6 +35,8 @@ export default function useSessionGuard() {
     };
   }, [router]);
 
-  return { isLoading, isAuthenticated };
+  return {
+    isLoading: status === "unknown",
+    isAuthenticated: status === "authenticated",
+  };
 }
-
