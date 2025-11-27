@@ -5,10 +5,10 @@ import { useState } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatAccountType } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Plus, Wallet, ArrowUpRight, ArrowDownLeft, ArrowRightLeft } from "lucide-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
@@ -160,8 +160,8 @@ export default function DashboardPage() {
                           <p className="font-medium text-foreground truncate">
                             {account.name}
                           </p>
-                          <p className="text-xs text-muted-foreground capitalize">
-                            {account.type}
+                          <p className="text-xs text-muted-foreground">
+                            {formatAccountType(account.type)}
                           </p>
                         </div>
                       </div>
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                             ) : transaction.type === "expense" ? (
                               <ArrowUpRight className="h-5 w-5" />
                             ) : (
-                              <Wallet className="h-5 w-5" />
+                              <ArrowRightLeft className="h-5 w-5" />
                             )}
                           </div>
                           <div className="min-w-0">

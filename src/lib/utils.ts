@@ -13,3 +13,15 @@ export function formatCurrency(amount: number, currency: string = "IDR") {
     maximumFractionDigits: 0,
   }).format(amount);
 }
+
+const ACCOUNT_TYPE_LABELS: Record<string, string> = {
+  cash: "Tunai",
+  bank: "Bank",
+  ewallet: "E-Wallet",
+  savings: "Tabungan",
+};
+
+export function formatAccountType(type?: string | null) {
+  if (!type) return "";
+  return ACCOUNT_TYPE_LABELS[type] ?? type;
+}

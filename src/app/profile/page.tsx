@@ -8,7 +8,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useAccounts } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
 import { supabase } from "@/lib/supabase";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatAccountType } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -304,7 +304,9 @@ export default function ProfilePage() {
                       </div>
                       <div>
                         <p className="font-medium text-foreground">{account.name}</p>
-                        <p className="text-xs text-muted-foreground capitalize">{account.type}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatAccountType(account.type)}
+                        </p>
                       </div>
                     </div>
                     <p className="font-semibold text-foreground">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatAccountType } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,14 +136,8 @@ export default function AccountsPage() {
                           <p className="font-medium text-sm text-foreground truncate">
                             {account.name}
                           </p>
-                          <p className="text-xs text-muted-foreground capitalize">
-                            {account.type === "ewallet"
-                              ? "E-Wallet"
-                              : account.type === "cash"
-                              ? "Tunai"
-                              : account.type === "bank"
-                              ? "Bank"
-                              : "Tabungan"}
+                          <p className="text-xs text-muted-foreground">
+                            {formatAccountType(account.type)}
                           </p>
                         </div>
                       </div>

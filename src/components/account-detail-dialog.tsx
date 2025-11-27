@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useProfile } from "@/hooks/use-profile";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatAccountType } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -143,14 +143,8 @@ export function AccountDetailDialog({
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{account.name}</h3>
-          <p className="text-sm text-muted-foreground capitalize">
-            {account.type === "ewallet"
-              ? "E-Wallet"
-              : account.type === "cash"
-              ? "Tunai"
-              : account.type === "bank"
-              ? "Bank"
-              : "Tabungan"}
+          <p className="text-sm text-muted-foreground">
+            {formatAccountType(account.type)}
           </p>
           <p className="text-2xl font-bold mt-2">
             {formatCurrency(account.balance, profile?.currency)}
