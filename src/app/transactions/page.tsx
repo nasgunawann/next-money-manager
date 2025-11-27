@@ -33,7 +33,12 @@ import { id } from "date-fns/locale";
 
 export default function TransactionsPage() {
   const { data: profile } = useProfile();
-  const { data: transactions, isLoading } = useTransactions();
+  const {
+    data: transactionsData,
+    isLoading,
+    isFetching,
+  } = useTransactions();
+  const transactions = transactionsData ?? [];
 
   // Filters
   const [search, setSearch] = useState("");
@@ -55,7 +60,7 @@ export default function TransactionsPage() {
     setIsEditOpen(true);
   };
 
-  const filteredTransactions = transactions?.filter((t) => {
+  const filteredTransactions = transactions.filter((t) => {
     const matchesSearch =
       t.description?.toLowerCase().includes(search.toLowerCase()) ||
       t.category?.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -70,19 +75,17 @@ export default function TransactionsPage() {
     return matchesSearch && matchesType && matchesMonth && matchesYear;
   });
 
-  const groupedTransactions = filteredTransactions
-    ? filteredTransactions.reduce(
-        (acc, tx) => {
-          const dateKey = format(startOfDay(new Date(tx.date)), "yyyy-MM-dd");
-          if (!acc[dateKey]) {
-            acc[dateKey] = [];
-          }
-          acc[dateKey].push(tx);
-          return acc;
-        },
-        {} as Record<string, Transaction[]>
-      )
-    : {};
+  const groupedTransactions = filteredTransactions.reduce(
+    (acc, tx) => {
+      const dateKey = format(startOfDay(new Date(tx.date)), "yyyy-MM-dd");
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(tx);
+      return acc;
+    },
+    {} as Record<string, Transaction[]>
+  );
 
   const sortedGroupKeys = Object.keys(groupedTransactions).sort((a, b) =>
     new Date(b).getTime() - new Date(a).getTime()
@@ -180,7 +183,7 @@ export default function TransactionsPage() {
 
         {/* Transaction List */}
         <div className="space-y-6">
-          {isLoading ? (
+          {!filteredTransactions.length && isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((key) => (
                 <Card key={key} className="border-none shadow-sm">
@@ -197,7 +200,7 @@ export default function TransactionsPage() {
                 </Card>
               ))}
             </div>
-          ) : filteredTransactions && filteredTransactions.length > 0 ? (
+          ) : filteredTransactions.length > 0 ? (
             sortedGroupKeys.map((dateKey) => (
               <div key={dateKey} className="space-y-3">
                 <div>
@@ -207,61 +210,61 @@ export default function TransactionsPage() {
                 </div>
                 <div className="space-y-3">
                   {groupedTransactions[dateKey].map((transaction) => (
-                    <Card
-                      key={transaction.id}
-                      className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => handleTransactionClick(transaction)}
+              <Card
+                key={transaction.id}
+                className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
+                onClick={() => handleTransactionClick(transaction)}
+              >
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div
+                      className={cn(
+                        "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                        transaction.type === "income"
+                          ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                          : transaction.type === "expense"
+                          ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                          : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                      )}
                     >
-                      <CardContent className="p-4 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div
-                            className={cn(
-                              "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
-                              transaction.type === "income"
-                                ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                                : transaction.type === "expense"
-                                ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                                : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                            )}
-                          >
-                            {transaction.type === "income" ? (
-                              <IconArrowDownLeft className="h-5 w-5" />
-                            ) : transaction.type === "expense" ? (
-                              <IconArrowUpRight className="h-5 w-5" />
-                            ) : (
-                              <IconArrowsLeftRight className="h-5 w-5" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-foreground text-sm truncate">
-                              {transaction.description ||
-                                transaction.category?.name ||
-                                "Transaksi"}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
+                      {transaction.type === "income" ? (
+                        <IconArrowDownLeft className="h-5 w-5" />
+                      ) : transaction.type === "expense" ? (
+                        <IconArrowUpRight className="h-5 w-5" />
+                      ) : (
+                        <IconArrowsLeftRight className="h-5 w-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground text-sm truncate">
+                        {transaction.description ||
+                          transaction.category?.name ||
+                          "Transaksi"}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
                               {transaction.account?.name}
-                            </p>
-                          </div>
-                        </div>
-                        <p
-                          className={cn(
-                            "font-semibold text-sm whitespace-nowrap ml-2 text-right shrink-0",
-                            transaction.type === "income"
-                              ? "text-green-600 dark:text-green-400"
-                              : transaction.type === "expense"
-                              ? "text-red-600 dark:text-red-400"
-                              : "text-blue-600 dark:text-blue-400"
-                          )}
-                        >
-                          {transaction.type === "income"
-                            ? "+"
-                            : transaction.type === "expense"
-                            ? "-"
-                            : ""}{" "}
-                          {formatCurrency(transaction.amount, profile?.currency)}
-                        </p>
-                      </CardContent>
-                    </Card>
+                      </p>
+                    </div>
+                  </div>
+                  <p
+                    className={cn(
+                      "font-semibold text-sm whitespace-nowrap ml-2 text-right shrink-0",
+                      transaction.type === "income"
+                        ? "text-green-600 dark:text-green-400"
+                        : transaction.type === "expense"
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-blue-600 dark:text-blue-400"
+                    )}
+                  >
+                    {transaction.type === "income"
+                      ? "+"
+                      : transaction.type === "expense"
+                      ? "-"
+                      : ""}{" "}
+                    {formatCurrency(transaction.amount, profile?.currency)}
+                  </p>
+                </CardContent>
+              </Card>
                   ))}
                 </div>
               </div>
