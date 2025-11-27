@@ -46,7 +46,13 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { format } from "date-fns";
-import { cn, formatCurrency } from "@/lib/utils";
+import {
+  cn,
+  formatCurrency,
+  formatNumericInput,
+  sanitizeNumericInput,
+  numericInputToNumber,
+} from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -145,7 +151,8 @@ export function AddTransactionDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || !accountId || !date) return;
+    const numericAmount = numericInputToNumber(amount);
+    if (!numericAmount || !accountId || !date) return;
     if (type === "transfer" && !targetAccountId) return;
     if (type !== "transfer" && !categoryId) return;
 
@@ -153,8 +160,6 @@ export function AddTransactionDialog({
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error("Not authenticated");
-
-      const numericAmount = parseFloat(amount);
 
       if (type === "transfer") {
         // Handle Transfer: Deduct from Source, Add to Target
@@ -336,12 +341,14 @@ export function AddTransactionDialog({
           </span>
           <Input
             id="amount"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
             placeholder="0"
             className="pl-9 text-lg font-semibold"
-            value={amount}
+            value={formatNumericInput(amount)}
             onChange={(e) => {
-              setAmount(e.target.value);
+              setAmount(sanitizeNumericInput(e.target.value));
               setIsDirty(true);
             }}
             required

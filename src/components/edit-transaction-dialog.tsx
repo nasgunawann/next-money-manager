@@ -43,7 +43,13 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { format } from "date-fns";
-import { cn, formatCurrency } from "@/lib/utils";
+import {
+  cn,
+  formatCurrency,
+  formatNumericInput,
+  sanitizeNumericInput,
+  numericInputToNumber,
+} from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -84,7 +90,7 @@ export function EditTransactionDialog({
 
   useEffect(() => {
     if (transaction) {
-      setAmount(transaction.amount.toString());
+      setAmount(sanitizeNumericInput(transaction.amount.toString()));
       setAccountId(transaction.account_id);
       setCategoryId(transaction.category_id || "");
       setDate(new Date(transaction.date));
@@ -100,7 +106,7 @@ export function EditTransactionDialog({
     try {
       await updateTransaction({
         id: transaction.id,
-        amount: parseFloat(amount),
+        amount: numericInputToNumber(amount),
         account_id: accountId,
         category_id: categoryId || null,
         date: date.toISOString(),
@@ -207,10 +213,13 @@ export function EditTransactionDialog({
           </span>
           <Input
             id="edit-amount"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
             className="pl-9 text-lg font-semibold"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0"
+            value={formatNumericInput(amount)}
+            onChange={(e) => setAmount(sanitizeNumericInput(e.target.value))}
             required
           />
         </div>

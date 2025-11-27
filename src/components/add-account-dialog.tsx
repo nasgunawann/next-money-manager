@@ -35,7 +35,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { IconLoader2 } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import {
+  cn,
+  formatNumericInput,
+  sanitizeNumericInput,
+  numericInputToNumber,
+} from "@/lib/utils";
 import { ACCOUNT_ICON_OPTIONS } from "@/constants/account-icons";
 
 const COLORS = [
@@ -114,6 +119,7 @@ export function AddAccountDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !balance) return;
+    const numericBalance = numericInputToNumber(balance);
 
     setIsLoading(true);
     try {
@@ -121,7 +127,7 @@ export function AddAccountDialog({
         user_id: profile?.id,
         name,
         type,
-        balance: parseFloat(balance),
+        balance: numericBalance,
         color,
         icon: iconKey,
       });
@@ -213,17 +219,25 @@ export function AddAccountDialog({
 
       <div className="space-y-2">
         <Label htmlFor="balance">Saldo Awal</Label>
-        <Input
-          id="balance"
-          type="number"
-          placeholder="0"
-          value={balance}
-          onChange={(e) => {
-            setBalance(e.target.value);
-            setIsDirty(true);
-          }}
-          required
-        />
+        <div className="relative">
+          <span className="absolute left-3 top-2.5 text-muted-foreground">
+            Rp
+          </span>
+          <Input
+            id="balance"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="0"
+            className="pl-9 text-lg font-semibold"
+            value={formatNumericInput(balance)}
+            onChange={(e) => {
+              setBalance(sanitizeNumericInput(e.target.value));
+              setIsDirty(true);
+            }}
+            required
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

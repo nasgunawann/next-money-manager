@@ -25,3 +25,18 @@ export function formatAccountType(type?: string | null) {
   if (!type) return "";
   return ACCOUNT_TYPE_LABELS[type] ?? type;
 }
+
+export function sanitizeNumericInput(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+export function formatNumericInput(value: string) {
+  const digits = sanitizeNumericInput(value);
+  if (!digits) return "";
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+export function numericInputToNumber(value: string) {
+  const digits = sanitizeNumericInput(value);
+  return digits ? parseInt(digits, 10) : 0;
+}
