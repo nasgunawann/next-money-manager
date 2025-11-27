@@ -21,6 +21,16 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -115,18 +125,37 @@ export function AddCategoryDialog({
   const [color, setColor] = useState(COLORS[0]);
   const [icon, setIcon] = useState("more-horizontal");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
+
+  const resetForm = () => {
+    setName("");
+    setType("expense");
+    setColor(COLORS[0]);
+    setIcon("more-horizontal");
+    setIsDirty(false);
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    onOpenChange?.(false);
+    setShowUnsavedAlert(false);
+    setTimeout(resetForm, 300);
+  };
 
   const handleOpenChange = (val: boolean) => {
-    setIsOpen(val);
-    onOpenChange?.(val);
-    if (!val) {
-      setTimeout(() => {
-        setName("");
-        setType("expense");
-        setColor(COLORS[0]);
-        setIcon("more-horizontal");
-      }, 300);
+    if (val) {
+      setIsOpen(true);
+      onOpenChange?.(true);
+      return;
     }
+
+    if (isDirty) {
+      setShowUnsavedAlert(true);
+      return;
+    }
+
+    closeDialog();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,6 +176,7 @@ export function AddCategoryDialog({
 
       await queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Kategori berhasil dibuat");
+      setIsDirty(false);
       handleOpenChange(false);
     } catch (error) {
       console.error("Error creating category:", error);
@@ -166,14 +196,23 @@ export function AddCategoryDialog({
           id="cat-name"
           placeholder="Contoh: Jajan, Hobi, Freelance"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setIsDirty(true);
+          }}
           required
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="cat-type">Tipe</Label>
-        <Select value={type} onValueChange={setType}>
+        <Select
+          value={type}
+          onValueChange={(val) => {
+            setType(val);
+            setIsDirty(true);
+          }}
+        >
           <SelectTrigger id="cat-type">
             <SelectValue placeholder="Pilih tipe" />
           </SelectTrigger>
@@ -199,7 +238,10 @@ export function AddCategoryDialog({
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "text-muted-foreground"
                 )}
-                onClick={() => setIcon(item.name)}
+                onClick={() => {
+                  setIcon(item.name);
+                  setIsDirty(true);
+                }}
               >
                 <IconComp className="h-5 w-5" />
               </button>
@@ -222,7 +264,10 @@ export function AddCategoryDialog({
                   : "hover:scale-105"
               )}
               style={{ backgroundColor: c }}
-              onClick={() => setColor(c)}
+              onClick={() => {
+                setColor(c);
+                setIsDirty(true);
+              }}
             />
           ))}
         </div>
@@ -245,33 +290,87 @@ export function AddCategoryDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Kategori Baru</DialogTitle>
-            <DialogDescription>
-              Buat kategori kustom untuk transaksi Anda.
-            </DialogDescription>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
+          <DialogTrigger asChild>{children}</DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Tambah Kategori Baru</DialogTitle>
+              <DialogDescription>
+                Buat kategori kustom untuk transaksi Anda.
+              </DialogDescription>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+        <AlertDialog
+          open={showUnsavedAlert}
+          onOpenChange={(open) => {
+            if (!open) setShowUnsavedAlert(false);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Batalkan pengisian?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Formulir kategori belum disimpan. Keluar sekarang akan menghapus
+                data yang sudah diisi.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={closeDialog}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Buang Perubahan
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
     );
   }
 
   return (
-    <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle>Tambah Kategori Baru</DrawerTitle>
-          <DrawerDescription>
-            Buat kategori kustom untuk transaksi Anda.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
+        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Tambah Kategori Baru</DrawerTitle>
+            <DrawerDescription>
+              Buat kategori kustom untuk transaksi Anda.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+      <AlertDialog
+        open={showUnsavedAlert}
+        onOpenChange={(open) => {
+          if (!open) setShowUnsavedAlert(false);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Batalkan pengisian?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Formulir kategori belum disimpan. Keluar sekarang akan menghapus
+              data yang sudah diisi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={closeDialog}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Buang Perubahan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

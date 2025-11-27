@@ -23,6 +23,7 @@ import {
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -79,19 +80,42 @@ export function AddAccountDialog({
   const [color, setColor] = useState(COLORS[6]); // Default Blue
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
+
+  const resetForm = () => {
+    setName("");
+    setType("cash");
+    setBalance("");
+    setColor(COLORS[6]);
+    setIsDirty(false);
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    onOpenChange?.(false);
+    setShowUnsavedAlert(false);
+    setTimeout(resetForm, 300);
+  };
 
   const handleOpenChange = (val: boolean) => {
-    setIsOpen(val);
-    onOpenChange?.(val);
-    if (!val) {
-      // Reset form on close
-      setTimeout(() => {
-        setName("");
-        setType("cash");
-        setBalance("");
-        setColor(COLORS[6]);
-      }, 300);
+    if (val) {
+      setIsOpen(true);
+      onOpenChange?.(true);
+      return;
     }
+
+    if (isDirty) {
+      setShowUnsavedAlert(true);
+      return;
+    }
+
+    closeDialog();
+  };
+
+  const handleFieldChange = (setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    setIsDirty(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +136,8 @@ export function AddAccountDialog({
       if (error) throw error;
 
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      handleOpenChange(false);
+      setIsDirty(false);
+      closeDialog();
     } catch (error) {
       console.error("Error creating account:", error);
       setErrorMessage("Gagal membuat akun. Silakan coba lagi.");
@@ -142,6 +167,41 @@ export function AddAccountDialog({
     </AlertDialog>
   );
 
+  const handleDiscardChanges = () => {
+    setShowUnsavedAlert(false);
+    setIsDirty(false);
+    resetForm();
+    closeDialog();
+  };
+
+  const unsavedDialog = (
+    <AlertDialog
+      open={showUnsavedAlert}
+      onOpenChange={(open) => {
+        if (!open) setShowUnsavedAlert(false);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Batalkan pengisian?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Formulir akun belum disimpan. Keluar sekarang akan menghapus data
+            yang sudah diisi.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDiscardChanges}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Buang Perubahan
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
       <div className="space-y-2">
@@ -150,7 +210,10 @@ export function AddAccountDialog({
           id="name"
           placeholder="Contoh: BCA, GoPay, Dompet"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setIsDirty(true);
+          }}
           required
         />
       </div>
@@ -158,7 +221,13 @@ export function AddAccountDialog({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="type">Tipe</Label>
-          <Select value={type} onValueChange={setType}>
+          <Select
+            value={type}
+            onValueChange={(value) => {
+              setType(value);
+              setIsDirty(true);
+            }}
+          >
             <SelectTrigger id="type">
               <SelectValue placeholder="Pilih tipe" />
             </SelectTrigger>
@@ -178,7 +247,10 @@ export function AddAccountDialog({
             type="number"
             placeholder="0"
             value={balance}
-            onChange={(e) => setBalance(e.target.value)}
+            onChange={(e) => {
+              setBalance(e.target.value);
+              setIsDirty(true);
+            }}
             required
           />
         </div>
@@ -198,7 +270,10 @@ export function AddAccountDialog({
                   : "hover:scale-105"
               )}
               style={{ backgroundColor: c }}
-              onClick={() => setColor(c)}
+              onClick={() => {
+                setColor(c);
+                setIsDirty(true);
+              }}
             />
           ))}
         </div>
@@ -223,7 +298,7 @@ export function AddAccountDialog({
     return (
       <>
         <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>{children}</DialogTrigger>
+          {children && <DialogTrigger asChild>{children}</DialogTrigger>}
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Tambah Akun Baru</DialogTitle>
@@ -235,6 +310,7 @@ export function AddAccountDialog({
           </DialogContent>
         </Dialog>
         {errorDialog}
+        {unsavedDialog}
       </>
     );
   }
@@ -242,7 +318,7 @@ export function AddAccountDialog({
   return (
     <>
       <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
-        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
         <DrawerContent>
           <DrawerHeader className="text-left">
             <DrawerTitle>Tambah Akun Baru</DrawerTitle>
@@ -254,6 +330,7 @@ export function AddAccountDialog({
         </DrawerContent>
       </Drawer>
       {errorDialog}
+      {unsavedDialog}
     </>
   );
 }

@@ -23,6 +23,7 @@ import {
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -79,20 +80,41 @@ export function AddTransactionDialog({
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
+
+  const resetForm = () => {
+    setAmount("");
+    setDescription("");
+    setDate(new Date());
+    setAccountId("");
+    setTargetAccountId("");
+    setCategoryId("");
+    setType("expense");
+    setErrorMessage(null);
+    setIsDirty(false);
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    onOpenChange?.(false);
+    setShowUnsavedAlert(false);
+    setTimeout(resetForm, 300);
+  };
 
   const handleOpenChange = (val: boolean) => {
-    setIsOpen(val);
-    onOpenChange?.(val);
-    if (!val) {
-      setTimeout(() => {
-        setAmount("");
-        setDescription("");
-        setDate(new Date());
-        setAccountId("");
-        setTargetAccountId("");
-        setCategoryId("");
-      }, 300);
+    if (val) {
+      setIsOpen(true);
+      onOpenChange?.(true);
+      return;
     }
+
+    if (isDirty) {
+      setShowUnsavedAlert(true);
+      return;
+    }
+
+    closeDialog();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,6 +192,7 @@ export function AddTransactionDialog({
 
       await queryClient.invalidateQueries({ queryKey: ["transactions"] });
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      setIsDirty(false);
       handleOpenChange(false);
     } catch (error) {
       console.error("Error creating transaction:", error);
@@ -202,11 +225,48 @@ export function AddTransactionDialog({
     </AlertDialog>
   );
 
+  const handleDiscardChanges = () => {
+    setShowUnsavedAlert(false);
+    setIsDirty(false);
+    closeDialog();
+  };
+
+  const unsavedDialog = (
+    <AlertDialog
+      open={showUnsavedAlert}
+      onOpenChange={(open) => {
+        if (!open) setShowUnsavedAlert(false);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Batalkan pengisian?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Formulir transaksi belum disimpan. Keluar sekarang akan menghapus
+            data yang sudah diisi.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Lanjutkan mengisi</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDiscardChanges}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Buang Perubahan
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
       <Tabs
         value={type}
-        onValueChange={(v: string) => setType(v as "income" | "expense" | "transfer")}
+        onValueChange={(v: string) => {
+          setType(v as "income" | "expense" | "transfer");
+          setIsDirty(true);
+        }}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-3">
@@ -228,7 +288,10 @@ export function AddTransactionDialog({
             placeholder="0"
             className="pl-9 text-lg font-semibold"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              setIsDirty(true);
+            }}
             required
           />
         </div>
@@ -237,7 +300,14 @@ export function AddTransactionDialog({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Sumber dana {type === "transfer" ? "Asal" : ""}</Label>
-          <Select value={accountId} onValueChange={setAccountId} required>
+          <Select
+            value={accountId}
+            onValueChange={(val) => {
+              setAccountId(val);
+              setIsDirty(true);
+            }}
+            required
+          >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Sumber dana" />
             </SelectTrigger>
@@ -256,7 +326,10 @@ export function AddTransactionDialog({
             <Label>Sumber dana Tujuan</Label>
             <Select
               value={targetAccountId}
-              onValueChange={setTargetAccountId}
+              onValueChange={(val) => {
+                setTargetAccountId(val);
+                setIsDirty(true);
+              }}
               required
             >
               <SelectTrigger>
@@ -289,7 +362,14 @@ export function AddTransactionDialog({
                 </Button>
               </ManageCategoriesDialog>
             </div>
-            <Select value={categoryId} onValueChange={setCategoryId} required>
+            <Select
+              value={categoryId}
+              onValueChange={(val) => {
+                setCategoryId(val);
+                setIsDirty(true);
+              }}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Pilih Kategori" />
               </SelectTrigger>
@@ -326,7 +406,12 @@ export function AddTransactionDialog({
             <Calendar
               mode="single"
               selected={date}
-              onSelect={setDate}
+              onSelect={(selectedDate) => {
+                setDate(selectedDate);
+                if (selectedDate) {
+                  setIsDirty(true);
+                }
+              }}
               initialFocus
             />
           </PopoverContent>
@@ -339,9 +424,10 @@ export function AddTransactionDialog({
           id="desc"
           placeholder="Contoh: Makan siang di Warteg"
           value={description}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setDescription(e.target.value)
-          }
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            setDescription(e.target.value);
+            setIsDirty(true);
+          }}
         />
       </div>
 
@@ -373,6 +459,7 @@ export function AddTransactionDialog({
           </DialogContent>
         </Dialog>
         {errorDialog}
+        {unsavedDialog}
       </>
     );
   }
@@ -389,6 +476,7 @@ export function AddTransactionDialog({
         </DrawerContent>
       </Drawer>
       {errorDialog}
+      {unsavedDialog}
     </>
   );
 }
