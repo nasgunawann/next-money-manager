@@ -17,8 +17,6 @@ import {
   IconArrowUpRight,
   IconArrowDownLeft,
   IconArrowsLeftRight,
-  IconCircleArrowDownRight,
-  IconCircleArrowUpRight,
 } from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";

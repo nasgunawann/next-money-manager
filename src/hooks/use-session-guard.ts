@@ -3,15 +3,19 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 type AuthStatus = "unknown" | "authenticated" | "unauthenticated";
+let cachedStatus: AuthStatus | null = null;
 
 export default function useSessionGuard() {
   const router = useRouter();
-  const [status, setStatus] = useState<AuthStatus>("unknown");
+  const [status, setStatus] = useState<AuthStatus>(
+    cachedStatus ?? "unknown"
+  );
 
   useEffect(() => {
     let isMounted = true;
 
     const applyStatus = (nextStatus: AuthStatus) => {
+      cachedStatus = nextStatus;
       if (!isMounted) return;
       setStatus(nextStatus);
       if (nextStatus === "unauthenticated") {
@@ -19,26 +23,23 @@ export default function useSessionGuard() {
       }
     };
 
-    const localUser = supabase.auth.getUser()
+    supabase.auth
+      .getUser()
       .then(({ data }) => {
-        if (!isMounted) return;
-        if (data.user) {
-          setStatus("authenticated");
-        } else {
-          setStatus("unauthenticated");
-          router.replace("/login");
-        }
+        applyStatus(data.user ? "authenticated" : "unauthenticated");
       })
       .catch(() => {
-        if (!isMounted) return;
-        setStatus("unauthenticated");
-        router.replace("/login");
+        applyStatus("unauthenticated");
       });
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) return;
-      applyStatus(data.session ? "authenticated" : "unauthenticated");
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        applyStatus(data.session ? "authenticated" : "unauthenticated");
+      })
+      .catch(() => {
+        applyStatus("unauthenticated");
+      });
 
     const {
       data: { subscription },
