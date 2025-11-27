@@ -152,7 +152,10 @@ export function AddTransactionDialog({
     closeDialog();
   };
 
-  const filteredCategories = categories?.filter((c) => c.type === type);
+  const filteredCategories =
+    type === "transfer"
+      ? []
+      : categories?.filter((c) => c.type === type) ?? [];
   const selectedAccount = accounts?.find((acc) => acc.id === accountId);
   const selectedTargetAccount = accounts?.find(
     (acc) => acc.id === targetAccountId
