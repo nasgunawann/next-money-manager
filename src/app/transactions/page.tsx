@@ -71,20 +71,20 @@ export default function TransactionsPage() {
             }
           }
 
-          const matchesSearch =
+        const matchesSearch =
             search === "" ||
-            t.description?.toLowerCase().includes(search.toLowerCase()) ||
+          t.description?.toLowerCase().includes(search.toLowerCase()) ||
             t.category?.name?.toLowerCase().includes(search.toLowerCase()) ||
             t.account?.name?.toLowerCase().includes(search.toLowerCase());
 
-          const matchesType = typeFilter === "all" || t.type === typeFilter;
+        const matchesType = typeFilter === "all" || t.type === typeFilter;
 
-          const txDate = new Date(t.date);
-          const matchesMonth = txDate.getMonth().toString() === selectedMonth;
-          const matchesYear = txDate.getFullYear().toString() === selectedYear;
+        const txDate = new Date(t.date);
+        const matchesMonth = txDate.getMonth().toString() === selectedMonth;
+        const matchesYear = txDate.getFullYear().toString() === selectedYear;
 
-          return matchesSearch && matchesType && matchesMonth && matchesYear;
-        }),
+        return matchesSearch && matchesType && matchesMonth && matchesYear;
+      }),
     [transactions, search, typeFilter, selectedMonth, selectedYear]
   );
 
@@ -197,29 +197,29 @@ export default function TransactionsPage() {
         </Card>
 
         {/* Transaction List */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {!hasTransactions && isLoading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : groupedTransactions.length ? (
             groupedTransactions.map((group) => (
-              <div key={group.key} className="space-y-3">
+              <div key={group.key} className="space-y-2">
                 <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
                   {group.label}
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {group.items.map((transaction) => (
                     <Card
                       key={transaction.id}
                       className="border-none shadow-sm hover:bg-accent/50 transition-colors cursor-pointer"
                       onClick={() => handleTransactionClick(transaction)}
                     >
-                      <CardContent className="p-4 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <CardContent className="p-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
                           <div
                             className={cn(
-                              "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                              "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
                               transaction.type === "income"
                                 ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                                 : transaction.type === "expense"
@@ -228,20 +228,20 @@ export default function TransactionsPage() {
                             )}
                           >
                             {transaction.type === "income" ? (
-                              <IconArrowDownLeft className="h-5 w-5" />
+                              <IconArrowDownLeft className="h-4.5 w-4.5" />
                             ) : transaction.type === "expense" ? (
-                              <IconArrowUpRight className="h-5 w-5" />
+                              <IconArrowUpRight className="h-4.5 w-4.5" />
                             ) : (
-                              <IconArrowsLeftRight className="h-5 w-5" />
+                              <IconArrowsLeftRight className="h-4.5 w-4.5" />
                             )}
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-medium text-foreground text-sm truncate">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-foreground text-sm leading-tight truncate">
                               {transaction.description ||
                                 transaction.category?.name ||
                                 "Transaksi"}
                             </p>
-                            <p className="text-xs text-muted-foreground truncate">
+                            <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                               {format(new Date(transaction.date), "HH:mm", {
                                 locale: id,
                               })}{" "}
@@ -251,7 +251,7 @@ export default function TransactionsPage() {
                         </div>
                         <p
                           className={cn(
-                            "font-semibold text-sm whitespace-nowrap ml-2 text-right shrink-0",
+                            "font-semibold text-sm whitespace-nowrap text-right shrink-0",
                             transaction.type === "income"
                               ? "text-green-600 dark:text-green-400"
                               : transaction.type === "expense"

@@ -186,11 +186,11 @@ export function AccountDetailDialog({
                 key={transaction.id}
                 className="border-none shadow-sm hover:bg-accent/50 transition-colors"
               >
-                <CardContent className="p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <div
                       className={cn(
-                        "h-8 w-8 rounded-full flex items-center justify-center",
+                        "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
                         transaction.type === "income"
                           ? "bg-green-100 text-green-600"
                           : transaction.type === "expense"
@@ -199,20 +199,20 @@ export function AccountDetailDialog({
                       )}
                     >
                       {transaction.type === "income" ? (
-                        <IconArrowDownLeft className="h-4 w-4" />
+                        <IconArrowDownLeft className="h-4.5 w-4.5" />
                       ) : transaction.type === "expense" ? (
-                        <IconArrowUpRight className="h-4 w-4" />
+                        <IconArrowUpRight className="h-4.5 w-4.5" />
                       ) : (
-                        <IconArrowsLeftRight className="h-4 w-4" />
+                        <IconArrowsLeftRight className="h-4.5 w-4.5" />
                       )}
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm leading-tight truncate">
                         {transaction.description ||
                           transaction.category?.name ||
                           "Transaksi"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                         {new Date(transaction.date).toLocaleDateString(
                           "id-ID",
                           { day: "numeric", month: "short", year: "numeric" }
@@ -222,7 +222,7 @@ export function AccountDetailDialog({
                   </div>
                   <p
                     className={cn(
-                      "font-semibold text-sm",
+                      "font-semibold text-sm whitespace-nowrap text-right shrink-0",
                       transaction.type === "income"
                         ? "text-green-600"
                         : transaction.type === "transfer" &&

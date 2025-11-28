@@ -193,8 +193,8 @@ export default function DashboardPage() {
 
                 <div className="rounded-[24px] bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 shadow-inner border border-white/10">
                   <div className="flex items-center gap-2 justify-self-start">
-                    <div className="rounded-full bg-emerald-100/90 p-2">
-                      <IconArrowDownLeft className="h-4 w-4 text-emerald-600" />
+                    <div className="h-9 w-9 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 flex items-center justify-center shrink-0">
+                      <IconArrowDownLeft className="h-4.5 w-4.5" />
                     </div>
                     <div>
                       <p className="text-[10px] text-white/70 uppercase tracking-wide">
@@ -207,8 +207,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="h-10 w-px bg-white/20 self-stretch" />
                   <div className="flex items-center gap-2 justify-self-end text-right">
-                    <div className="rounded-full bg-rose-100/90 p-2">
-                      <IconArrowUpRight className="h-4 w-4 text-rose-500" />
+                    <div className="h-9 w-9 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex items-center justify-center shrink-0">
+                      <IconArrowUpRight className="h-4.5 w-4.5" />
                     </div>
                     <div>
                       <p className="text-[10px] text-white/70 uppercase tracking-wide">
@@ -282,44 +282,51 @@ export default function DashboardPage() {
                   {getGroupedRecentTransactions(transactions)
                     .slice(0, 2)
                     .map(([label, items]) => (
-                      <div key={label} className="space-y-3">
+                      <div key={label} className="space-y-2">
                         <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
                           {label}
                         </p>
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           {items.map((transaction) => (
                             <Card
                               key={transaction.id}
                               className="border-none shadow-sm hover:bg-accent/50 transition-colors"
                             >
-                              <CardContent className="p-4 flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <CardContent className="p-4 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
                                   <div
                                     className={cn(
-                                      "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                                      "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
                                       transaction.type === "income"
-                                        ? "bg-green-100 text-green-600"
+                                        ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                                         : transaction.type === "expense"
-                                        ? "bg-red-100 text-red-600"
-                                        : "bg-blue-100 text-blue-600"
+                                        ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                                        : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
                                     )}
                                   >
                                     {transaction.type === "income" ? (
-                                      <IconArrowDownLeft className="h-5 w-5" />
+                                      <IconArrowDownLeft className="h-4.5 w-4.5" />
                                     ) : transaction.type === "expense" ? (
-                                      <IconArrowUpRight className="h-5 w-5" />
+                                      <IconArrowUpRight className="h-4.5 w-4.5" />
                                     ) : (
-                                      <IconArrowsLeftRight className="h-5 w-5" />
+                                      <IconArrowsLeftRight className="h-4.5 w-4.5" />
                                     )}
                                   </div>
-                                  <div className="min-w-0">
-                                    <p className="font-medium text-foreground text-sm truncate">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-medium text-foreground text-sm leading-tight truncate">
                                       {transaction.description ||
                                         transaction.category?.name ||
                                         "Transaksi"}
                                     </p>
-                                    <p className="text-xs text-muted-foreground truncate">
-                                      {transaction.account?.name}
+                                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                                      {format(
+                                        new Date(transaction.date),
+                                        "HH:mm",
+                                        {
+                                          locale: id,
+                                        }
+                                      )}{" "}
+                                      • {transaction.account?.name}
                                     </p>
                                   </div>
                                 </div>
@@ -327,10 +334,10 @@ export default function DashboardPage() {
                                   className={cn(
                                     "font-semibold text-sm whitespace-nowrap text-right shrink-0",
                                     transaction.type === "income"
-                                      ? "text-green-600"
+                                      ? "text-green-600 dark:text-green-400"
                                       : transaction.type === "expense"
-                                      ? "text-red-600"
-                                      : "text-blue-600"
+                                      ? "text-red-600 dark:text-red-400"
+                                      : "text-blue-600 dark:text-blue-400"
                                   )}
                                 >
                                   {transaction.type === "income"
