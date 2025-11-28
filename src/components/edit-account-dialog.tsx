@@ -18,20 +18,23 @@ import {
   DrawerTitle,
   DrawerClose,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription as AlertDialogDesc,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Loader2, X } from "lucide-react";
+import { IconLoader2, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import type { Account } from "@/hooks/use-accounts";
+import { ACCOUNT_ICON_OPTIONS } from "@/constants/account-icons";
 
 const COLORS = [
   "#ef4444",
@@ -48,6 +51,8 @@ const COLORS = [
   "#64748b",
 ];
 
+const DEFAULT_ICON_OPTION = ACCOUNT_ICON_OPTIONS[0];
+
 interface EditAccountDialogProps {
   account: Account | null;
   open: boolean;
@@ -63,15 +68,22 @@ export function EditAccountDialog({
   const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
-  const [type, setType] = useState("cash");
+  const [type, setType] = useState(DEFAULT_ICON_OPTION.type);
   const [color, setColor] = useState(COLORS[6]);
+  const [iconKey, setIconKey] = useState(DEFAULT_ICON_OPTION.key);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (account) {
       setName(account.name);
       setType(account.type);
       setColor(account.color || COLORS[6]);
+      const availableKeys = ACCOUNT_ICON_OPTIONS.map((option) => option.key);
+      const preferredKey = account.icon && availableKeys.includes(account.icon)
+        ? account.icon
+        : account.type;
+      setIconKey(preferredKey || DEFAULT_ICON_OPTION.key);
     }
   }, [account]);
 
@@ -87,6 +99,7 @@ export function EditAccountDialog({
           name,
           type,
           color,
+          icon: iconKey,
         })
         .eq("id", account.id);
 
@@ -96,11 +109,32 @@ export function EditAccountDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating account:", error);
-      alert("Gagal memperbarui akun. Silakan coba lagi.");
+      setErrorMessage("Gagal memperbarui akun. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const errorDialog = (
+    <AlertDialog
+      open={!!errorMessage}
+      onOpenChange={(open) => {
+        if (!open) setErrorMessage(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Terjadi Kesalahan</AlertDialogTitle>
+          <AlertDialogDesc>{errorMessage}</AlertDialogDesc>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorMessage(null)}>
+            Mengerti
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
@@ -116,18 +150,32 @@ export function EditAccountDialog({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="edit-type">Tipe</Label>
-        <Select value={type} onValueChange={setType}>
-          <SelectTrigger id="edit-type">
-            <SelectValue placeholder="Pilih tipe" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="cash">Tunai</SelectItem>
-            <SelectItem value="bank">Bank</SelectItem>
-            <SelectItem value="ewallet">E-Wallet</SelectItem>
-            <SelectItem value="savings">Tabungan</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label>Ikon &amp; Tipe</Label>
+        <div className="grid grid-cols-4 gap-2">
+          {ACCOUNT_ICON_OPTIONS.map((option) => {
+            const IconComponent = option.icon;
+            const isActive = iconKey === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-md border p-2 text-xs transition-colors text-center",
+                  isActive
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border hover:bg-muted"
+                )}
+                onClick={() => {
+                  setIconKey(option.key);
+                  setType(option.type);
+                }}
+              >
+                <IconComponent className="h-5 w-5" />
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -154,7 +202,7 @@ export function EditAccountDialog({
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               Memperbarui...
             </>
           ) : (
@@ -167,35 +215,41 @@ export function EditAccountDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Sumber Dana</DialogTitle>
-            <DialogDescription>
-              Perbarui informasi sumber dana Anda.
-            </DialogDescription>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Sumber Dana</DialogTitle>
+              <DialogDescription>
+                Perbarui informasi sumber dana Anda.
+              </DialogDescription>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+        {errorDialog}
+      </>
     );
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader className="text-left relative">
-          <DrawerTitle>Edit Sumber Dana</DrawerTitle>
-          <DrawerDescription>
-            Perbarui informasi sumber dana Anda.
-          </DrawerDescription>
+    <>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <DrawerHeader className="text-left relative">
+            <DrawerTitle>Edit Sumber Dana</DrawerTitle>
+            <DrawerDescription>
+              Perbarui informasi sumber dana Anda.
+            </DrawerDescription>
           <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DrawerClose>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+            <IconX className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DrawerClose>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+      {errorDialog}
+    </>
   );
 }

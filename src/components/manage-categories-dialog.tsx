@@ -25,14 +25,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
-  Plus,
-  Trash2,
-  Tag,
-  Loader2,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+  IconPlus,
+  IconTrash,
+  IconTag,
+  IconLoader2,
+  IconTrendingUp,
+  IconTrendingDown,
+} from "@tabler/icons-react";
 import { toast } from "sonner";
+import { getCategoryIconComponent } from "@/constants/category-icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,52 +44,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Utensils,
-  Bus,
-  ShoppingBag,
-  Film,
-  Receipt,
-  HeartPulse,
-  GraduationCap,
-  PiggyBank,
-  Banknote,
-  Wallet,
-  Gift,
-  Briefcase,
-  Coffee,
-  Smartphone,
-  Wifi,
-  Home,
-  Car,
-  Plane,
-  MoreHorizontal,
-} from "lucide-react";
-
-// Icon mapping
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  utensils: Utensils,
-  bus: Bus,
-  "shopping-bag": ShoppingBag,
-  film: Film,
-  receipt: Receipt,
-  "heart-pulse": HeartPulse,
-  "graduation-cap": GraduationCap,
-  "piggy-bank": PiggyBank,
-  banknote: Banknote,
-  wallet: Wallet,
-  gift: Gift,
-  "trending-up": TrendingUp,
-  briefcase: Briefcase,
-  coffee: Coffee,
-  smartphone: Smartphone,
-  wifi: Wifi,
-  home: Home,
-  car: Car,
-  plane: Plane,
-  "more-horizontal": MoreHorizontal,
-};
-
 export function ManageCategoriesDialog({
   children,
   open,
@@ -116,13 +71,20 @@ export function ManageCategoriesDialog({
       toast.success("Kategori berhasil dihapus");
       setDeleteCategoryId(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal menghapus kategori");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menghapus kategori"
+      );
     }
   };
 
-  const userCategories = categories?.filter((cat) => cat.user_id === profile?.id) || [];
-  const incomeCategories = userCategories.filter((cat) => cat.type === "income");
-  const expenseCategories = userCategories.filter((cat) => cat.type === "expense");
+  const userCategories =
+    categories?.filter((cat) => cat.user_id === profile?.id) || [];
+  const incomeCategories = userCategories.filter(
+    (cat) => cat.type === "income"
+  );
+  const expenseCategories = userCategories.filter(
+    (cat) => cat.type === "expense"
+  );
 
   const Content = (
     <div className="space-y-4">
@@ -132,7 +94,7 @@ export function ManageCategoriesDialog({
         </p>
         <AddCategoryDialog>
           <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
+            <IconPlus className="h-4 w-4 mr-2" />
             Tambah
           </Button>
         </AddCategoryDialog>
@@ -141,11 +103,11 @@ export function ManageCategoriesDialog({
       <Tabs defaultValue="expense" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="expense">
-            <TrendingDown className="h-4 w-4 mr-2" />
+            <IconTrendingDown className="h-4 w-4 mr-2" />
             Pengeluaran
           </TabsTrigger>
           <TabsTrigger value="income">
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <IconTrendingUp className="h-4 w-4 mr-2" />
             Pemasukan
           </TabsTrigger>
         </TabsList>
@@ -154,7 +116,7 @@ export function ManageCategoriesDialog({
           {expenseCategories.length > 0 ? (
             <div className="grid grid-cols-1 gap-2">
               {expenseCategories.map((category) => {
-                const IconComponent = ICON_MAP[category.icon] || Tag;
+                const IconComponent = getCategoryIconComponent(category.icon);
                 return (
                   <Card key={category.id} className="p-3">
                     <CardContent className="p-0 flex items-center justify-between">
@@ -167,7 +129,9 @@ export function ManageCategoriesDialog({
                         </div>
                         <div>
                           <p className="font-medium">{category.name}</p>
-                          <p className="text-xs text-muted-foreground">Kustom</p>
+                          <p className="text-xs text-muted-foreground">
+                            Kustom
+                          </p>
                         </div>
                       </div>
                       <Button
@@ -176,7 +140,7 @@ export function ManageCategoriesDialog({
                         onClick={() => setDeleteCategoryId(category.id)}
                         className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <IconTrash className="h-4 w-4" />
                       </Button>
                     </CardContent>
                   </Card>
@@ -185,7 +149,7 @@ export function ManageCategoriesDialog({
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <Tag className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <IconTag className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p>Belum ada kategori pengeluaran buatan Anda</p>
             </div>
           )}
@@ -195,7 +159,7 @@ export function ManageCategoriesDialog({
           {incomeCategories.length > 0 ? (
             <div className="grid grid-cols-1 gap-2">
               {incomeCategories.map((category) => {
-                const IconComponent = ICON_MAP[category.icon] || Tag;
+                const IconComponent = getCategoryIconComponent(category.icon);
                 return (
                   <Card key={category.id} className="p-3">
                     <CardContent className="p-0 flex items-center justify-between">
@@ -208,7 +172,9 @@ export function ManageCategoriesDialog({
                         </div>
                         <div>
                           <p className="font-medium">{category.name}</p>
-                          <p className="text-xs text-muted-foreground">Kustom</p>
+                          <p className="text-xs text-muted-foreground">
+                            Kustom
+                          </p>
                         </div>
                       </div>
                       <Button
@@ -217,7 +183,7 @@ export function ManageCategoriesDialog({
                         onClick={() => setDeleteCategoryId(category.id)}
                         className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <IconTrash className="h-4 w-4" />
                       </Button>
                     </CardContent>
                   </Card>
@@ -226,7 +192,7 @@ export function ManageCategoriesDialog({
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <Tag className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <IconTag className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p>Belum ada kategori pemasukan buatan Anda</p>
             </div>
           )}
@@ -241,8 +207,9 @@ export function ManageCategoriesDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Kategori?</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.
-              Kategori yang sedang digunakan dalam transaksi tidak dapat dihapus.
+              Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak
+              dapat dibatalkan. Kategori yang sedang digunakan dalam transaksi
+              tidak dapat dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -254,7 +221,7 @@ export function ManageCategoriesDialog({
             >
               {isDeleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
                   Menghapus...
                 </>
               ) : (
@@ -299,4 +266,3 @@ export function ManageCategoriesDialog({
     </Drawer>
   );
 }
-

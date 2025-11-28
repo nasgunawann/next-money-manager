@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useProfile } from "@/hooks/use-profile";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatAccountType } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -33,16 +33,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Wallet,
-  Edit,
-  Trash2,
-  X,
-  ArrowUpRight,
-  ArrowDownLeft,
-  Loader2,
-} from "lucide-react";
+  IconWallet,
+  IconPencil,
+  IconTrash,
+  IconX,
+  IconArrowUpRight,
+  IconArrowDownLeft,
+  IconLoader2,
+  IconArrowsLeftRight,
+} from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
 import { EditAccountDialog } from "@/components/edit-account-dialog";
+import { getAccountIconComponent } from "@/constants/account-icons";
 
 interface AccountDetailDialogProps {
   account: Account | null;
@@ -63,8 +65,11 @@ export function AccountDetailDialog({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!account) return null;
+
+  const AccountIcon = getAccountIconComponent(account.icon, account.type);
 
   // Get transactions for this account
   const accountTransactions =
@@ -82,7 +87,7 @@ export function AccountDetailDialog({
         .eq("account_id", account.id);
 
       if (count && count > 0) {
-        alert(
+        setErrorMessage(
           "Tidak dapat menghapus sumber dana yang memiliki transaksi. Hapus transaksi terlebih dahulu."
         );
         setShowDeleteAlert(false);
@@ -102,12 +107,33 @@ export function AccountDetailDialog({
       onOpenChange(false); // Close the detail dialog
     } catch (error) {
       console.error("Error deleting account:", error);
-      alert("Gagal menghapus sumber dana");
+      setErrorMessage("Gagal menghapus sumber dana");
     } finally {
       setIsDeleting(false);
       setShowDeleteAlert(false);
     }
   };
+
+  const errorDialog = (
+    <AlertDialog
+      open={!!errorMessage}
+      onOpenChange={(open) => {
+        if (!open) setErrorMessage(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Terjadi Kesalahan</AlertDialogTitle>
+          <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorMessage(null)}>
+            Mengerti
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   const Content = (
     <div className="space-y-6">
@@ -117,18 +143,12 @@ export function AccountDetailDialog({
           className="h-16 w-16 rounded-full flex items-center justify-center text-white shrink-0"
           style={{ backgroundColor: account.color || "#94a3b8" }}
         >
-          <Wallet className="h-8 w-8" />
+          <AccountIcon className="h-8 w-8" />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{account.name}</h3>
-          <p className="text-sm text-muted-foreground capitalize">
-            {account.type === "ewallet"
-              ? "E-Wallet"
-              : account.type === "cash"
-              ? "Tunai"
-              : account.type === "bank"
-              ? "Bank"
-              : "Tabungan"}
+          <p className="text-sm text-muted-foreground">
+            {formatAccountType(account.type)}
           </p>
           <p className="text-2xl font-bold mt-2">
             {formatCurrency(account.balance, profile?.currency)}
@@ -143,7 +163,7 @@ export function AccountDetailDialog({
           className="w-full"
           onClick={() => setShowEditDialog(true)}
         >
-          <Edit className="h-4 w-4 mr-2" />
+          <IconPencil className="h-4 w-4 mr-2" />
           Edit
         </Button>
         <Button
@@ -151,7 +171,7 @@ export function AccountDetailDialog({
           className="w-full text-destructive hover:text-destructive"
           onClick={() => setShowDeleteAlert(true)}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <IconTrash className="h-4 w-4 mr-2" />
           Hapus
         </Button>
       </div>
@@ -166,11 +186,11 @@ export function AccountDetailDialog({
                 key={transaction.id}
                 className="border-none shadow-sm hover:bg-accent/50 transition-colors"
               >
-                <CardContent className="p-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <div
                       className={cn(
-                        "h-8 w-8 rounded-full flex items-center justify-center",
+                        "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
                         transaction.type === "income"
                           ? "bg-green-100 text-green-600"
                           : transaction.type === "expense"
@@ -179,20 +199,20 @@ export function AccountDetailDialog({
                       )}
                     >
                       {transaction.type === "income" ? (
-                        <ArrowDownLeft className="h-4 w-4" />
+                        <IconArrowDownLeft className="h-4.5 w-4.5" />
                       ) : transaction.type === "expense" ? (
-                        <ArrowUpRight className="h-4 w-4" />
+                        <IconArrowUpRight className="h-4.5 w-4.5" />
                       ) : (
-                        <Wallet className="h-4 w-4" />
+                        <IconArrowsLeftRight className="h-4.5 w-4.5" />
                       )}
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm leading-tight truncate">
                         {transaction.description ||
                           transaction.category?.name ||
                           "Transaksi"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                         {new Date(transaction.date).toLocaleDateString(
                           "id-ID",
                           { day: "numeric", month: "short", year: "numeric" }
@@ -202,13 +222,20 @@ export function AccountDetailDialog({
                   </div>
                   <p
                     className={cn(
-                      "font-semibold text-sm",
+                      "font-semibold text-sm whitespace-nowrap text-right shrink-0",
                       transaction.type === "income"
+                        ? "text-green-600"
+                        : transaction.type === "transfer" &&
+                          transaction.description?.includes("(dari")
                         ? "text-green-600"
                         : "text-red-600"
                     )}
                   >
-                    {transaction.type === "income" ? "+" : "-"}{" "}
+                    {transaction.type === "income" ||
+                    (transaction.type === "transfer" &&
+                      transaction.description?.includes("(dari"))
+                      ? "+"
+                      : "-"}{" "}
                     {formatCurrency(transaction.amount, profile?.currency)}
                   </p>
                 </CardContent>
@@ -217,7 +244,7 @@ export function AccountDetailDialog({
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground text-sm">
-            <Wallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <IconWallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p>Belum ada transaksi</p>
           </div>
         )}
@@ -262,7 +289,7 @@ export function AccountDetailDialog({
               >
                 {isDeleting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
                     Menghapus...
                   </>
                 ) : (
@@ -272,6 +299,7 @@ export function AccountDetailDialog({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        {errorDialog}
       </>
     );
   }
@@ -283,7 +311,7 @@ export function AccountDetailDialog({
           <DrawerHeader className="text-left relative">
             <DrawerTitle>Detail Sumber Dana</DrawerTitle>
             <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-              <X className="h-4 w-4" />
+              <IconX className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </DrawerClose>
           </DrawerHeader>
@@ -316,7 +344,7 @@ export function AccountDetailDialog({
             >
               {isDeleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
                   Menghapus...
                 </>
               ) : (
@@ -326,6 +354,7 @@ export function AccountDetailDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {errorDialog}
     </>
   );
 }

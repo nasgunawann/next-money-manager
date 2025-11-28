@@ -70,6 +70,29 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
+  useEffect(() => {
+    let isInitialMount = true;
+    
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      // Skip clearing cache on initial mount to preserve any pre-loaded data
+      if (isInitialMount) {
+        isInitialMount = false;
+        return;
+      }
+      
+      // Only clear cache on actual login/logout events, not on token refresh
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        queryClient.clear();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryClient]);
+
   return (
     <NextThemesProvider
       attribute="class"

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useProfile } from "@/hooks/use-profile";
+import type { Account } from "@/hooks/use-accounts";
 import {
   Dialog,
   DialogContent,
@@ -20,19 +21,29 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { IconLoader2 } from "@tabler/icons-react";
+import {
+  cn,
+  formatNumericInput,
+  sanitizeNumericInput,
+  numericInputToNumber,
+  generateTempId,
+} from "@/lib/utils";
+import { ACCOUNT_ICON_OPTIONS } from "@/constants/account-icons";
 
 const COLORS = [
   "#ef4444", // Red
@@ -48,6 +59,8 @@ const COLORS = [
   "#ec4899", // Pink
   "#64748b", // Slate
 ];
+
+const DEFAULT_ICON_OPTION = ACCOUNT_ICON_OPTIONS[0];
 
 export function AddAccountDialog({
   children,
@@ -65,51 +78,159 @@ export function AddAccountDialog({
 
   // Form State
   const [name, setName] = useState("");
-  const [type, setType] = useState("cash");
+  const [type, setType] = useState(DEFAULT_ICON_OPTION.type);
   const [balance, setBalance] = useState("");
   const [color, setColor] = useState(COLORS[6]); // Default Blue
+  const [iconKey, setIconKey] = useState(DEFAULT_ICON_OPTION.key);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
+
+  const resetForm = () => {
+    setName("");
+    setType(DEFAULT_ICON_OPTION.type);
+    setBalance("");
+    setColor(COLORS[6]);
+    setIconKey(DEFAULT_ICON_OPTION.key);
+    setIsDirty(false);
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    onOpenChange?.(false);
+    setShowUnsavedAlert(false);
+    setTimeout(resetForm, 300);
+  };
 
   const handleOpenChange = (val: boolean) => {
-    setIsOpen(val);
-    onOpenChange?.(val);
-    if (!val) {
-      // Reset form on close
-      setTimeout(() => {
-        setName("");
-        setType("cash");
-        setBalance("");
-        setColor(COLORS[6]);
-      }, 300);
+    if (val) {
+      setIsOpen(true);
+      onOpenChange?.(true);
+      return;
     }
+
+    if (isDirty) {
+      setShowUnsavedAlert(true);
+      return;
+    }
+
+    closeDialog();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !balance) return;
+    const numericBalance = numericInputToNumber(balance);
 
     setIsLoading(true);
-    try {
-      const { error } = await supabase.from("accounts").insert({
-        user_id: profile?.id,
-        name,
-        type,
-        balance: parseFloat(balance),
-        color,
-        icon: "wallet", // Default icon for now
-      });
+    const previousAccounts =
+      queryClient.getQueryData<Account[]>(["accounts"]);
+    const optimisticAccount: Account = {
+      id: generateTempId(),
+      name,
+      type,
+      balance: numericBalance,
+      color,
+      icon: iconKey,
+    };
 
-      if (error) throw error;
+    queryClient.setQueryData<Account[]>(["accounts"], (old = []) => [
+      optimisticAccount,
+      ...old,
+    ]);
+
+    try {
+      const { data: createdAccount, error } = await supabase
+        .from("accounts")
+        .insert({
+          user_id: profile?.id,
+          name,
+          type,
+          balance: numericBalance,
+          color,
+          icon: iconKey,
+        })
+        .select()
+        .single();
+
+      if (error || !createdAccount) throw error;
+
+      queryClient.setQueryData<Account[]>(["accounts"], (old = []) =>
+        old.map((account) =>
+          account.id === optimisticAccount.id
+            ? (createdAccount as Account)
+            : account
+        )
+      );
 
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      handleOpenChange(false);
+      setIsDirty(false);
+      closeDialog();
     } catch (error) {
       console.error("Error creating account:", error);
-      alert("Gagal membuat akun. Silakan coba lagi.");
+      setErrorMessage("Gagal membuat akun. Silakan coba lagi.");
+      queryClient.setQueryData(["accounts"], previousAccounts);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const errorDialog = (
+    <AlertDialog
+      open={!!errorMessage}
+      onOpenChange={(open) => {
+        if (!open) setErrorMessage(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Terjadi Kesalahan</AlertDialogTitle>
+          <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorMessage(null)}>
+            Mengerti
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedAlert(false);
+    setIsDirty(false);
+    resetForm();
+    closeDialog();
+  };
+
+  const unsavedDialog = (
+    <AlertDialog
+      open={showUnsavedAlert}
+      onOpenChange={(open) => {
+        if (!open) setShowUnsavedAlert(false);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Batalkan pengisian?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Formulir akun belum disimpan. Keluar sekarang akan menghapus data
+            yang sudah diisi.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDiscardChanges}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Buang Perubahan
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
@@ -119,37 +240,64 @@ export function AddAccountDialog({
           id="name"
           placeholder="Contoh: BCA, GoPay, Dompet"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setIsDirty(true);
+          }}
           required
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="type">Tipe</Label>
-          <Select value={type} onValueChange={setType}>
-            <SelectTrigger id="type">
-              <SelectValue placeholder="Pilih tipe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cash">Tunai</SelectItem>
-              <SelectItem value="bank">Bank</SelectItem>
-              <SelectItem value="ewallet">E-Wallet</SelectItem>
-              <SelectItem value="savings">Tabungan</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="balance">Saldo Awal</Label>
+      <div className="space-y-2">
+        <Label htmlFor="balance">Saldo Awal</Label>
+        <div className="relative">
+          <span className="absolute left-3 top-2.5 text-muted-foreground">
+            Rp
+          </span>
           <Input
             id="balance"
-            type="number"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
             placeholder="0"
-            value={balance}
-            onChange={(e) => setBalance(e.target.value)}
+            className="pl-9 text-lg font-semibold"
+            value={formatNumericInput(balance)}
+            onChange={(e) => {
+              setBalance(sanitizeNumericInput(e.target.value));
+              setIsDirty(true);
+            }}
             required
           />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Ikon &amp; Tipe</Label>
+        <div className="grid grid-cols-4 gap-2">
+          {ACCOUNT_ICON_OPTIONS.map((option) => {
+            const IconComponent = option.icon;
+            const isActive = iconKey === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-md border p-2 text-xs transition-colors",
+                  isActive
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border hover:bg-muted"
+                )}
+                onClick={() => {
+                  setIconKey(option.key);
+                  setType(option.type);
+                  setIsDirty(true);
+                }}
+              >
+                <IconComponent className="h-5 w-5" />
+                <span>{option.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -167,7 +315,10 @@ export function AddAccountDialog({
                   : "hover:scale-105"
               )}
               style={{ backgroundColor: c }}
-              onClick={() => setColor(c)}
+              onClick={() => {
+                setColor(c);
+                setIsDirty(true);
+              }}
             />
           ))}
         </div>
@@ -177,7 +328,7 @@ export function AddAccountDialog({
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               Menyimpan...
             </>
           ) : (
@@ -190,33 +341,41 @@ export function AddAccountDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Akun Baru</DialogTitle>
-            <DialogDescription>
-              Buat akun baru untuk melacak keuangan Anda.
-            </DialogDescription>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
+          {children && <DialogTrigger asChild>{children}</DialogTrigger>}
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Tambah Akun Baru</DialogTitle>
+              <DialogDescription>
+                Buat akun baru untuk melacak keuangan Anda.
+              </DialogDescription>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+        {errorDialog}
+        {unsavedDialog}
+      </>
     );
   }
 
   return (
-    <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle>Tambah Akun Baru</DrawerTitle>
-          <DrawerDescription>
-            Buat akun baru untuk melacak keuangan Anda.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
+        {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Tambah Akun Baru</DrawerTitle>
+            <DrawerDescription>
+              Buat akun baru untuk melacak keuangan Anda.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+      {errorDialog}
+      {unsavedDialog}
+    </>
   );
 }

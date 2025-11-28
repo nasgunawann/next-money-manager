@@ -5,16 +5,55 @@ import { useState } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, cn, formatAccountType } from "@/lib/utils";
+import { format, isToday, isYesterday, startOfDay } from "date-fns";
+import { id } from "date-fns/locale";
+import type { Transaction } from "@/hooks/use-transactions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import {
+  IconPlus,
+  IconWallet,
+  IconArrowUpRight,
+  IconArrowDownLeft,
+  IconArrowsLeftRight,
+} from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
+import { getAccountIconComponent } from "@/constants/account-icons";
+
+import useSessionGuard from "@/hooks/use-session-guard";
+
+const getGroupedRecentTransactions = (transactions: Transaction[]) => {
+  const grouped = transactions
+    .filter((tx) => {
+      // Filter out the receiving side of transfers to show only one entry per transfer
+      if (tx.type === "transfer" && tx.related_transaction_id) {
+        if (tx.description?.includes("(dari")) {
+          return false;
+        }
+      }
+      return true;
+    })
+    .slice(0, 10)
+    .reduce<Record<string, Transaction[]>>((acc, tx) => {
+      const day = startOfDay(new Date(tx.date));
+      let label = format(day, "dd MMMM yyyy", { locale: id });
+      if (isToday(day)) label = "Hari ini";
+      else if (isYesterday(day)) label = "Kemarin";
+
+      if (!acc[label]) acc[label] = [];
+      acc[label].push(tx);
+      return acc;
+    }, {});
+
+  return Object.entries(grouped);
+};
 
 export default function DashboardPage() {
+  const sessionGuard = useSessionGuard();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: accounts, isLoading: accountsLoading } = useAccounts();
   const { data: transactions, isLoading: transactionsLoading } =
@@ -29,7 +68,6 @@ export default function DashboardPage() {
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
-  const monthName = now.toLocaleDateString("id-ID", { month: "long" });
 
   const monthlyIncome =
     transactions
@@ -55,7 +93,12 @@ export default function DashboardPage() {
       })
       .reduce((acc, t) => acc + t.amount, 0) || 0;
 
-  if (profileLoading || accountsLoading || transactionsLoading) {
+  if (
+    sessionGuard.isLoading ||
+    profileLoading ||
+    accountsLoading ||
+    transactionsLoading
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -63,74 +106,118 @@ export default function DashboardPage() {
     );
   }
 
+  const renderAccountCard = (account: Account) => {
+    const AccountIcon = getAccountIconComponent(account.icon, account.type);
+    return (
+      <Card
+        key={account.id}
+        className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
+        onClick={() => setSelectedAccount(account)}
+      >
+        <CardContent>
+          <div className="flex items-center gap-3 mb-3">
+            <div
+              className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
+              style={{
+                backgroundColor: account.color || "#94a3b8",
+              }}
+            >
+              <AccountIcon className="h-6 w-6" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-foreground truncate">
+                {account.name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {formatAccountType(account.type)}
+              </p>
+            </div>
+          </div>
+          <p className="font-semibold text-lg text-foreground">
+            {formatCurrency(account.balance, profile?.currency)}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const addAccountCard = (
+    <AddAccountDialog key="add-account">
+      <Card className="border border-dashed border-primary/40 bg-card text-muted-foreground hover:border-primary/80 transition-colors cursor-pointer h-full">
+        <CardContent className="p-4 flex flex-col items-center justify-center gap-2">
+          <IconPlus className="h-6 w-6" />
+          <span>Tambah Akun Baru</span>
+        </CardContent>
+      </Card>
+    </AddAccountDialog>
+  );
+
+  if (!sessionGuard.isAuthenticated) {
+    return null;
+  }
+
   return (
     <AppLayout>
-      <div className="p-4 md:p-8 space-y-6">
-        {/* Header (Mobile Only - Welcome Message) */}
-        <div className="md:hidden mb-4">
-          <h1 className="text-xl font-bold text-foreground">
-            Halo, {profile?.full_name?.split(" ")[0]}
-          </h1>
-        </div>
-
-        {/* Desktop Header */}
-        <div className="hidden md:flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Ringkasan keuangan Anda hari ini.
-            </p>
-          </div>
+      <div className="p-4 md:p-8 space-y-5">
+        <div className="hidden md:flex justify-end">
           <AddTransactionDialog>
             <Button>
-              <Plus className="mr-2 h-4 w-4" /> Tambah Transaksi
+              <IconPlus className="mr-2 h-4 w-4" /> Tambah Transaksi
             </Button>
           </AddTransactionDialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Left Column (Balance & Accounts) */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Total Balance Card */}
-            <Card className="bg-primary text-primary-foreground border-none shadow-lg">
-              <CardContent className="p-6 md:p-8">
-                <p className="text-primary-foreground/80 text-sm font-medium mb-1">
-                  Total Saldo
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold mb-2">
-                  {formatCurrency(totalBalance, profile?.currency)}
-                </h2>
-
-                <p className="text-primary-foreground/70 text-xs font-medium mb-4">
-                  Laporan bulan {monthName}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="bg-green-400/20 p-1 rounded">
-                        <ArrowDownLeft className="h-4 w-4 text-green-300" />
-                      </div>
-                      <span className="text-xs text-primary-foreground/80">
-                        Pemasukan
-                      </span>
-                    </div>
-                    <p className="font-semibold text-lg">
-                      {formatCurrency(monthlyIncome, profile?.currency)}
-                    </p>
+          <div className="md:col-span-2 space-y-5">
+            {/* Overview Hero */}
+            <Card className="relative overflow-hidden border-none bg-linear-to-br from-[#4663f1] via-[#3552d8] to-[#1f37a7] text-white shadow-2xl">
+              <CardContent className="p-5 md:p-7 space-y-4">
+                <div className="flex flex-col gap-1">
+                  <p className="text-[11px] font-semibold tracking-wide text-white/80 uppercase">
+                    Total Saldo
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-4xl md:text-4xl font-bold tracking-tight">
+                      {formatCurrency(totalBalance, profile?.currency)}
+                    </h2>
                   </div>
-                  <div className="bg-background/10 rounded-lg p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="bg-red-400/20 p-1 rounded">
-                        <ArrowUpRight className="h-4 w-4 text-red-300" />
-                      </div>
-                      <span className="text-xs text-primary-foreground/80">
-                        Pengeluaran
-                      </span>
+                  <p className="text-xs opacity-80">
+                    Laporan bulan ini |{" "}
+                    {new Date().toLocaleDateString("id-ID", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+
+                <div className="rounded-[24px] bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 shadow-inner border border-white/10">
+                  <div className="flex items-center gap-2 justify-self-start">
+                    <div className="h-9 w-9 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 flex items-center justify-center shrink-0">
+                      <IconArrowDownLeft className="h-4.5 w-4.5" />
                     </div>
-                    <p className="font-semibold text-lg">
-                      {formatCurrency(monthlyExpense, profile?.currency)}
-                    </p>
+                    <div>
+                      <p className="text-[10px] text-white/70 uppercase tracking-wide">
+                        Pendapatan
+                      </p>
+                      <p className="text-sm font-semibold text-white leading-tight">
+                        {formatCurrency(monthlyIncome, profile?.currency)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-10 w-px bg-white/20 self-stretch" />
+                  <div className="flex items-center gap-2 justify-self-end text-right">
+                    <div className="h-9 w-9 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex items-center justify-center shrink-0">
+                      <IconArrowUpRight className="h-4.5 w-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-white/70 uppercase tracking-wide">
+                        Pengeluaran
+                      </p>
+                      <p className="text-sm font-semibold text-white leading-tight">
+                        {formatCurrency(monthlyExpense, profile?.currency)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -153,48 +240,26 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                {accounts?.map((account) => (
-                  <Card
-                    key={account.id}
-                    className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
-                    onClick={() => setSelectedAccount(account)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div
-                          className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
-                          style={{
-                            backgroundColor: account.color || "#94a3b8",
-                          }}
-                        >
-                          <Wallet className="h-6 w-6" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-foreground truncate">
-                            {account.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground capitalize">
-                            {account.type}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="font-semibold text-lg text-foreground">
-                        {formatCurrency(account.balance, profile?.currency)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
+              {/* Mobile carousel */}
+              <div className="relative -mx-4 md:hidden">
+                <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-8 no-scrollbar carousel-smooth">
+                  {accounts?.map((account) => (
+                    <div key={account.id} className="snap-center shrink-0 w-64">
+                      {renderAccountCard(account)}
+                    </div>
+                  ))}
+                  <div className="snap-center shrink-0 w-64">
+                    {addAccountCard}
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-8 fade-edge-left" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-8 fade-edge-right" />
+              </div>
 
-                <AddAccountDialog>
-                  <Button
-                    variant="outline"
-                    className="w-full border-dashed border-2 h-auto py-4 text-muted-foreground hover:text-foreground hover:border-primary/50 flex flex-col gap-2"
-                  >
-                    <Plus className="h-6 w-6" />
-                    <span>Tambah Akun Baru</span>
-                  </Button>
-                </AddAccountDialog>
+              {/* Desktop grid */}
+              <div className="hidden md:grid grid-cols-2 gap-4">
+                {accounts?.map((account) => renderAccountCard(account))}
+                {addAccountCard}
               </div>
             </section>
           </div>
@@ -202,73 +267,100 @@ export default function DashboardPage() {
           {/* Right Column (Recent Transactions - Desktop) */}
           <div className="space-y-6">
             <section>
-              <h3 className="font-semibold text-foreground mb-4 text-lg">
-                Transaksi Terakhir
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-foreground text-lg">
+                  Transaksi Terakhir
+                </h3>
+                <Link href="/transactions">
+                  <Button variant="ghost" size="sm" className="text-primary">
+                    Lihat Semua
+                  </Button>
+                </Link>
+              </div>
               {transactions && transactions.length > 0 ? (
-                <div className="space-y-3">
-                  {transactions.slice(0, 5).map((transaction) => (
-                    <Card
-                      key={transaction.id}
-                      className="border-none shadow-sm hover:bg-accent/50 transition-colors"
-                    >
-                      <CardContent className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={cn(
-                              "h-10 w-10 rounded-full flex items-center justify-center",
-                              transaction.type === "income"
-                                ? "bg-green-100 text-green-600"
-                                : transaction.type === "expense"
-                                ? "bg-red-100 text-red-600"
-                                : "bg-blue-100 text-blue-600"
-                            )}
-                          >
-                            {transaction.type === "income" ? (
-                              <ArrowDownLeft className="h-5 w-5" />
-                            ) : transaction.type === "expense" ? (
-                              <ArrowUpRight className="h-5 w-5" />
-                            ) : (
-                              <Wallet className="h-5 w-5" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground text-sm">
-                              {transaction.description ||
-                                transaction.category?.name ||
-                                "Transaksi"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(transaction.date).toLocaleDateString(
-                                "id-ID",
-                                { day: "numeric", month: "short" }
-                              )}{" "}
-                              • {transaction.account?.name}
-                            </p>
-                          </div>
-                        </div>
-                        <p
-                          className={cn(
-                            "font-semibold text-sm",
-                            transaction.type === "income"
-                              ? "text-green-600"
-                              : "text-red-600"
-                          )}
-                        >
-                          {transaction.type === "income" ? "+" : "-"}{" "}
-                          {formatCurrency(
-                            transaction.amount,
-                            profile?.currency
-                          )}
+                <div className="space-y-4">
+                  {getGroupedRecentTransactions(transactions)
+                    .slice(0, 2)
+                    .map(([label, items]) => (
+                      <div key={label} className="space-y-2">
+                        <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                          {label}
                         </p>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        <div className="space-y-2">
+                          {items.map((transaction) => (
+                            <Card
+                              key={transaction.id}
+                              className="border-none shadow-sm hover:bg-accent/50 transition-colors"
+                            >
+                              <CardContent className="p-4 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                  <div
+                                    className={cn(
+                                      "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
+                                      transaction.type === "income"
+                                        ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                                        : transaction.type === "expense"
+                                        ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                                        : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                                    )}
+                                  >
+                                    {transaction.type === "income" ? (
+                                      <IconArrowDownLeft className="h-4.5 w-4.5" />
+                                    ) : transaction.type === "expense" ? (
+                                      <IconArrowUpRight className="h-4.5 w-4.5" />
+                                    ) : (
+                                      <IconArrowsLeftRight className="h-4.5 w-4.5" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-medium text-foreground text-sm leading-tight truncate">
+                                      {transaction.description ||
+                                        transaction.category?.name ||
+                                        "Transaksi"}
+                                    </p>
+                                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                                      {format(
+                                        new Date(transaction.date),
+                                        "HH:mm",
+                                        {
+                                          locale: id,
+                                        }
+                                      )}{" "}
+                                      • {transaction.account?.name}
+                                    </p>
+                                  </div>
+                                </div>
+                                <p
+                                  className={cn(
+                                    "font-semibold text-sm whitespace-nowrap text-right shrink-0",
+                                    transaction.type === "income"
+                                      ? "text-green-600 dark:text-green-400"
+                                      : transaction.type === "expense"
+                                      ? "text-red-600 dark:text-red-400"
+                                      : "text-blue-600 dark:text-blue-400"
+                                  )}
+                                >
+                                  {transaction.type === "income"
+                                    ? "+"
+                                    : transaction.type === "expense"
+                                    ? "-"
+                                    : ""}{" "}
+                                  {formatCurrency(
+                                    transaction.amount,
+                                    profile?.currency
+                                  )}
+                                </p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               ) : (
                 <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border">
                   <div className="bg-muted w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Wallet className="h-6 w-6 text-muted-foreground" />
+                    <IconWallet className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <p className="text-muted-foreground text-sm">
                     Belum ada transaksi

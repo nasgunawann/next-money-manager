@@ -8,7 +8,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useAccounts } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
 import { supabase } from "@/lib/supabase";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatAccountType } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,19 +29,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  User,
-  Mail,
-  Wallet,
-  LogOut,
-  Edit,
-  Loader2,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Sun,
-  Moon,
-  Monitor,
-} from "lucide-react";
+  IconUser,
+  IconMail,
+  IconWallet,
+  IconLogout,
+  IconPencil,
+  IconLoader2,
+  IconCurrencyDollar,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconSun,
+  IconMoon,
+  IconDeviceDesktop,
+} from "@tabler/icons-react";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -149,16 +149,9 @@ export default function ProfilePage() {
   return (
     <AppLayout>
       <div className="p-4 md:p-8 space-y-6 pb-24 md:pb-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Profil Saya</h1>
-            <p className="text-muted-foreground">
-              Kelola informasi profil dan pengaturan akun Anda.
-            </p>
-          </div>
+        <div className="flex justify-end">
           <Button onClick={handleEditClick} variant="outline">
-            <Edit className="mr-2 h-4 w-4" />
+            <IconPencil className="mr-2 h-4 w-4" />
             Edit Profil
           </Button>
         </div>
@@ -167,21 +160,21 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+              <IconUser className="h-5 w-5" />
               Informasi Profil
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-8 w-8 text-primary" />
+                <IconUser className="h-8 w-8 text-primary" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-lg text-foreground">
                   {profile?.full_name || "Tidak ada nama"}
                 </p>
                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                  <Mail className="h-4 w-4" />
+                  <IconMail className="h-4 w-4" />
                   {profile?.email || "Tidak ada email"}
                 </p>
               </div>
@@ -206,15 +199,15 @@ export default function ProfilePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="light">
-                      <Sun className="h-4 w-4 mr-2" />
+                      <IconSun className="h-4 w-4 mr-2" />
                       Terang
                     </SelectItem>
                     <SelectItem value="dark">
-                      <Moon className="h-4 w-4 mr-2" />
+                      <IconMoon className="h-4 w-4 mr-2" />
                       Gelap
                     </SelectItem>
                     <SelectItem value="system">
-                      <Monitor className="h-4 w-4 mr-2" />
+                      <IconDeviceDesktop className="h-4 w-4 mr-2" />
                       Sistem
                     </SelectItem>
                   </SelectContent>
@@ -236,7 +229,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Wallet className="h-6 w-6 text-primary" />
+                  <IconWallet className="h-6 w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -250,7 +243,7 @@ export default function ProfilePage() {
                   <p className="text-2xl font-bold text-foreground">{totalAccounts}</p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-blue-500" />
+                  <IconCurrencyDollar className="h-6 w-6 text-blue-500" />
                 </div>
               </div>
             </CardContent>
@@ -266,7 +259,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                  <TrendingDown className="h-6 w-6 text-green-500" />
+                  <IconTrendingDown className="h-6 w-6 text-green-500" />
                 </div>
               </div>
             </CardContent>
@@ -282,7 +275,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
                 <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-red-500" />
+                  <IconTrendingUp className="h-6 w-6 text-red-500" />
                 </div>
               </div>
             </CardContent>
@@ -307,11 +300,13 @@ export default function ProfilePage() {
                         className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                         style={{ backgroundColor: account.color || "#94a3b8" }}
                       >
-                        <Wallet className="h-5 w-5" />
+                        <IconWallet className="h-5 w-5" />
                       </div>
                       <div>
                         <p className="font-medium text-foreground">{account.name}</p>
-                        <p className="text-xs text-muted-foreground capitalize">{account.type}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatAccountType(account.type)}
+                        </p>
                       </div>
                     </div>
                     <p className="font-semibold text-foreground">
@@ -336,7 +331,7 @@ export default function ProfilePage() {
               className="w-full"
               onClick={handleLogout}
             >
-              <LogOut className="mr-2 h-4 w-4" />
+              <IconLogout className="mr-2 h-4 w-4" />
               Keluar
             </Button>
           </CardContent>
@@ -386,15 +381,15 @@ export default function ProfilePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="light">
-                      <Sun className="h-4 w-4 mr-2" />
+                      <IconSun className="h-4 w-4 mr-2" />
                       Terang
                     </SelectItem>
                     <SelectItem value="dark">
-                      <Moon className="h-4 w-4 mr-2" />
+                      <IconMoon className="h-4 w-4 mr-2" />
                       Gelap
                     </SelectItem>
                     <SelectItem value="system">
-                      <Monitor className="h-4 w-4 mr-2" />
+                      <IconDeviceDesktop className="h-4 w-4 mr-2" />
                       Sistem
                     </SelectItem>
                   </SelectContent>
@@ -408,7 +403,7 @@ export default function ProfilePage() {
               <Button onClick={handleSave} disabled={isUpdating}>
                 {isUpdating ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
                     Menyimpan...
                   </>
                 ) : (

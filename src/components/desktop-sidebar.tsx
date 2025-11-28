@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, PieChart, Wallet, User, LogOut, Settings } from "lucide-react";
+import {
+  IconHome,
+  IconChartPie,
+  IconWallet,
+  IconUser,
+  IconLogout,
+  IconSettings,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -13,12 +20,12 @@ export function DesktopSidebar() {
   const router = useRouter();
 
   const links = [
-    { href: "/dashboard", label: "Beranda", icon: Home },
-    { href: "/transactions", label: "Transaksi", icon: Wallet },
-    { href: "/accounts", label: "Sumber Dana", icon: Wallet },
-    { href: "/reports", label: "Laporan", icon: PieChart },
-    { href: "/profile", label: "Profil", icon: User },
-    { href: "/settings", label: "Pengaturan", icon: Settings },
+    { href: "/dashboard", label: "Beranda", icon: IconHome },
+    { href: "/transactions", label: "Transaksi", icon: IconWallet },
+    { href: "/accounts", label: "Sumber Dana", icon: IconWallet },
+    { href: "/reports", label: "Laporan", icon: IconChartPie },
+    { href: "/profile", label: "Profil", icon: IconUser },
+    { href: "/settings", label: "Pengaturan", icon: IconSettings },
   ];
 
   // Prefetch all navigation links for faster navigation
@@ -38,7 +45,7 @@ export function DesktopSidebar() {
     <aside className="hidden md:flex flex-col w-64 bg-sidebar border-r border-sidebar-border h-screen fixed left-0 top-0 z-50">
       <div className="p-6 border-b border-sidebar-border">
         <h1 className="text-xl font-bold text-sidebar-primary flex items-center gap-2">
-          <Wallet className="h-6 w-6" />
+          <IconWallet className="h-6 w-6" />
           MoneyManager
         </h1>
       </div>
@@ -62,7 +69,7 @@ export function DesktopSidebar() {
             >
               <Icon
                 className={cn(
-                  "h-5 w-5 transition-transform duration-200",
+                  "h-6 w-6 transition-transform duration-200",
                   isActive ? "scale-110" : "group-hover:scale-110"
                 )}
               />
@@ -78,7 +85,7 @@ export function DesktopSidebar() {
           className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-150"
           onClick={handleLogout}
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <IconLogout className="mr-2 h-4 w-4" />
           Keluar
         </Button>
       </div>

@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 
 export default function OnboardingPage() {
   const [fullName, setFullName] = useState("");
@@ -168,7 +168,7 @@ export default function OnboardingPage() {
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
               Mulai Sekarang
             </Button>

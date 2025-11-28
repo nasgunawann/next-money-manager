@@ -32,30 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  Loader2,
-  Utensils,
-  Bus,
-  ShoppingBag,
-  Film,
-  Receipt,
-  HeartPulse,
-  GraduationCap,
-  PiggyBank,
-  Banknote,
-  Wallet,
-  Gift,
-  TrendingUp,
-  MoreHorizontal,
-  Briefcase,
-  Coffee,
-  Smartphone,
-  Wifi,
-  Home,
-  Car,
-  Plane,
-} from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { CATEGORY_ICON_OPTIONS } from "@/constants/category-icons";
 
 const COLORS = [
   "#ef4444",
@@ -72,29 +51,6 @@ const COLORS = [
   "#64748b",
 ];
 
-const ICONS = [
-  { name: "utensils", icon: Utensils },
-  { name: "bus", icon: Bus },
-  { name: "shopping-bag", icon: ShoppingBag },
-  { name: "film", icon: Film },
-  { name: "receipt", icon: Receipt },
-  { name: "heart-pulse", icon: HeartPulse },
-  { name: "graduation-cap", icon: GraduationCap },
-  { name: "piggy-bank", icon: PiggyBank },
-  { name: "banknote", icon: Banknote },
-  { name: "wallet", icon: Wallet },
-  { name: "gift", icon: Gift },
-  { name: "trending-up", icon: TrendingUp },
-  { name: "briefcase", icon: Briefcase },
-  { name: "coffee", icon: Coffee },
-  { name: "smartphone", icon: Smartphone },
-  { name: "wifi", icon: Wifi },
-  { name: "home", icon: Home },
-  { name: "car", icon: Car },
-  { name: "plane", icon: Plane },
-  { name: "more-horizontal", icon: MoreHorizontal },
-];
-
 export function AddCategoryDialog({
   children,
   open,
@@ -104,7 +60,7 @@ export function AddCategoryDialog({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+const [isOpen, setIsOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const queryClient = useQueryClient();
   const { data: profile } = useProfile();
@@ -116,16 +72,25 @@ export function AddCategoryDialog({
   const [icon, setIcon] = useState("more-horizontal");
   const [isLoading, setIsLoading] = useState(false);
 
+  const resetForm = () => {
+    setName("");
+    setType("expense");
+    setColor(COLORS[0]);
+    setIcon("more-horizontal");
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    onOpenChange?.(false);
+    setTimeout(resetForm, 300);
+  };
+
   const handleOpenChange = (val: boolean) => {
-    setIsOpen(val);
-    onOpenChange?.(val);
-    if (!val) {
-      setTimeout(() => {
-        setName("");
-        setType("expense");
-        setColor(COLORS[0]);
-        setIcon("more-horizontal");
-      }, 300);
+    if (val) {
+      setIsOpen(true);
+      onOpenChange?.(true);
+    } else {
+      closeDialog();
     }
   };
 
@@ -166,14 +131,21 @@ export function AddCategoryDialog({
           id="cat-name"
           placeholder="Contoh: Jajan, Hobi, Freelance"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
           required
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="cat-type">Tipe</Label>
-        <Select value={type} onValueChange={setType}>
+        <Select
+          value={type}
+          onValueChange={(val) => {
+            setType(val);
+          }}
+        >
           <SelectTrigger id="cat-type">
             <SelectValue placeholder="Pilih tipe" />
           </SelectTrigger>
@@ -187,19 +159,21 @@ export function AddCategoryDialog({
       <div className="space-y-2">
         <Label>Ikon</Label>
         <div className="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-1">
-          {ICONS.map((item) => {
+          {CATEGORY_ICON_OPTIONS.map((item) => {
             const IconComp = item.icon;
             return (
               <button
-                key={item.name}
+                key={item.key}
                 type="button"
                 className={cn(
                   "flex items-center justify-center p-2 rounded-md hover:bg-accent transition-colors",
-                  icon === item.name
+                  icon === item.key
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "text-muted-foreground"
                 )}
-                onClick={() => setIcon(item.name)}
+                onClick={() => {
+                  setIcon(item.key);
+                }}
               >
                 <IconComp className="h-5 w-5" />
               </button>
@@ -222,7 +196,9 @@ export function AddCategoryDialog({
                   : "hover:scale-105"
               )}
               style={{ backgroundColor: c }}
-              onClick={() => setColor(c)}
+                onClick={() => {
+                  setColor(c);
+                }}
             />
           ))}
         </div>
@@ -232,7 +208,7 @@ export function AddCategoryDialog({
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               Menyimpan...
             </>
           ) : (
@@ -245,33 +221,37 @@ export function AddCategoryDialog({
 
   if (isDesktop) {
     return (
-      <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Tambah Kategori Baru</DialogTitle>
-            <DialogDescription>
-              Buat kategori kustom untuk transaksi Anda.
-            </DialogDescription>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
+      <>
+        <Dialog open={open ?? isOpen} onOpenChange={handleOpenChange}>
+          <DialogTrigger asChild>{children}</DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Tambah Kategori Baru</DialogTitle>
+              <DialogDescription>
+                Buat kategori kustom untuk transaksi Anda.
+              </DialogDescription>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
   return (
-    <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle>Tambah Kategori Baru</DrawerTitle>
-          <DrawerDescription>
-            Buat kategori kustom untuk transaksi Anda.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="pb-8">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange}>
+        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>Tambah Kategori Baru</DrawerTitle>
+            <DrawerDescription>
+              Buat kategori kustom untuk transaksi Anda.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="pb-8">{FormContent}</div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }

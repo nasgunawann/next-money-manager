@@ -112,7 +112,30 @@ export function useTransactions() {
         });
       }
 
-      // 3. Update Transaction
+      // 3. Check balance for expenses (after reverting old amount)
+      if (updates.type === "expense" || (oldTx.type === "expense" && !updates.type)) {
+        const newAmount = updates.amount ?? oldTx.amount;
+        const accountId = updates.account_id ?? oldTx.account_id;
+        
+        const { data: account } = await supabase
+          .from("accounts")
+          .select("balance")
+          .eq("id", accountId)
+          .single();
+
+        if (account && account.balance < newAmount) {
+          // Revert the balance back since validation failed
+          if (oldTx.type !== "transfer") {
+            await supabase.rpc("increment_balance", {
+              account_id: oldTx.account_id,
+              amount: -revertAmount,
+            });
+          }
+          throw new Error("Saldo tidak mencukupi untuk pengeluaran ini");
+        }
+      }
+
+      // 4. Update Transaction
       const { data: updatedTx, error } = await supabase
         .from("transactions")
         .update(updates)
@@ -122,7 +145,7 @@ export function useTransactions() {
 
       if (error) throw error;
 
-      // 4. Apply new balance
+      // 5. Apply new balance
       if (updatedTx.type !== "transfer") {
         let newAmount = 0;
         if (updatedTx.type === "income") newAmount = updatedTx.amount;
@@ -153,7 +176,7 @@ export function useTransactions() {
 
       if (!tx) throw new Error("Transaction not found");
 
-      // 2. Revert balance
+      // 2. Revert balance based on transaction type
       if (tx.type === "income") {
         await supabase.rpc("increment_balance", {
           account_id: tx.account_id,
@@ -164,9 +187,39 @@ export function useTransactions() {
           account_id: tx.account_id,
           amount: tx.amount,
         });
+      } else if (tx.type === "transfer") {
+        // For transfer: revert both accounts
+        // This transaction took money OUT of the account_id, so add it back
+        await supabase.rpc("increment_balance", {
+          account_id: tx.account_id,
+          amount: tx.amount,
+        });
+
+        // Find and revert the related transaction (the receiving side)
+        if (tx.related_transaction_id) {
+          const { data: relatedTx } = await supabase
+            .from("transactions")
+            .select("*")
+            .eq("id", tx.related_transaction_id)
+            .single();
+
+          if (relatedTx) {
+            // Remove money from the account that received it
+            await supabase.rpc("increment_balance", {
+              account_id: relatedTx.account_id,
+              amount: -relatedTx.amount,
+            });
+
+            // Delete the related transaction too
+            await supabase
+              .from("transactions")
+              .delete()
+              .eq("id", relatedTx.id);
+          }
+        }
       }
 
-      // 3. Delete
+      // 3. Delete the main transaction
       const { error } = await supabase
         .from("transactions")
         .delete()
