@@ -254,26 +254,58 @@ export function AddTransactionDialog({
       let createdTransaction: Transaction | null = null;
 
       if (isTransfer && targetAccountId) {
-        const { error: tx1Error } = await supabase.from("transactions").insert({
-          user_id: user.id,
-          account_id: accountId,
-          amount: numericAmount,
-          type: "transfer",
-          date: isoDate,
-          description: `Transfer ke Akun Lain: ${description}`,
-        });
+        // Check if source account has sufficient balance
+        const sourceAccount = accounts?.find((acc) => acc.id === accountId);
+        if (sourceAccount && sourceAccount.balance < numericAmount) {
+          throw new Error("Saldo tidak mencukupi untuk melakukan transfer");
+        }
+
+        // Create the first transaction (source - outgoing)
+        const sourceDesc = description
+          ? `${description} (ke ${selectedTargetAccount?.name})`
+          : `Transfer ke ${selectedTargetAccount?.name}`;
+        
+        const { data: tx1, error: tx1Error } = await supabase
+          .from("transactions")
+          .insert({
+            user_id: user.id,
+            account_id: accountId,
+            amount: numericAmount,
+            type: "transfer",
+            date: isoDate,
+            description: sourceDesc,
+          })
+          .select()
+          .single();
         if (tx1Error) throw tx1Error;
 
-        const { error: tx2Error } = await supabase.from("transactions").insert({
-          user_id: user.id,
-          account_id: targetAccountId,
-          amount: numericAmount,
-          type: "transfer",
-          date: isoDate,
-          description: `Transfer dari Akun Lain: ${description}`,
-        });
+        // Create the second transaction (target - incoming) with related_transaction_id
+        const targetDesc = description
+          ? `${description} (dari ${selectedAccount?.name})`
+          : `Transfer dari ${selectedAccount?.name}`;
+        
+        const { data: tx2, error: tx2Error } = await supabase
+          .from("transactions")
+          .insert({
+            user_id: user.id,
+            account_id: targetAccountId,
+            amount: numericAmount,
+            type: "transfer",
+            date: isoDate,
+            description: targetDesc,
+            related_transaction_id: tx1.id,
+          })
+          .select()
+          .single();
         if (tx2Error) throw tx2Error;
 
+        // Update first transaction to link back to second
+        await supabase
+          .from("transactions")
+          .update({ related_transaction_id: tx2.id })
+          .eq("id", tx1.id);
+
+        // Update balances
         const { error: rpcError1 } = await supabase.rpc("increment_balance", {
           account_id: accountId,
           amount: -numericAmount,
@@ -286,16 +318,24 @@ export function AddTransactionDialog({
         });
         if (rpcError2) throw rpcError2;
       } else {
+        // Check balance for expenses
+        if (type === "expense") {
+          const sourceAccount = accounts?.find((acc) => acc.id === accountId);
+          if (sourceAccount && sourceAccount.balance < numericAmount) {
+            throw new Error("Saldo tidak mencukupi untuk pengeluaran ini");
+          }
+        }
+
         const { data: insertedTx, error } = await supabase
           .from("transactions")
           .insert({
-          user_id: user.id,
-          account_id: accountId,
-          category_id: categoryId,
-          amount: numericAmount,
-          type,
+            user_id: user.id,
+            account_id: accountId,
+            category_id: categoryId,
+            amount: numericAmount,
+            type,
             date: isoDate,
-          description,
+            description,
           })
           .select(
             `
@@ -331,10 +371,14 @@ export function AddTransactionDialog({
       await queryClient.invalidateQueries({ queryKey: ["transactions"] });
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
       setIsDirty(false);
-      handleOpenChange(false);
+      closeDialog();
     } catch (error) {
       console.error("Error creating transaction:", error);
-      setErrorMessage("Gagal menyimpan transaksi. Silakan coba lagi.");
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan transaksi. Silakan coba lagi.";
+      setErrorMessage(errorMsg);
       resetOptimisticState();
     } finally {
       setIsLoading(false);

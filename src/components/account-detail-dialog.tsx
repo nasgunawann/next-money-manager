@@ -225,10 +225,17 @@ export function AccountDetailDialog({
                       "font-semibold text-sm",
                       transaction.type === "income"
                         ? "text-green-600"
+                        : transaction.type === "transfer" &&
+                          transaction.description?.includes("(dari")
+                        ? "text-green-600"
                         : "text-red-600"
                     )}
                   >
-                    {transaction.type === "income" ? "+" : "-"}{" "}
+                    {transaction.type === "income" ||
+                    (transaction.type === "transfer" &&
+                      transaction.description?.includes("(dari"))
+                      ? "+"
+                      : "-"}{" "}
                     {formatCurrency(transaction.amount, profile?.currency)}
                   </p>
                 </CardContent>

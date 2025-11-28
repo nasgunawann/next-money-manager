@@ -28,6 +28,15 @@ import useSessionGuard from "@/hooks/use-session-guard";
 
 const getGroupedRecentTransactions = (transactions: Transaction[]) => {
   const grouped = transactions
+    .filter((tx) => {
+      // Filter out the receiving side of transfers to show only one entry per transfer
+      if (tx.type === "transfer" && tx.related_transaction_id) {
+        if (tx.description?.includes("(dari")) {
+          return false;
+        }
+      }
+      return true;
+    })
     .slice(0, 10)
     .reduce<Record<string, Transaction[]>>((acc, tx) => {
       const day = startOfDay(new Date(tx.date));

@@ -117,7 +117,9 @@ export function EditTransactionDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating transaction:", error);
-      toast.error("Gagal memperbarui transaksi");
+      const errorMsg =
+        error instanceof Error ? error.message : "Gagal memperbarui transaksi";
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -205,6 +207,15 @@ export function EditTransactionDialog({
 
   const FormContent = (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 md:px-0">
+      {isTransfer && (
+        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            <strong>Catatan:</strong> Transfer tidak dapat diedit. Silakan hapus
+            dan buat transfer baru jika diperlukan.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="edit-amount">Jumlah</Label>
         <div className="relative">
@@ -221,6 +232,7 @@ export function EditTransactionDialog({
             value={formatNumericInput(amount)}
             onChange={(e) => setAmount(sanitizeNumericInput(e.target.value))}
             required
+            disabled={isTransfer}
           />
         </div>
       </div>
@@ -233,6 +245,7 @@ export function EditTransactionDialog({
             variant="outline"
             className="w-full justify-between h-auto py-3 px-3"
             onClick={() => setAccountDrawerOpen(true)}
+            disabled={isTransfer}
           >
             {selectedAccount ? (
               <div className="flex items-center gap-3 text-left">
@@ -272,6 +285,7 @@ export function EditTransactionDialog({
               variant="outline"
               className="w-full justify-between h-auto py-3 px-3"
               onClick={() => setCategoryDrawerOpen(true)}
+              disabled={isTransfer}
             >
               {selectedCategory ? (
                 <div className="flex items-center gap-3 text-left">
@@ -316,6 +330,7 @@ export function EditTransactionDialog({
                 "w-full justify-start text-left font-normal",
                 !date && "text-muted-foreground"
               )}
+              disabled={isTransfer}
             >
               <IconCalendar className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : <span>Pilih tanggal</span>}
@@ -340,6 +355,7 @@ export function EditTransactionDialog({
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
             setDescription(e.target.value)
           }
+          disabled={isTransfer}
         />
       </div>
 
@@ -347,7 +363,7 @@ export function EditTransactionDialog({
         <Button
           type="button"
           variant="destructive"
-          className="flex-1"
+          className={isTransfer ? "w-full" : "flex-1"}
           onClick={() => setShowDeleteConfirm(true)}
           disabled={isDeleting || isLoading}
         >
@@ -358,17 +374,19 @@ export function EditTransactionDialog({
           )}
           Hapus
         </Button>
-        <Button
-          type="submit"
-          className="flex-2"
-          disabled={isLoading || isDeleting}
-        >
-          {isLoading ? (
-            <IconLoader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Simpan Perubahan"
-          )}
-        </Button>
+        {!isTransfer && (
+          <Button
+            type="submit"
+            className="flex-2"
+            disabled={isLoading || isDeleting}
+          >
+            {isLoading ? (
+              <IconLoader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Simpan Perubahan"
+            )}
+          </Button>
+        )}
       </div>
     </form>
   );

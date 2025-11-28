@@ -61,20 +61,30 @@ export default function TransactionsPage() {
 
   const filteredTransactions = useMemo(
     () =>
-      transactions.filter((t) => {
-        const matchesSearch =
-          t.description?.toLowerCase().includes(search.toLowerCase()) ||
-          t.category?.name.toLowerCase().includes(search.toLowerCase()) ||
-          t.account?.name.toLowerCase().includes(search.toLowerCase());
+      transactions
+        .filter((t) => {
+          // Filter out the receiving side of transfers to show only one entry per transfer
+          if (t.type === "transfer" && t.related_transaction_id) {
+            // Check if this is the receiving side (description contains "(dari")
+            if (t.description?.includes("(dari")) {
+              return false;
+            }
+          }
 
-        const matchesType = typeFilter === "all" || t.type === typeFilter;
+          const matchesSearch =
+            search === "" ||
+            t.description?.toLowerCase().includes(search.toLowerCase()) ||
+            t.category?.name?.toLowerCase().includes(search.toLowerCase()) ||
+            t.account?.name?.toLowerCase().includes(search.toLowerCase());
 
-        const txDate = new Date(t.date);
-        const matchesMonth = txDate.getMonth().toString() === selectedMonth;
-        const matchesYear = txDate.getFullYear().toString() === selectedYear;
+          const matchesType = typeFilter === "all" || t.type === typeFilter;
 
-        return matchesSearch && matchesType && matchesMonth && matchesYear;
-      }),
+          const txDate = new Date(t.date);
+          const matchesMonth = txDate.getMonth().toString() === selectedMonth;
+          const matchesYear = txDate.getFullYear().toString() === selectedYear;
+
+          return matchesSearch && matchesType && matchesMonth && matchesYear;
+        }),
     [transactions, search, typeFilter, selectedMonth, selectedYear]
   );
 
