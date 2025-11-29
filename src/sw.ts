@@ -1,7 +1,13 @@
 /// <reference lib="webworker" />
 
 import { defaultCache } from "@serwist/next/worker";
-import { Serwist, CacheableResponsePlugin, ExpirationPlugin } from "serwist";
+import {
+  Serwist,
+  CacheableResponsePlugin,
+  ExpirationPlugin,
+  NetworkFirst,
+  CacheFirst,
+} from "serwist";
 
 declare const self: ServiceWorkerGlobalScope & {
   __SW_MANIFEST: Array<string | { url: string; revision?: string }>;
@@ -16,8 +22,7 @@ const serwist = new Serwist({
     // Cache API requests with network-first strategy
     {
       matcher: ({ url }) => url.pathname.startsWith("/api/"),
-      handler: "NetworkFirst",
-      options: {
+      handler: new NetworkFirst({
         cacheName: "api-cache",
         plugins: [
           new CacheableResponsePlugin({
@@ -28,13 +33,12 @@ const serwist = new Serwist({
             maxAgeSeconds: 5 * 60, // 5 minutes
           }),
         ],
-      },
+      }),
     },
     // Cache Supabase requests with network-first
     {
       matcher: ({ url }) => url.hostname.includes("supabase.co"),
-      handler: "NetworkFirst",
-      options: {
+      handler: new NetworkFirst({
         cacheName: "supabase-cache",
         plugins: [
           new CacheableResponsePlugin({
@@ -45,13 +49,12 @@ const serwist = new Serwist({
             maxAgeSeconds: 10 * 60, // 10 minutes
           }),
         ],
-      },
+      }),
     },
     // Cache images with cache-first
     {
       matcher: ({ request }) => request.destination === "image",
-      handler: "CacheFirst",
-      options: {
+      handler: new CacheFirst({
         cacheName: "image-cache",
         plugins: [
           new ExpirationPlugin({
@@ -59,7 +62,7 @@ const serwist = new Serwist({
             maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
           }),
         ],
-      },
+      }),
     },
     // Default cache for everything else
     ...defaultCache,
