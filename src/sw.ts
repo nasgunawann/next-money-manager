@@ -1,9 +1,7 @@
 /// <reference lib="webworker" />
 
 import { defaultCache } from "@serwist/next/worker";
-import { Serwist } from "serwist";
-import { CacheableResponsePlugin } from "serwist/plugins";
-import { ExpirationPlugin } from "serwist/plugins";
+import { Serwist, CacheableResponsePlugin, ExpirationPlugin } from "serwist";
 
 declare const self: ServiceWorkerGlobalScope & {
   __SW_MANIFEST: Array<string | { url: string; revision?: string }>;
