@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 import Providers from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "Student Money Manager",
-  description: "Manage your finances with ease",
+  title: "Kaslo - By Nanasgunung",
+  description: "Mencatat transaksi dan pengendalian anggaran harian.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "MoneyManager",
+    title: "Kaslo",
   },
   formatDetection: {
     telephone: false,

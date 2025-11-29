@@ -1,7 +1,7 @@
 {
-  "version": "0.3",
-  "name": "KasFlo — By Nanasgunung",
-  "short_name": "KasFlo",
+  "version": "0.4",
+  "name": "Kaslo — By Nanasgunung",
+  "short_name": "Kaslo",
   "description": "Pencatatan transaksi dan pengendalian anggaran harian.",
   "start_url": "/",
   "display": "standalone",
