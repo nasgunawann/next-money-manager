@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
+import Image from "next/image";
 
 export function DesktopSidebar() {
   const pathname = usePathname();
@@ -36,11 +37,15 @@ export function DesktopSidebar() {
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-sidebar border-r border-sidebar-border h-screen fixed left-0 top-0 z-50">
-      <div className="p-6 border-b border-sidebar-border">
-        <h1 className="text-xl font-bold text-sidebar-primary flex items-center gap-2">
-          <IconWallet className="h-6 w-6" />
-          Kaslo
-        </h1>
+      <div className="p-4 border-b border-sidebar-border flex items-center justify-center">
+        <Image
+          src="/logo-sm.svg"
+          alt="Kaslo"
+          width={525}
+          height={464}
+          className="h-8 w-auto object-contain"
+          priority
+        />
       </div>
 
       {/* Add Transaction Button - Primary Action */}

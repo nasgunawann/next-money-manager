@@ -23,6 +23,8 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 
 type HeaderMenuItem = {
   href?: string;
@@ -39,6 +41,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { data: profile } = useProfile();
   const firstName = profile?.full_name?.split(" ")[0];
   const sessionGuard = useSessionGuard();
+  const { resolvedTheme } = useTheme();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -56,27 +59,22 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {
         href: "/transactions",
         title: "Riwayat Transaksi",
-        subtitle: "Kelola semua pemasukan dan pengeluaran Anda.",
       },
       {
         href: "/accounts",
         title: "Sumber Dana",
-        subtitle: "Pantau setiap akun dan saldo Anda.",
       },
       {
         href: "/reports",
         title: "Analisis Pengeluaran",
-        subtitle: "Visualisasikan distribusi pengeluaran bulanan.",
       },
       {
         href: "/profile",
         title: "Profil Saya",
-        subtitle: "Kelola informasi profil dan pengaturan akun.",
       },
       {
         href: "/onboarding",
         title: "Onboarding",
-        subtitle: "Lengkapi langkah awal sebelum mulai menggunakan aplikasi.",
       },
     ];
 
@@ -155,23 +153,32 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div
             className={cn(
               "max-w-7xl mx-auto px-4 md:px-6 lg:px-8 transition-all duration-300",
-              isScrolled ? "py-1.5 md:py-2" : "py-4 md:py-5"
+              isScrolled ? "py-1 md:py-1.5" : "py-2.5 md:py-3"
             )}
           >
             <div className="flex items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h1
-                  className={cn(
-                    "font-bold text-foreground transition-all duration-300 tracking-tight",
-                    isScrolled ? "text-sm md:text-base" : "text-xl md:text-2xl"
-                  )}
-                >
-                  {headerContent.title}
-                </h1>
-                {headerContent.subtitle && !isScrolled && (
-                  <p className="text-sm text-muted-foreground mt-1.5 line-clamp-1">
-                    {headerContent.subtitle}
-                  </p>
+              <div className="flex-1 min-w-0 flex items-center gap-3">
+                {pathname === "/dashboard" ? (
+                  <Image
+                    src={resolvedTheme === "dark" ? "/logo-dark.svg" : "/logolight.svg"}
+                    alt="Kaslo"
+                    width={1643}
+                    height={464}
+                    className={cn(
+                      "transition-all duration-300 object-contain",
+                      isScrolled ? "h-5 w-auto" : "h-7 md:h-8 w-auto"
+                    )}
+                    priority
+                  />
+                ) : (
+                  <h1
+                    className={cn(
+                      "font-bold text-foreground transition-all duration-300 tracking-tight",
+                      isScrolled ? "text-sm md:text-base" : "text-xl md:text-2xl"
+                    )}
+                  >
+                    {headerContent.title}
+                  </h1>
                 )}
               </div>
               
