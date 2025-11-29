@@ -17,7 +17,7 @@ import Providers from "@/components/providers";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 
 export const metadata: Metadata = {
-  title: "Kaslo - By Nanasgunung",
+  title: "Kaslo",
   description: "Pencatatan transaksi dan pengendalian anggaran harian.",
   manifest: "/manifest.json",
   appleWebApp: {

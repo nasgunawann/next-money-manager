@@ -7,11 +7,8 @@ import {
   IconChartPie,
   IconWallet,
   IconUser,
-  IconLogout,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
 
 export function DesktopSidebar() {
@@ -33,11 +30,6 @@ export function DesktopSidebar() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-sidebar border-r border-sidebar-border h-screen fixed left-0 top-0 z-50">
@@ -76,17 +68,6 @@ export function DesktopSidebar() {
           );
         })}
       </nav>
-
-      <div className="p-4 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-150"
-          onClick={handleLogout}
-        >
-          <IconLogout className="mr-2 h-4 w-4" />
-          Keluar
-        </Button>
-      </div>
     </aside>
   );
 }
