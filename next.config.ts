@@ -16,8 +16,6 @@ const nextConfig: NextConfig = {
   },
   // Compress output
   compress: true,
-  // Optimize fonts
-  optimizeFonts: true,
 };
 
 export default withSerwist(nextConfig);
