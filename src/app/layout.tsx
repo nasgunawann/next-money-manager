@@ -17,7 +17,7 @@ import Providers from "@/components/providers";
 
 export const metadata: Metadata = {
   title: "Kaslo - By Nanasgunung",
-  description: "Mencatat transaksi dan pengendalian anggaran harian.",
+  description: "Pencatatan transaksi dan pengendalian anggaran harian.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -26,6 +26,32 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  // Enhanced PWA metadata
+  applicationName: "Kaslo",
+  referrer: "origin-when-cross-origin",
+  keywords: [
+    "money",
+    "finance",
+    "budget",
+    "transaksi",
+    "keuangan",
+    "pengeluaran",
+    "pemasukan",
+  ],
+  authors: [{ name: "Nanasgunung" }],
+  creator: "Nanasgunung",
+  publisher: "Nanasgunung",
+  openGraph: {
+    type: "website",
+    siteName: "Kaslo",
+    title: "Kaslo - Money Manager",
+    description: "Pencatatan transaksi dan pengendalian anggaran harian.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Kaslo - Money Manager",
+    description: "Pencatatan transaksi dan pengendalian anggaran harian.",
   },
 };
 
@@ -36,8 +62,9 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5, // Allow zoom for accessibility
+  userScalable: true, // Allow zoom for accessibility
+  viewportFit: "cover", // For iOS notch support
 };
 
 export default function RootLayout({
@@ -46,7 +73,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
