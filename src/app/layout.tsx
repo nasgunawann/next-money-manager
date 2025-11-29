@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 import Providers from "@/components/providers";
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 
 export const metadata: Metadata = {
   title: "Kaslo - By Nanasgunung",
@@ -78,6 +79,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
+          <ServiceWorkerRegistration />
           {children}
           <Toaster position="top-center" richColors />
         </Providers>

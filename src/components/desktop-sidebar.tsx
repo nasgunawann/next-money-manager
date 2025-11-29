@@ -8,7 +8,6 @@ import {
   IconWallet,
   IconUser,
   IconLogout,
-  IconSettings,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,6 @@ export function DesktopSidebar() {
     { href: "/accounts", label: "Sumber Dana", icon: IconWallet },
     { href: "/reports", label: "Laporan", icon: IconChartPie },
     { href: "/profile", label: "Profil", icon: IconUser },
-    { href: "/settings", label: "Pengaturan", icon: IconSettings },
   ];
 
   // Prefetch all navigation links for faster navigation

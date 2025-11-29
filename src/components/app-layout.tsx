@@ -50,11 +50,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         subtitle: "Kelola informasi profil dan pengaturan akun.",
       },
       {
-        href: "/settings",
-        title: "Pengaturan",
-        subtitle: "Atur preferensi aplikasi Anda.",
-      },
-      {
         href: "/onboarding",
         title: "Onboarding",
         subtitle: "Lengkapi langkah awal sebelum mulai menggunakan aplikasi.",
