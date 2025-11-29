@@ -7,9 +7,12 @@ import {
   IconChartPie,
   IconWallet,
   IconUser,
+  IconPlus,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 
 export function DesktopSidebar() {
   const pathname = usePathname();
@@ -36,8 +39,18 @@ export function DesktopSidebar() {
       <div className="p-6 border-b border-sidebar-border">
         <h1 className="text-xl font-bold text-sidebar-primary flex items-center gap-2">
           <IconWallet className="h-6 w-6" />
-          MoneyManager
+          Kaslo
         </h1>
+      </div>
+
+      {/* Add Transaction Button - Primary Action */}
+      <div className="px-4 pt-4 pb-2">
+        <AddTransactionDialog>
+          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all duration-200">
+            <IconPlus className="h-5 w-5 mr-2" />
+            Tambah Transaksi
+          </Button>
+        </AddTransactionDialog>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
