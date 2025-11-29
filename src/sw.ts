@@ -19,6 +19,36 @@ const serwist = new Serwist({
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
+    // Handle navigation requests with offline fallback
+    {
+      matcher: ({ request }) => request.mode === "navigate",
+      handler: new NetworkFirst({
+        cacheName: "pages-cache",
+        plugins: [
+          new CacheableResponsePlugin({
+            statuses: [0, 200],
+          }),
+          {
+            handlerDidError: async () => {
+              // If network fails and cache is empty, serve offline page
+              const cache = await caches.open("pages-cache");
+              const offlineResponse = await cache.match("/offline");
+              if (offlineResponse) {
+                return offlineResponse;
+              }
+              // If offline page not cached, fetch it
+              return fetch("/offline").catch(() => {
+                // Last resort: return a basic response
+                return new Response("Offline", {
+                  status: 200,
+                  headers: { "Content-Type": "text/html" },
+                });
+              });
+            },
+          },
+        ],
+      }),
+    },
     // Cache API requests with network-first strategy
     {
       matcher: ({ url }) => url.pathname.startsWith("/api/"),
