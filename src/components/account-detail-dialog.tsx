@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useProfile } from "@/hooks/use-profile";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, cn, formatAccountType } from "@/lib/utils";
+import { formatCurrency, formatAccountType } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -31,14 +31,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   IconWallet,
   IconPencil,
   IconTrash,
   IconX,
   IconLoader2,
-  IconArrowsLeftRight,
 } from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
 import { EditAccountDialog } from "@/components/edit-account-dialog";

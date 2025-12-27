@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, cn, formatAccountType } from "@/lib/utils";
+import { formatCurrency, formatAccountType } from "@/lib/utils";
 import { format, isToday, isYesterday, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 import type { Transaction } from "@/hooks/use-transactions";
@@ -16,7 +16,6 @@ import {
   IconWallet,
   IconArrowUpRight,
   IconArrowDownLeft,
-  IconArrowsLeftRight,
 } from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";

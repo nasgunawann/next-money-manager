@@ -102,10 +102,28 @@ export default function ReportsPage() {
     0
   );
 
-  const renderIconLabel = (props: any) => {
+  const renderIconLabel = (props: {
+    cx?: number;
+    cy?: number;
+    midAngle?: number;
+    innerRadius?: number;
+    outerRadius?: number;
+    payload?: { color: string; icon: string };
+    value?: number;
+  }) => {
     const { cx, cy, midAngle, innerRadius, outerRadius, payload, value } =
       props;
-    if (!totalExpense) return null;
+    if (
+      !totalExpense ||
+      !cx ||
+      !cy ||
+      !midAngle ||
+      !innerRadius ||
+      !outerRadius ||
+      !payload ||
+      !value
+    )
+      return null;
     const percent = (value / totalExpense) * 100;
     if (percent < 5) return null; // hide on tiny slices to avoid overlap
 

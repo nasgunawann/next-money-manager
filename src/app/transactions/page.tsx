@@ -6,7 +6,6 @@ import { useTransactions, Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { useCategories } from "@/hooks/use-categories";
 import { useAccounts } from "@/hooks/use-accounts";
-import { formatCurrency, cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,10 +28,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import {
-  IconArrowUpRight,
-  IconArrowDownLeft,
   IconSearch,
-  IconArrowsLeftRight,
   IconFilter,
   IconX,
   IconAdjustments,
