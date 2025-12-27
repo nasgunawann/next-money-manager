@@ -23,6 +23,7 @@ import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
 import { getAccountIconComponent } from "@/constants/account-icons";
+import { getCategoryIconComponent } from "@/constants/category-icons";
 
 import useSessionGuard from "@/hooks/use-session-guard";
 
@@ -296,12 +297,18 @@ export default function DashboardPage() {
                                         : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
                                     )}
                                   >
-                                    {transaction.type === "income" ? (
-                                      <IconArrowDownLeft className="h-4.5 w-4.5" />
-                                    ) : transaction.type === "expense" ? (
-                                      <IconArrowUpRight className="h-4.5 w-4.5" />
-                                    ) : (
+                                    {transaction.type === "transfer" ? (
                                       <IconArrowsLeftRight className="h-4.5 w-4.5" />
+                                    ) : (
+                                      (() => {
+                                        const CatIcon =
+                                          getCategoryIconComponent(
+                                            transaction.category?.icon
+                                          );
+                                        return (
+                                          <CatIcon className="h-4.5 w-4.5" />
+                                        );
+                                      })()
                                     )}
                                   </div>
                                   <div className="min-w-0 flex-1">

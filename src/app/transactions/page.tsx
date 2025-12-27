@@ -40,7 +40,10 @@ import {
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
 import { format, isToday, isYesterday, parseISO, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
-import { CATEGORY_ICON_MAP } from "@/constants/category-icons";
+import {
+  CATEGORY_ICON_MAP,
+  getCategoryIconComponent,
+} from "@/constants/category-icons";
 import { ACCOUNT_ICON_MAP } from "@/constants/account-icons";
 
 export default function TransactionsPage() {
@@ -539,12 +542,15 @@ export default function TransactionsPage() {
                                 : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
                             )}
                           >
-                            {transaction.type === "income" ? (
-                              <IconArrowDownLeft className="h-4.5 w-4.5" />
-                            ) : transaction.type === "expense" ? (
-                              <IconArrowUpRight className="h-4.5 w-4.5" />
-                            ) : (
+                            {transaction.type === "transfer" ? (
                               <IconArrowsLeftRight className="h-4.5 w-4.5" />
+                            ) : (
+                              (() => {
+                                const CatIcon = getCategoryIconComponent(
+                                  transaction.category?.icon
+                                );
+                                return <CatIcon className="h-4.5 w-4.5" />;
+                              })()
                             )}
                           </div>
                           <div className="min-w-0 flex-1">

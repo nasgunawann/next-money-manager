@@ -37,14 +37,13 @@ import {
   IconPencil,
   IconTrash,
   IconX,
-  IconArrowUpRight,
-  IconArrowDownLeft,
   IconLoader2,
   IconArrowsLeftRight,
 } from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
 import { EditAccountDialog } from "@/components/edit-account-dialog";
 import { getAccountIconComponent } from "@/constants/account-icons";
+import { getCategoryIconComponent } from "@/constants/category-icons";
 
 interface AccountDetailDialogProps {
   account: Account | null;
@@ -198,12 +197,15 @@ export function AccountDetailDialog({
                           : "bg-blue-100 text-blue-600"
                       )}
                     >
-                      {transaction.type === "income" ? (
-                        <IconArrowDownLeft className="h-4.5 w-4.5" />
-                      ) : transaction.type === "expense" ? (
-                        <IconArrowUpRight className="h-4.5 w-4.5" />
-                      ) : (
+                      {transaction.type === "transfer" ? (
                         <IconArrowsLeftRight className="h-4.5 w-4.5" />
+                      ) : (
+                        (() => {
+                          const CatIcon = getCategoryIconComponent(
+                            transaction.category?.icon
+                          );
+                          return <CatIcon className="h-4.5 w-4.5" />;
+                        })()
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -382,12 +384,15 @@ export function AccountDetailDialog({
                               : "bg-blue-100 text-blue-600"
                           )}
                         >
-                          {transaction.type === "income" ? (
-                            <IconArrowDownLeft className="h-4.5 w-4.5" />
-                          ) : transaction.type === "expense" ? (
-                            <IconArrowUpRight className="h-4.5 w-4.5" />
-                          ) : (
+                          {transaction.type === "transfer" ? (
                             <IconArrowsLeftRight className="h-4.5 w-4.5" />
+                          ) : (
+                            (() => {
+                              const CatIcon = getCategoryIconComponent(
+                                transaction.category?.icon
+                              );
+                              return <CatIcon className="h-4.5 w-4.5" />;
+                            })()
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
