@@ -159,6 +159,7 @@ export default function ReportsPage() {
             </p>
           </div>
           <button
+            onClick={handleNextMonth}
             style={{ animation: "fade-icon 320ms ease forwards", opacity: 0 }}
             className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
           >
