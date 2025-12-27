@@ -307,7 +307,7 @@ export function AccountDetailDialog({
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
+        <DrawerContent className="overflow-hidden">
           <DrawerHeader className="text-left relative">
             <DrawerTitle>Detail Sumber Dana</DrawerTitle>
             <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
@@ -315,7 +315,128 @@ export function AccountDetailDialog({
               <span className="sr-only">Close</span>
             </DrawerClose>
           </DrawerHeader>
-          <div className="pb-8 px-4">{Content}</div>
+          {/* Static header/body content */}
+          <div className="px-4 space-y-6 pb-4">
+            {/* Account Info */}
+            <div className="flex items-center gap-4">
+              <div
+                className="h-16 w-16 rounded-full flex items-center justify-center text-white shrink-0"
+                style={{ backgroundColor: account.color || "#94a3b8" }}
+              >
+                <AccountIcon className="h-8 w-8" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold">{account.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {formatAccountType(account.type)}
+                </p>
+                <p className="text-2xl font-bold mt-2">
+                  {formatCurrency(account.balance, profile?.currency)}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowEditDialog(true)}
+              >
+                <IconPencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full text-destructive hover:text-destructive"
+                onClick={() => setShowDeleteAlert(true)}
+              >
+                <IconTrash className="h-4 w-4 mr-2" />
+                Hapus
+              </Button>
+            </div>
+          </div>
+
+          {/* Scrollable transactions section */}
+          <div
+            className="px-4 pb-8 flex-1 overflow-y-auto no-scrollbar"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            <div className="h-2" />
+            {accountTransactions.length > 0 ? (
+              <div className="space-y-2">
+                {accountTransactions.map((transaction) => (
+                  <Card
+                    key={transaction.id}
+                    className="border-none shadow-sm hover:bg-accent/50 transition-colors"
+                  >
+                    <CardContent className="p-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div
+                          className={cn(
+                            "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
+                            transaction.type === "income"
+                              ? "bg-green-100 text-green-600"
+                              : transaction.type === "expense"
+                              ? "bg-red-100 text-red-600"
+                              : "bg-blue-100 text-blue-600"
+                          )}
+                        >
+                          {transaction.type === "income" ? (
+                            <IconArrowDownLeft className="h-4.5 w-4.5" />
+                          ) : transaction.type === "expense" ? (
+                            <IconArrowUpRight className="h-4.5 w-4.5" />
+                          ) : (
+                            <IconArrowsLeftRight className="h-4.5 w-4.5" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm leading-tight truncate">
+                            {transaction.description ||
+                              transaction.category?.name ||
+                              "Transaksi"}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                            {new Date(transaction.date).toLocaleDateString(
+                              "id-ID",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <p
+                        className={cn(
+                          "font-semibold text-sm whitespace-nowrap text-right shrink-0",
+                          transaction.type === "income"
+                            ? "text-green-600"
+                            : transaction.type === "transfer" &&
+                              transaction.description?.includes("(dari")
+                            ? "text-green-600"
+                            : "text-red-600"
+                        )}
+                      >
+                        {transaction.type === "income" ||
+                        (transaction.type === "transfer" &&
+                          transaction.description?.includes("(dari"))
+                          ? "+"
+                          : "-"}{" "}
+                        {formatCurrency(transaction.amount, profile?.currency)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                <IconWallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>Belum ada transaksi</p>
+              </div>
+            )}
+          </div>
         </DrawerContent>
       </Drawer>
 
