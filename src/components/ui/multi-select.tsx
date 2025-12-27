@@ -77,7 +77,7 @@ export function MultiSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-60 p-0" align="start">
-        <div className="max-h-[300px] overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto no-scrollbar">
           {/* Select All */}
           <div
             className="flex items-center gap-2 px-3 py-2.5 cursor-pointer hover:bg-accent border-b"
