@@ -42,7 +42,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { IconLoader2, IconChevronRight, IconPlus } from "@tabler/icons-react";
-import { format } from "date-fns";
 import {
   cn,
   formatCurrency,

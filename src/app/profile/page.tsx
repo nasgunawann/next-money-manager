@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import { AppLayout } from "@/components/app-layout";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/lib/supabase";
@@ -32,7 +33,11 @@ import { toast } from "sonner";
 
 export default function ProfilePage() {
   const { theme, setTheme } = useTheme();
-  const { data: profile, isLoading: profileLoading, updateProfile, isUpdating } = useProfile();
+  const {
+    data: profile,
+    isLoading: profileLoading,
+    updateProfile,
+  } = useProfile();
 
   // Name state
   const [fullName, setFullName] = useState("");
@@ -45,7 +50,6 @@ export default function ProfilePage() {
   const [isSavingEmail, setIsSavingEmail] = useState(false);
 
   // Password state
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -83,7 +87,9 @@ export default function ProfilePage() {
       toast.success("Nama berhasil diperbarui");
       setIsEditingName(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal memperbarui nama");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal memperbarui nama"
+      );
     } finally {
       setIsSavingName(false);
     }
@@ -99,13 +105,17 @@ export default function ProfilePage() {
     try {
       const { error } = await supabase.auth.updateUser({ email });
       if (error) throw error;
-      
+
       // Update profile email as well
       await updateProfile({ email });
-      toast.success("Email berhasil diperbarui. Silakan cek email Anda untuk konfirmasi.");
+      toast.success(
+        "Email berhasil diperbarui. Silakan cek email Anda untuk konfirmasi."
+      );
       setIsEditingEmail(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal memperbarui email");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal memperbarui email"
+      );
     } finally {
       setIsSavingEmail(false);
     }
@@ -124,16 +134,19 @@ export default function ProfilePage() {
 
     setIsSavingPassword(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
       if (error) throw error;
-      
+
       toast.success("Password berhasil diubah");
-      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setIsChangingPassword(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal mengubah password");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal mengubah password"
+      );
     } finally {
       setIsSavingPassword(false);
     }
@@ -146,7 +159,9 @@ export default function ProfilePage() {
       setCurrency(newCurrency);
       toast.success("Mata uang berhasil diubah");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal mengubah mata uang");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal mengubah mata uang"
+      );
     } finally {
       setIsChangingCurrency(false);
     }
@@ -157,14 +172,16 @@ export default function ProfilePage() {
     // Optimistically update theme immediately
     const previousTheme = theme || profile?.theme || "system";
     setTheme(newTheme);
-    
+
     try {
       await updateProfile({
         theme: newTheme,
       });
       toast.success("Tema berhasil diubah");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal mengubah tema");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal mengubah tema"
+      );
       // Revert theme change on error
       setTheme(previousTheme);
     } finally {
@@ -172,12 +189,14 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       toast.error("File harus berupa gambar");
       return;
     }
@@ -200,10 +219,10 @@ export default function ProfilePage() {
         try {
           // Extract the file path from the URL
           // Supabase storage URLs format: https://[project].supabase.co/storage/v1/object/public/avatars/[userId]/[filename]
-          const urlParts = profile.avatar_url.split('/');
+          const urlParts = profile.avatar_url.split("/");
           const fileName = urlParts[urlParts.length - 1];
           const folderPath = `${user.id}/${fileName}`;
-          await supabase.storage.from('avatars').remove([folderPath]);
+          await supabase.storage.from("avatars").remove([folderPath]);
         } catch (error) {
           // Ignore deletion errors - old file might not exist
           console.warn("Could not delete old avatar:", error);
@@ -211,37 +230,38 @@ export default function ProfilePage() {
       }
 
       // Upload new avatar
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
+
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from("avatars")
         .upload(fileName, file, {
-          cacheControl: '3600',
+          cacheControl: "3600",
           upsert: false,
         });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
 
       // Update profile
       await updateProfile({ avatar_url: publicUrl });
       toast.success("Foto profil berhasil diubah");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal mengupload foto profil");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal mengupload foto profil"
+      );
     } finally {
       setIsUploadingAvatar(false);
       // Reset file input
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
-
 
   if (profileLoading) {
     return (
@@ -272,9 +292,11 @@ export default function ProfilePage() {
                   {isUploadingAvatar ? (
                     <IconLoader2 className="h-12 w-12 text-primary animate-spin" />
                   ) : profile?.avatar_url ? (
-                    <img
+                    <Image
                       src={profile.avatar_url}
                       alt={profile.full_name || "Profile"}
+                      width={96}
+                      height={96}
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -302,7 +324,7 @@ export default function ProfilePage() {
                   className="hidden"
                 />
               </div>
-              
+
               {/* Profile Details */}
               <div className="flex-1 text-center md:text-left space-y-2">
                 <h2 className="text-2xl font-bold text-foreground">
@@ -479,7 +501,6 @@ export default function ProfilePage() {
                         setIsChangingPassword(false);
                         setNewPassword("");
                         setConfirmPassword("");
-                        setCurrentPassword("");
                       }}
                     >
                       <IconX className="h-4 w-4" />
@@ -557,9 +578,7 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
-
       </div>
     </AppLayout>
   );
 }
-

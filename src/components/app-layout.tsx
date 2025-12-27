@@ -160,7 +160,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex-1 min-w-0 flex items-center gap-3">
                 {pathname === "/dashboard" ? (
                   <Image
-                    src={resolvedTheme === "dark" ? "/logo-dark.svg" : "/logolight.svg"}
+                    src={
+                      resolvedTheme === "dark"
+                        ? "/logo-dark.svg"
+                        : "/logolight.svg"
+                    }
                     alt="Kaslo"
                     width={1643}
                     height={464}
@@ -174,14 +178,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <h1
                     className={cn(
                       "font-bold text-foreground transition-all duration-300 tracking-tight",
-                      isScrolled ? "text-sm md:text-base" : "text-xl md:text-2xl"
+                      isScrolled
+                        ? "text-sm md:text-base"
+                        : "text-xl md:text-2xl"
                     )}
                   >
                     {headerContent.title}
                   </h1>
                 )}
               </div>
-              
+
               {/* User Menu */}
               <Popover open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen}>
                 <PopoverTrigger asChild>
@@ -189,8 +195,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     variant="ghost"
                     className={cn(
                       "flex items-center rounded-full hover:bg-accent/50 transition-all duration-200",
-                      isScrolled 
-                        ? "h-auto py-1 px-1.5 gap-1.5" 
+                      isScrolled
+                        ? "h-auto py-1 px-1.5 gap-1.5"
                         : "h-auto py-2 px-3 gap-2.5"
                     )}
                   >
@@ -201,9 +207,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       )}
                     >
                       {profile?.avatar_url ? (
-                        <img
+                        <Image
                           src={profile.avatar_url}
                           alt={profile.full_name || "Profile"}
+                          width={36}
+                          height={36}
                           className="h-full w-full object-cover"
                         />
                       ) : (
@@ -219,7 +227,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       <>
                         <div className="hidden md:flex flex-col items-start">
                           <span className="text-sm font-semibold text-foreground leading-tight">
-                            {firstName || profile?.email?.split("@")[0] || "User"}
+                            {firstName ||
+                              profile?.email?.split("@")[0] ||
+                              "User"}
                           </span>
                           <span className="text-xs text-muted-foreground leading-tight">
                             {profile?.email?.split("@")[0] || ""}
@@ -235,9 +245,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="px-2 py-3 border-b border-border/50 flex items-center gap-3 bg-muted/30 rounded-lg">
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-border flex-shrink-0 ring-2 ring-primary/10">
                         {profile?.avatar_url ? (
-                          <img
+                          <Image
                             src={profile.avatar_url}
                             alt={profile.full_name || "Profile"}
+                            width={48}
+                            height={48}
                             className="h-full w-full object-cover"
                           />
                         ) : (
