@@ -171,10 +171,10 @@ export function AddTransactionDialog({
 
     setIsLoading(true);
 
-    const previousTransactions =
-      queryClient.getQueryData<Transaction[]>(["transactions"]);
-    const previousAccounts =
-      queryClient.getQueryData<Account[]>(["accounts"]);
+    const previousTransactions = queryClient.getQueryData<Transaction[]>([
+      "transactions",
+    ]);
+    const previousAccounts = queryClient.getQueryData<Account[]>(["accounts"]);
     const isoDate = date.toISOString();
     const optimisticId = generateTempId();
 
@@ -237,7 +237,10 @@ export function AddTransactionDialog({
         if (previousTransactions !== undefined) {
           queryClient.setQueryData(["transactions"], previousTransactions);
         } else {
-          queryClient.removeQueries({ queryKey: ["transactions"], exact: true });
+          queryClient.removeQueries({
+            queryKey: ["transactions"],
+            exact: true,
+          });
         }
       }
       if (previousAccounts !== undefined) {
@@ -264,7 +267,7 @@ export function AddTransactionDialog({
         const sourceDesc = description
           ? `${description} (ke ${selectedTargetAccount?.name})`
           : `Transfer ke ${selectedTargetAccount?.name}`;
-        
+
         const { data: tx1, error: tx1Error } = await supabase
           .from("transactions")
           .insert({
@@ -283,7 +286,7 @@ export function AddTransactionDialog({
         const targetDesc = description
           ? `${description} (dari ${selectedAccount?.name})`
           : `Transfer dari ${selectedAccount?.name}`;
-        
+
         const { data: tx2, error: tx2Error } = await supabase
           .from("transactions")
           .insert({
@@ -511,7 +514,7 @@ export function AddTransactionDialog({
             onClick={() => setAccountDrawerOpen(true)}
           >
             {selectedAccount ? (
-              <div className="flex items-center gap-3 text-left">
+              <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                 <div
                   className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                   style={{ backgroundColor: selectedAccount.color }}
@@ -524,9 +527,9 @@ export function AddTransactionDialog({
                     return <IconComp className="h-5 w-5" />;
                   })()}
                 </div>
-                <div>
-                  <p className="font-medium">{selectedAccount.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{selectedAccount.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {formatCurrency(selectedAccount.balance)}
                   </p>
                 </div>
@@ -550,7 +553,7 @@ export function AddTransactionDialog({
               onClick={() => setTargetAccountDrawerOpen(true)}
             >
               {selectedTargetAccount ? (
-                <div className="flex items-center gap-3 text-left">
+                <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                   <div
                     className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                     style={{ backgroundColor: selectedTargetAccount.color }}
@@ -563,9 +566,11 @@ export function AddTransactionDialog({
                       return <IconComp className="h-5 w-5" />;
                     })()}
                   </div>
-                  <div>
-                    <p className="font-medium">{selectedTargetAccount.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      {selectedTargetAccount.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {formatCurrency(selectedTargetAccount.balance)}
                     </p>
                   </div>
@@ -588,7 +593,7 @@ export function AddTransactionDialog({
               onClick={() => setCategoryDrawerOpen(true)}
             >
               {selectedCategory ? (
-                <div className="flex items-center gap-3 text-left">
+                <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                   <div
                     className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                     style={{ backgroundColor: selectedCategory.color }}
@@ -600,9 +605,11 @@ export function AddTransactionDialog({
                       return <IconComp className="h-5 w-5" />;
                     })()}
                   </div>
-                  <div>
-                    <p className="font-medium">{selectedCategory.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      {selectedCategory.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize truncate">
                       {type === "income" ? "Pemasukan" : "Pengeluaran"}
                     </p>
                   </div>
@@ -878,7 +885,8 @@ export function AddTransactionDialog({
             })
           ) : (
             <div className="text-center text-muted-foreground text-sm py-8">
-              Belum ada kategori {type === "income" ? "pemasukan" : "pengeluaran"}.
+              Belum ada kategori{" "}
+              {type === "income" ? "pemasukan" : "pengeluaran"}.
             </div>
           )}
         </div>
@@ -909,7 +917,11 @@ export function AddTransactionDialog({
 
   return (
     <>
-      <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange} modal={true}>
+      <Drawer
+        open={open ?? isOpen}
+        onOpenChange={handleOpenChange}
+        modal={true}
+      >
         {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
         <DrawerContent>
           <DrawerHeader className="text-left">

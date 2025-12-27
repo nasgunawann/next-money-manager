@@ -248,7 +248,7 @@ export function EditTransactionDialog({
             disabled={isTransfer}
           >
             {selectedAccount ? (
-              <div className="flex items-center gap-3 text-left">
+              <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                 <div
                   className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                   style={{ backgroundColor: selectedAccount.color }}
@@ -261,9 +261,9 @@ export function EditTransactionDialog({
                     return <IconComp className="h-5 w-5" />;
                   })()}
                 </div>
-                <div>
-                  <p className="font-medium">{selectedAccount.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{selectedAccount.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {formatCurrency(selectedAccount.balance)}
                   </p>
                 </div>
@@ -288,7 +288,7 @@ export function EditTransactionDialog({
               disabled={isTransfer}
             >
               {selectedCategory ? (
-                <div className="flex items-center gap-3 text-left">
+                <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                   <div
                     className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                     style={{ backgroundColor: selectedCategory.color }}
@@ -300,9 +300,11 @@ export function EditTransactionDialog({
                       return <IconComp className="h-5 w-5" />;
                     })()}
                   </div>
-                  <div>
-                    <p className="font-medium">{selectedCategory.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      {selectedCategory.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize truncate">
                       {selectedCategory.type === "income"
                         ? "Pemasukan"
                         : "Pengeluaran"}
