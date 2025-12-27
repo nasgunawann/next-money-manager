@@ -183,7 +183,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                <div className="rounded-[24px] bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 shadow-inner border border-white/10">
+                <div className="rounded-3xl bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 shadow-inner border border-white/10">
                   <div className="flex items-center gap-2 justify-self-start">
                     <div className="h-9 w-9 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 flex items-center justify-center shrink-0">
                       <IconArrowDownLeft className="h-4.5 w-4.5" />

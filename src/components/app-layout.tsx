@@ -243,7 +243,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <PopoverContent className="w-64 p-3" align="end">
                   <div className="space-y-2">
                     <div className="px-2 py-3 border-b border-border/50 flex items-center gap-3 bg-muted/30 rounded-lg">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-border flex-shrink-0 ring-2 ring-primary/10">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-2 border-border shrink-0 ring-2 ring-primary/10">
                         {profile?.avatar_url ? (
                           <Image
                             src={profile.avatar_url}
