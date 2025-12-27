@@ -10,12 +10,12 @@ INSERT INTO public.categories (name, type, icon, color) VALUES
 
 -- Expense Categories
 INSERT INTO public.categories (name, type, icon, color) VALUES
-('Makanan', 'expense', 'utensils', '#ef4444'), -- Red
-('Transportasi', 'expense', 'bus', '#f97316'), -- Orange
-('Belanja', 'expense', 'shopping-bag', '#ec4899'), -- Pink
-('Hiburan', 'expense', 'film', '#8b5cf6'), -- Violet
-('Tagihan', 'expense', 'receipt', '#ef4444'), -- Red
-('Kesehatan', 'expense', 'heart-pulse', '#ef4444'), -- Red
+('Makanan', 'expense', 'utensils', '#ef4444'),      -- Red
+('Transportasi', 'expense', 'bus', '#f97316'),      -- Orange
+('Belanja', 'expense', 'shopping-bag', '#ec4899'),  -- Pink
+('Hiburan', 'expense', 'film', '#8b5cf6'),          -- Violet
+('Tagihan', 'expense', 'receipt', '#06b6d4'),       -- Cyan (distinct)
+('Kesehatan', 'expense', 'heart-pulse', '#10b981'), -- Emerald (distinct)
 ('Pendidikan', 'expense', 'graduation-cap', '#3b82f6'), -- Blue
-('Investasi', 'expense', 'piggy-bank', '#f59e0b'), -- Amber
+('Investasi', 'expense', 'piggy-bank', '#f59e0b'),  -- Amber
 ('Lainnya', 'expense', 'more-horizontal', '#64748b'); -- Slate

@@ -8,6 +8,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { getCategoryIconComponent } from "@/constants/category-icons";
 
 export default function ReportsPage() {
   const { data: profile } = useProfile();
@@ -76,18 +77,19 @@ export default function ReportsPage() {
     const monthTx = getMonthTransactions();
     const map = new Map<
       string,
-      { name: string; value: number; color: string }
+      { name: string; value: number; color: string; icon?: string }
     >();
     monthTx
       .filter((t) => t.type === "expense")
       .forEach((t) => {
         const name = t.category?.name || "Lainnya";
         const color = t.category?.color || "#94a3b8";
+        const icon = t.category?.icon || "more-horizontal";
         const existing = map.get(name);
         if (existing) {
           existing.value += t.amount;
         } else {
-          map.set(name, { name, value: t.amount, color });
+          map.set(name, { name, value: t.amount, color, icon });
         }
       });
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
@@ -181,7 +183,12 @@ export default function ReportsPage() {
                             className="h-8 w-8 rounded-full flex items-center justify-center text-white shrink-0"
                             style={{ backgroundColor: cat.color }}
                           >
-                            <span className="text-lg font-bold">•</span>
+                            {(() => {
+                              const IconComp = getCategoryIconComponent(
+                                cat.icon
+                              );
+                              return <IconComp className="h-5 w-5" />;
+                            })()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-foreground text-sm">
