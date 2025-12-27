@@ -42,8 +42,8 @@ import {
 } from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
 import { EditAccountDialog } from "@/components/edit-account-dialog";
+import { TransactionListItem } from "@/components/transaction-list-item";
 import { getAccountIconComponent } from "@/constants/account-icons";
-import { getCategoryIconComponent } from "@/constants/category-icons";
 
 interface AccountDetailDialogProps {
   account: Account | null;
@@ -181,67 +181,12 @@ export function AccountDetailDialog({
         {accountTransactions.length > 0 ? (
           <div className="space-y-2">
             {accountTransactions.map((transaction) => (
-              <Card
+              <TransactionListItem
                 key={transaction.id}
-                className="border-none shadow-sm hover:bg-accent/50 transition-colors"
-              >
-                <CardContent className="p-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <div
-                      className={cn(
-                        "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
-                        transaction.type === "income"
-                          ? "bg-green-100 text-green-600"
-                          : transaction.type === "expense"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-blue-100 text-blue-600"
-                      )}
-                    >
-                      {transaction.type === "transfer" ? (
-                        <IconArrowsLeftRight className="h-4.5 w-4.5" />
-                      ) : (
-                        (() => {
-                          const CatIcon = getCategoryIconComponent(
-                            transaction.category?.icon
-                          );
-                          return <CatIcon className="h-4.5 w-4.5" />;
-                        })()
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm leading-tight truncate">
-                        {transaction.description ||
-                          transaction.category?.name ||
-                          "Transaksi"}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                        {new Date(transaction.date).toLocaleDateString(
-                          "id-ID",
-                          { day: "numeric", month: "short", year: "numeric" }
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <p
-                    className={cn(
-                      "font-semibold text-sm whitespace-nowrap text-right shrink-0",
-                      transaction.type === "income"
-                        ? "text-green-600"
-                        : transaction.type === "transfer" &&
-                          transaction.description?.includes("(dari")
-                        ? "text-green-600"
-                        : "text-red-600"
-                    )}
-                  >
-                    {transaction.type === "income" ||
-                    (transaction.type === "transfer" &&
-                      transaction.description?.includes("(dari"))
-                      ? "+"
-                      : "-"}{" "}
-                    {formatCurrency(transaction.amount, profile?.currency)}
-                  </p>
-                </CardContent>
-              </Card>
+                transaction={transaction}
+                currency={profile?.currency}
+                showTime={false}
+              />
             ))}
           </div>
         ) : (
@@ -368,71 +313,12 @@ export function AccountDetailDialog({
             {accountTransactions.length > 0 ? (
               <div className="space-y-2">
                 {accountTransactions.map((transaction) => (
-                  <Card
+                  <TransactionListItem
                     key={transaction.id}
-                    className="border-none shadow-sm hover:bg-accent/50 transition-colors"
-                  >
-                    <CardContent className="p-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                        <div
-                          className={cn(
-                            "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
-                            transaction.type === "income"
-                              ? "bg-green-100 text-green-600"
-                              : transaction.type === "expense"
-                              ? "bg-red-100 text-red-600"
-                              : "bg-blue-100 text-blue-600"
-                          )}
-                        >
-                          {transaction.type === "transfer" ? (
-                            <IconArrowsLeftRight className="h-4.5 w-4.5" />
-                          ) : (
-                            (() => {
-                              const CatIcon = getCategoryIconComponent(
-                                transaction.category?.icon
-                              );
-                              return <CatIcon className="h-4.5 w-4.5" />;
-                            })()
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm leading-tight truncate">
-                            {transaction.description ||
-                              transaction.category?.name ||
-                              "Transaksi"}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                            {new Date(transaction.date).toLocaleDateString(
-                              "id-ID",
-                              {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                      <p
-                        className={cn(
-                          "font-semibold text-sm whitespace-nowrap text-right shrink-0",
-                          transaction.type === "income"
-                            ? "text-green-600"
-                            : transaction.type === "transfer" &&
-                              transaction.description?.includes("(dari")
-                            ? "text-green-600"
-                            : "text-red-600"
-                        )}
-                      >
-                        {transaction.type === "income" ||
-                        (transaction.type === "transfer" &&
-                          transaction.description?.includes("(dari"))
-                          ? "+"
-                          : "-"}{" "}
-                        {formatCurrency(transaction.amount, profile?.currency)}
-                      </p>
-                    </CardContent>
-                  </Card>
+                    transaction={transaction}
+                    currency={profile?.currency}
+                    showTime={false}
+                  />
                 ))}
               </div>
             ) : (

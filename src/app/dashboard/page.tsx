@@ -22,8 +22,8 @@ import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
+import { TransactionListItem } from "@/components/transaction-list-item";
 import { getAccountIconComponent } from "@/constants/account-icons";
-import { getCategoryIconComponent } from "@/constants/category-icons";
 
 import useSessionGuard from "@/hooks/use-session-guard";
 
@@ -281,76 +281,11 @@ export default function DashboardPage() {
                         </p>
                         <div className="space-y-2">
                           {items.map((transaction) => (
-                            <Card
+                            <TransactionListItem
                               key={transaction.id}
-                              className="border-none shadow-sm hover:bg-accent/50 transition-colors"
-                            >
-                              <CardContent className="p-4 flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                  <div
-                                    className={cn(
-                                      "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
-                                      transaction.type === "income"
-                                        ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                                        : transaction.type === "expense"
-                                        ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                                        : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                                    )}
-                                  >
-                                    {transaction.type === "transfer" ? (
-                                      <IconArrowsLeftRight className="h-4.5 w-4.5" />
-                                    ) : (
-                                      (() => {
-                                        const CatIcon =
-                                          getCategoryIconComponent(
-                                            transaction.category?.icon
-                                          );
-                                        return (
-                                          <CatIcon className="h-4.5 w-4.5" />
-                                        );
-                                      })()
-                                    )}
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="font-medium text-foreground text-sm leading-tight truncate">
-                                      {transaction.description ||
-                                        transaction.category?.name ||
-                                        "Transaksi"}
-                                    </p>
-                                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                                      {format(
-                                        new Date(transaction.date),
-                                        "HH:mm",
-                                        {
-                                          locale: id,
-                                        }
-                                      )}{" "}
-                                      • {transaction.account?.name}
-                                    </p>
-                                  </div>
-                                </div>
-                                <p
-                                  className={cn(
-                                    "font-semibold text-sm whitespace-nowrap text-right shrink-0",
-                                    transaction.type === "income"
-                                      ? "text-green-600 dark:text-green-400"
-                                      : transaction.type === "expense"
-                                      ? "text-red-600 dark:text-red-400"
-                                      : "text-blue-600 dark:text-blue-400"
-                                  )}
-                                >
-                                  {transaction.type === "income"
-                                    ? "+"
-                                    : transaction.type === "expense"
-                                    ? "-"
-                                    : ""}{" "}
-                                  {formatCurrency(
-                                    transaction.amount,
-                                    profile?.currency
-                                  )}
-                                </p>
-                              </CardContent>
-                            </Card>
+                              transaction={transaction}
+                              currency={profile?.currency}
+                            />
                           ))}
                         </div>
                       </div>
