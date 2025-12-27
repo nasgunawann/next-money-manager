@@ -10,6 +10,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 
+const RADIAN = Math.PI / 180;
+
 export default function ReportsPage() {
   const { data: profile } = useProfile();
   const { data: transactions, isLoading } = useTransactions();
@@ -100,8 +102,45 @@ export default function ReportsPage() {
     0
   );
 
+  const renderIconLabel = (props: any) => {
+    const { cx, cy, midAngle, innerRadius, outerRadius, payload, value } =
+      props;
+    if (!totalExpense) return null;
+    const percent = (value / totalExpense) * 100;
+    if (percent < 5) return null; // hide on tiny slices to avoid overlap
+
+    const radius = (innerRadius + outerRadius) / 2.05;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const IconComp = getCategoryIconComponent(payload.icon);
+    return (
+      <g
+        transform={`translate(${x},${y})`}
+        pointerEvents="none"
+        style={{
+          animation: "fade-icon 320ms ease forwards",
+          opacity: 0,
+          transformOrigin: "center center",
+        }}
+      >
+        <circle r={11} fill={payload.color} opacity={0.95} />
+        <g transform="translate(-8 -8)">
+          <IconComp className="h-4 w-4 text-white" />
+        </g>
+      </g>
+    );
+  };
+
   return (
     <AppLayout>
+      <style>
+        {`
+          @keyframes fade-icon {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+        `}
+      </style>
       <div className="p-4 md:p-8 max-w-2xl mx-auto">
         {/* Month Navigation */}
         <div className="flex items-center justify-center gap-6 py-4 mb-6">
@@ -120,7 +159,7 @@ export default function ReportsPage() {
             </p>
           </div>
           <button
-            onClick={handleNextMonth}
+            style={{ animation: "fade-icon 320ms ease forwards", opacity: 0 }}
             className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
           >
             <IconChevronRight className="w-5 h-5" />
@@ -151,6 +190,8 @@ export default function ReportsPage() {
                       strokeWidth={0}
                       animationDuration={500}
                       isAnimationActive={true}
+                      label={renderIconLabel}
+                      labelLine={false}
                     >
                       {expenseByCategory.map((entry, i) => (
                         <Cell key={`cell-${i}`} fill={entry.color} />
