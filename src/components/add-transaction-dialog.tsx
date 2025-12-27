@@ -41,12 +41,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  IconLoader2,
-  IconCalendar,
-  IconChevronRight,
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconLoader2, IconChevronRight, IconPlus } from "@tabler/icons-react";
 import { format } from "date-fns";
 import {
   cn,
@@ -56,12 +51,7 @@ import {
   numericInputToNumber,
   generateTempId,
 } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import DatePicker from "@/components/ui/date-picker";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 
@@ -627,33 +617,14 @@ export function AddTransactionDialog({
 
       <div className="space-y-2">
         <Label>Tanggal</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <IconCalendar className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Pilih tanggal</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(selectedDate) => {
-                setDate(selectedDate);
-                if (selectedDate) {
-                  setIsDirty(true);
-                }
-              }}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <DatePicker
+          date={date}
+          onChange={(d) => {
+            setDate(d);
+            if (d) setIsDirty(true);
+          }}
+          placeholder="Pilih tanggal"
+        />
       </div>
 
       <div className="space-y-2">
