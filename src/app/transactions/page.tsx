@@ -197,6 +197,27 @@ export default function TransactionsPage() {
     { value: "transfer", label: "Transfer" },
   ];
 
+  // Helpers: Indonesian number display (thousands '.' and decimal ',')
+  function normalizeDecimal(input: string): string {
+    if (!input) return "";
+    // Remove spaces, thousand separators and convert comma to dot
+    const s = input.replace(/\s+/g, "").replace(/\./g, "").replace(/,/g, ".");
+    // Keep digits and at most one dot
+    const cleaned = s.replace(/[^0-9.]/g, "");
+    const parts = cleaned.split(".");
+    if (parts.length === 1) return parts[0];
+    return parts[0] + "." + parts.slice(1).join("");
+  }
+
+  function formatIdDisplay(raw: string): string {
+    if (!raw) return "";
+    const [intPart, fracPart] = raw.split(".");
+    const intWithDots = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return fracPart !== undefined && fracPart !== ""
+      ? `${intWithDots},${fracPart}`
+      : intWithDots;
+  }
+
   // Active filters count
   const activeFiltersCount = [
     selectedCategories.length > 0,
@@ -348,20 +369,24 @@ export default function TransactionsPage() {
                         </label>
                         <div className="flex items-center gap-2">
                           <Input
-                            type="number"
+                            type="text"
                             inputMode="decimal"
                             placeholder="Min"
-                            value={tempMinAmount}
-                            onChange={(e) => setTempMinAmount(e.target.value)}
+                            value={formatIdDisplay(tempMinAmount)}
+                            onChange={(e) =>
+                              setTempMinAmount(normalizeDecimal(e.target.value))
+                            }
                             className="h-10"
                           />
                           <span className="text-muted-foreground">—</span>
                           <Input
-                            type="number"
+                            type="text"
                             inputMode="decimal"
                             placeholder="Max"
-                            value={tempMaxAmount}
-                            onChange={(e) => setTempMaxAmount(e.target.value)}
+                            value={formatIdDisplay(tempMaxAmount)}
+                            onChange={(e) =>
+                              setTempMaxAmount(normalizeDecimal(e.target.value))
+                            }
                             className="h-10"
                           />
                         </div>
@@ -459,7 +484,8 @@ export default function TransactionsPage() {
                 {(minAmount !== "" || maxAmount !== "") && (
                   <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium">
                     <IconFilter className="h-3 w-3" />
-                    Jumlah: {minAmount || "0"} - {maxAmount || "∞"}
+                    Jumlah: {formatIdDisplay(minAmount) || "0"} -{" "}
+                    {formatIdDisplay(maxAmount) || "∞"}
                     <button
                       onClick={() => {
                         setMinAmount("");
