@@ -12,6 +12,7 @@ import { getAccountIconComponent } from "@/constants/account-icons";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
+import { AccountsPageSkeleton } from "@/components/skeleton-loaders";
 import {
   Select,
   SelectContent,
@@ -41,9 +42,9 @@ export default function AccountsPage() {
 
   if (profileLoading || accountsLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AppLayout>
+        <AccountsPageSkeleton />
+      </AppLayout>
     );
   }
 

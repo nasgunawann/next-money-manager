@@ -35,6 +35,7 @@ import {
 } from "@tabler/icons-react";
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
 import { TransactionListItem } from "@/components/transaction-list-item";
+import { TransactionListSkeleton } from "@/components/skeleton-loaders";
 import { format, isToday, isYesterday, parseISO, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 import { CATEGORY_ICON_MAP } from "@/constants/category-icons";
@@ -508,9 +509,7 @@ export default function TransactionsPage() {
         {/* Transaction List */}
         <div className="space-y-4">
           {!hasTransactions && isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
+            <TransactionListSkeleton count={5} />
           ) : groupedTransactions.length ? (
             groupedTransactions.map((group) => (
               <div key={group.key} className="space-y-2">

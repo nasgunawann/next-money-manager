@@ -22,6 +22,7 @@ import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
 import { TransactionListItem } from "@/components/transaction-list-item";
+import { DashboardSkeleton } from "@/components/skeleton-loaders";
 import { getAccountIconComponent } from "@/constants/account-icons";
 
 import useSessionGuard from "@/hooks/use-session-guard";
@@ -100,9 +101,9 @@ export default function DashboardPage() {
     transactionsLoading
   ) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AppLayout>
+        <DashboardSkeleton />
+      </AppLayout>
     );
   }
 

@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
+import { ReportsSkeleton } from "@/components/skeleton-loaders";
 
 const RADIAN = Math.PI / 180;
 
@@ -187,9 +188,7 @@ export default function ReportsPage() {
 
         {/* Content for the selected month */}
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          </div>
+          <ReportsSkeleton />
         ) : expenseByCategory.length > 0 ? (
           <div className="space-y-6">
             {/* Donut Chart */}
