@@ -7,11 +7,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 import { ReportsSkeleton } from "@/components/skeleton-loaders";
 import { EmptyState, EmptyReportsIcon } from "@/components/empty-state";
