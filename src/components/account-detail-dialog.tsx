@@ -31,16 +31,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  IconWallet,
-  IconPencil,
-  IconTrash,
-  IconX,
-  IconLoader2,
-} from "@tabler/icons-react";
+import { IconPencil, IconTrash, IconX, IconLoader2 } from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
 import { EditAccountDialog } from "@/components/edit-account-dialog";
 import { TransactionListItem } from "@/components/transaction-list-item";
+import { EmptyListIcon } from "@/components/empty-state";
 import { getAccountIconComponent } from "@/constants/account-icons";
 
 interface AccountDetailDialogProps {
@@ -188,9 +183,14 @@ export function AccountDetailDialog({
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground text-sm">
-            <IconWallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>Belum ada transaksi</p>
+          <div className="text-center py-8">
+            <EmptyListIcon />
+            <p className="text-sm text-muted-foreground mt-3">
+              Belum ada transaksi
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              Aktivitas akan muncul di sini
+            </p>
           </div>
         )}
       </div>
@@ -320,9 +320,14 @@ export function AccountDetailDialog({
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                <IconWallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>Belum ada transaksi</p>
+              <div className="text-center py-8">
+                <EmptyListIcon />
+                <p className="text-sm text-muted-foreground mt-3">
+                  Belum ada transaksi
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-1">
+                  Aktivitas akan muncul di sini
+                </p>
               </div>
             )}
           </div>

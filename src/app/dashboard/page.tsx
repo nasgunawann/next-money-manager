@@ -13,16 +13,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   IconPlus,
-  IconWallet,
   IconArrowUpRight,
   IconArrowDownLeft,
 } from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
-import { AddTransactionDialog } from "@/components/add-transaction-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
 import { TransactionListItem } from "@/components/transaction-list-item";
 import { DashboardSkeleton } from "@/components/skeleton-loaders";
+import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 import { getAccountIconComponent } from "@/constants/account-icons";
 
 import useSessionGuard from "@/hooks/use-session-guard";
@@ -292,19 +291,16 @@ export default function DashboardPage() {
                     ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border">
-                  <div className="bg-muted w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <IconWallet className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    Belum ada transaksi
-                  </p>
-                  <AddTransactionDialog>
-                    <Button variant="link" className="text-primary mt-2">
-                      Mulai mencatat
-                    </Button>
-                  </AddTransactionDialog>
-                </div>
+                <EmptyState
+                  icon={<EmptyTransactionsIcon />}
+                  title="Mulai Mencatat Keuangan Anda"
+                  description="Catat transaksi pertama untuk melihat ringkasan dan analisis pengeluaran Anda"
+                  primaryAction={{
+                    label: "Tambah Transaksi Pertama",
+                    icon: <IconPlus className="h-4 w-4" />,
+                  }}
+                  hint="Atau tekan tombol + di navigasi bawah"
+                />
               )}
             </section>
           </div>

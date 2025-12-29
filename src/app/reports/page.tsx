@@ -7,9 +7,14 @@ import { useProfile } from "@/hooks/use-profile";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+} from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 import { ReportsSkeleton } from "@/components/skeleton-loaders";
+import { EmptyState, EmptyReportsIcon } from "@/components/empty-state";
 
 const RADIAN = Math.PI / 180;
 
@@ -278,9 +283,13 @@ export default function ReportsPage() {
             </div>
           </div>
         ) : (
-          <p className="text-center text-muted-foreground py-12">
-            Tidak ada data pengeluaran
-          </p>
+          <EmptyState
+            icon={<EmptyReportsIcon />}
+            title="Belum Ada Data Pengeluaran"
+            hint={`Mulai catat pengeluaran di bulan ${
+              months[parseInt(selectedMonth)]
+            } untuk melihat analisis dan grafik`}
+          />
         )}
       </div>
     </AppLayout>

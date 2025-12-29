@@ -36,6 +36,7 @@ import {
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
 import { TransactionListItem } from "@/components/transaction-list-item";
 import { TransactionListSkeleton } from "@/components/skeleton-loaders";
+import { EmptyState, EmptySearchIcon } from "@/components/empty-state";
 import { format, isToday, isYesterday, parseISO, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 import { CATEGORY_ICON_MAP } from "@/constants/category-icons";
@@ -529,17 +530,23 @@ export default function TransactionsPage() {
               </div>
             ))
           ) : (
-            <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border">
-              <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <IconSearch className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-medium text-foreground">
-                Tidak ada transaksi
-              </h3>
-              <p className="text-muted-foreground text-sm max-w-xs mx-auto mt-1">
-                Coba ubah filter atau tambah transaksi baru.
-              </p>
-            </div>
+            <EmptyState
+              icon={<EmptySearchIcon />}
+              title="Tidak Ada Transaksi"
+              description="Coba ubah filter, periode, atau kata kunci pencarian untuk menemukan transaksi"
+              secondaryAction={{
+                label: "Reset Semua Filter",
+                onClick: () => {
+                  setSearch("");
+                  setTypeFilter("all");
+                  setSelectedCategories([]);
+                  setSelectedAccounts([]);
+                  setMinAmount("");
+                  setMaxAmount("");
+                },
+              }}
+              variant="filtered"
+            />
           )}
         </div>
       </div>
