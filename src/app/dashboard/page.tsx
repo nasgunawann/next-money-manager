@@ -74,6 +74,7 @@ export default function DashboardPage() {
     useTransactions();
 
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const totalBalance =
@@ -170,7 +171,10 @@ export default function DashboardPage() {
         key={account.id}
         className="relative overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer"
         style={{ backgroundColor: withAlpha(account.color || "#94a3b8", 0.12) }}
-        onClick={() => setSelectedAccount(account)}
+        onClick={() => {
+          setSelectedAccount(account);
+          setDialogOpen(true);
+        }}
       >
         <CardContent className="px-3.5 py-2.5">
           <div className="flex items-center justify-between gap-3">
@@ -455,8 +459,14 @@ export default function DashboardPage() {
 
       <AccountDetailDialog
         account={selectedAccount}
-        open={!!selectedAccount}
-        onOpenChange={(open) => !open && setSelectedAccount(null)}
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) {
+            // Delay clearing the account to allow exit animation to complete
+            setTimeout(() => setSelectedAccount(null), 300);
+          }
+        }}
       />
     </AppLayout>
   );
