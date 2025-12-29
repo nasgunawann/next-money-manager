@@ -51,13 +51,13 @@ export function DashboardSkeleton() {
         <div className="md:col-span-2 space-y-4">
           {/* Hero Card */}
           <Card className="relative overflow-hidden border-none bg-linear-to-br from-[#4663f1] via-[#3552d8] to-[#1f37a7] text-white shadow-2xl">
-            <CardContent className="p-5 md:p-7 space-y-4">
-              <div className="flex flex-col gap-1">
+            <CardContent className="p-4 md:p-5 space-y-3">
+              <div className="flex flex-col gap-0.5">
                 <Skeleton className="h-3 w-20 bg-white/20" />
                 <Skeleton className="h-10 w-48 bg-white/20" />
                 <Skeleton className="h-3 w-40 bg-white/20" />
               </div>
-              <div className="rounded-3xl bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3">
+              <div className="rounded-3xl bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <Skeleton className="h-9 w-9 rounded-full bg-white/20" />
                   <div className="space-y-1">
@@ -77,15 +77,18 @@ export function DashboardSkeleton() {
             </CardContent>
           </Card>
 
-          {/* Mobile Accounts Section */}
-          <section className="md:hidden">
-            <div className="flex items-center justify-between mb-3">
+          {/* Accounts Section */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
               <Skeleton className="h-5 w-24" />
               <Skeleton className="h-4 w-20" />
             </div>
-            <div className="flex gap-3 overflow-x-auto">
-              <Skeleton className="h-20 w-64 shrink-0 rounded-lg" />
-              <Skeleton className="h-20 w-64 shrink-0 rounded-lg" />
+            <div className="relative">
+              <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                <Skeleton className="h-20 w-64 shrink-0 rounded-lg" />
+                <Skeleton className="h-20 w-64 shrink-0 rounded-lg" />
+                <Skeleton className="h-20 w-64 shrink-0 rounded-lg" />
+              </div>
             </div>
           </section>
 
@@ -104,29 +107,36 @@ export function DashboardSkeleton() {
           </section>
         </div>
 
-        {/* Right Column (Accounts Carousel & Donut Chart - Desktop Only) */}
-        <div className="hidden md:block space-y-4">
-          {/* Accounts Carousel */}
+        {/* Right Column (Chart Only - Desktop Only) */}
+        <div className="hidden md:block">
+          {/* Expense Chart with Category Breakdown */}
           <section>
-            <div className="flex items-center justify-between mb-3">
-              <Skeleton className="h-5 w-24" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-            <div className="relative">
-              <Skeleton className="h-20 w-full rounded-lg" />
-            </div>
-          </section>
-
-          {/* Expense Donut Chart */}
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-4 w-20" />
-            </div>
             <Card className="border-none shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex justify-center">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-5">
+                  <Skeleton className="h-6 w-40" />
+                  <Skeleton className="h-8 w-24" />
+                </div>
+                <div className="flex justify-center mb-6">
                   <Skeleton className="w-full max-w-[300px] aspect-square rounded-full" />
+                </div>
+                {/* Category Breakdown */}
+                <div className="pt-6 border-t space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 flex-1">
+                          <Skeleton className="h-6 w-6 rounded-full" />
+                          <Skeleton className="h-4 w-20" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-3 w-16" />
+                          <Skeleton className="h-3 w-10" />
+                        </div>
+                      </div>
+                      <Skeleton className="w-full h-1 rounded-full" />
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

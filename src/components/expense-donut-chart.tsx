@@ -117,10 +117,10 @@ export function ExpenseDonutChart({
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <p className="text-3xl md:text-2xl font-bold text-foreground">
+            <p className="text-2xl font-bold text-foreground">
               {formatCurrency(totalExpense, currency)}
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground">
               Total Pengeluaran
             </p>
           </div>

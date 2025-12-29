@@ -25,6 +25,7 @@ import { AccountDetailDialog } from "@/components/account-detail-dialog";
 import { TransactionListItem } from "@/components/transaction-list-item";
 import { DashboardSkeleton } from "@/components/skeleton-loaders";
 import { getAccountIconComponent } from "@/constants/account-icons";
+import { getCategoryIconComponent } from "@/constants/category-icons";
 import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 import { ExpenseDonutChart } from "@/components/expense-donut-chart";
 
@@ -141,16 +142,6 @@ export default function DashboardPage() {
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
   })();
 
-  const scrollCarousel = (direction: "left" | "right") => {
-    if (carouselRef.current) {
-      const scrollAmount = 280; // card width + gap
-      carouselRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
   if (
     sessionGuard.isLoading ||
     profileLoading ||
@@ -228,18 +219,18 @@ export default function DashboardPage() {
           <div className="md:col-span-2 space-y-4">
             {/* Overview Hero */}
             <Card className="relative overflow-hidden border-none bg-linear-to-br from-[#4663f1] via-[#3552d8] to-[#1f37a7] text-white shadow-2xl">
-              <CardContent className="p-5 md:p-7 space-y-4">
-                <div className="flex flex-col gap-1">
-                  <p className="text-[11px] font-semibold tracking-wide text-white/80 uppercase">
+              <CardContent className="p-4 md:p-5 space-y-3">
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-[11px] font-semibold tracking-wide text-white/90 uppercase">
                     Total Saldo
                   </p>
                   <div className="flex items-center gap-3">
-                    <h2 className="text-4xl md:text-4xl font-bold tracking-tight">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
                       {formatCurrency(totalBalance, profile?.currency)}
                     </h2>
                   </div>
-                  <p className="text-xs opacity-80">
-                    Laporan bulan ini |{" "}
+                  <p className="text-[13px] font-medium text-white/90 mt-0.5">
+                    Laporan bulan{" "}
                     {new Date().toLocaleDateString("id-ID", {
                       month: "long",
                       year: "numeric",
@@ -247,7 +238,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                <div className="rounded-3xl bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-3 shadow-inner border border-white/10">
+                <div className="rounded-3xl bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-2.5 shadow-inner border border-white/10">
                   <div className="flex items-center gap-2 justify-self-start">
                     <div className="h-9 w-9 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 flex items-center justify-center shrink-0">
                       <IconArrowDownLeft className="h-4.5 w-4.5" />
@@ -279,26 +270,59 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Mobile-only Accounts Section */}
-            <section className="md:hidden">
+            {/* Accounts Section */}
+            <section>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground text-base">
+                <h3 className="font-semibold text-foreground text-base md:text-lg">
                   Akun Saya
                 </h3>
                 <Link href="/accounts">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
+                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80 md:font-medium md:hover:bg-primary/10"
                   >
                     Lihat Semua
                   </Button>
                 </Link>
               </div>
 
-              {/* Mobile carousel */}
-              <div className="relative -mx-4">
-                <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-8 no-scrollbar carousel-smooth">
+              {/* Accounts carousel */}
+              <div className="relative">
+                {/* Navigation buttons - Desktop only */}
+                <button
+                  onClick={() => {
+                    if (carouselRef.current) {
+                      carouselRef.current.scrollBy({
+                        left: -280,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                  className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-background/80 backdrop-blur rounded-full shadow-md hover:bg-background transition-colors"
+                  aria-label="Previous account"
+                >
+                  <IconChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (carouselRef.current) {
+                      carouselRef.current.scrollBy({
+                        left: 280,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                  className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-background/80 backdrop-blur rounded-full shadow-md hover:bg-background transition-colors"
+                  aria-label="Next account"
+                >
+                  <IconChevronRight className="w-4 h-4" />
+                </button>
+
+                <div
+                  ref={carouselRef}
+                  className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-8 no-scrollbar carousel-smooth"
+                >
                   {accounts?.map((account) => (
                     <div key={account.id} className="snap-center shrink-0 w-64">
                       {renderAccountCard(account)}
@@ -308,8 +332,9 @@ export default function DashboardPage() {
                     {addAccountCard}
                   </div>
                 </div>
-                <div className="pointer-events-none absolute inset-y-0 left-0 w-8 fade-edge-left" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-8 fade-edge-right" />
+                {/* Fade edges */}
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-12 fade-edge-left mx-[-1]" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-12 fade-edge-right mx-[-1]" />
               </div>
             </section>
 
@@ -365,86 +390,82 @@ export default function DashboardPage() {
             </section>
           </div>
 
-          {/* Right Column (Accounts Carousel & Donut Chart - Desktop Only) */}
-          <div className="hidden md:block space-y-4">
-            {/* Accounts Carousel */}
-            <section>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-foreground text-base">
-                  Akun Saya
-                </h3>
-                <Link href="/accounts">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
-                  >
-                    Lihat Semua
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="relative">
-                {/* Navigation Buttons */}
-                <button
-                  onClick={() => scrollCarousel("left")}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-background/80 backdrop-blur rounded-full shadow-md hover:bg-background transition-colors"
-                  aria-label="Previous account"
-                >
-                  <IconChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => scrollCarousel("right")}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-background/80 backdrop-blur rounded-full shadow-md hover:bg-background transition-colors"
-                  aria-label="Next account"
-                >
-                  <IconChevronRight className="w-4 h-4" />
-                </button>
-
-                {/* Carousel */}
-                <div
-                  ref={carouselRef}
-                  className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 no-scrollbar carousel-smooth px-8"
-                >
-                  {accounts?.map((account) => (
-                    <div
-                      key={account.id}
-                      className="snap-center shrink-0 w-full"
-                    >
-                      {renderAccountCard(account)}
-                    </div>
-                  ))}
-                  <div className="snap-center shrink-0 w-full">
-                    {addAccountCard}
-                  </div>
-                </div>
-              </div>
-            </section>
-
+          {/* Right Column (Chart Only - Desktop Only) */}
+          <div className="hidden md:block">
             {/* Expense Donut Chart */}
             <section>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-foreground text-base">
-                  Pengeluaran Bulan Ini
-                </h3>
-                <Link href="/reports">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
-                  >
-                    Lihat Detail
-                  </Button>
-                </Link>
-              </div>
               <Card className="border-none shadow-sm">
-                <CardContent className="p-4">
+                <CardContent className="px-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-foreground text-lg">
+                      Pengeluaran Bulan Ini
+                    </h3>
+                    <Link href="/reports">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary font-medium hover:bg-primary/10"
+                      >
+                        Lihat Detail
+                      </Button>
+                    </Link>
+                  </div>
                   {expenseByCategory.length > 0 ? (
-                    <ExpenseDonutChart
-                      data={expenseByCategory.slice(0, 5)}
-                      totalExpense={monthlyExpense}
-                      currency={profile?.currency}
-                    />
+                    <>
+                      <ExpenseDonutChart
+                        data={expenseByCategory.slice(0, 5)}
+                        totalExpense={monthlyExpense}
+                        currency={profile?.currency}
+                      />
+
+                      {/* Category Breakdown */}
+                      <div className="mt-6 pt-6 border-t space-y-3">
+                        {expenseByCategory.slice(0, 5).map((cat, i) => {
+                          const percent =
+                            monthlyExpense > 0
+                              ? (cat.value / monthlyExpense) * 100
+                              : 0;
+                          const IconComp = getCategoryIconComponent(cat.icon);
+                          return (
+                            <div key={i}>
+                              <div className="flex items-center justify-between mb-1.5">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <div
+                                    className="h-6 w-6 rounded-full flex items-center justify-center text-white shrink-0"
+                                    style={{ backgroundColor: cat.color }}
+                                  >
+                                    <IconComp className="h-3.5 w-3.5" />
+                                  </div>
+                                  <p className="font-medium text-sm text-foreground truncate">
+                                    {cat.name}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatCurrency(
+                                      cat.value,
+                                      profile?.currency
+                                    )}
+                                  </p>
+                                  <p className="text-xs font-semibold text-foreground w-10 text-right">
+                                    {percent.toFixed(1)}%
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="w-full bg-muted rounded-full h-1">
+                                <div
+                                  className="h-1 rounded-full transition-all duration-500"
+                                  style={{
+                                    width: `${percent}%`,
+                                    backgroundColor: cat.color,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
                   ) : (
                     <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
                       Belum ada pengeluaran bulan ini

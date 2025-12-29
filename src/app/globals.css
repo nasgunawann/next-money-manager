@@ -229,7 +229,8 @@ body {
     background: linear-gradient(
       to right,
       var(--background) 0%,
-      color-mix(in oklch, var(--background) 80%, transparent) 60%,
+      var(--background) 30%,
+      color-mix(in oklch, var(--background) 60%, transparent) 70%,
       transparent 100%
     );
   }
@@ -238,7 +239,8 @@ body {
     background: linear-gradient(
       to left,
       var(--background) 0%,
-      color-mix(in oklch, var(--background) 80%, transparent) 60%,
+      var(--background) 30%,
+      color-mix(in oklch, var(--background) 60%, transparent) 70%,
       transparent 100%
     );
   }
