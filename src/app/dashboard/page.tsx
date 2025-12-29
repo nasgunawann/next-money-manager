@@ -333,8 +333,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 {/* Fade edges */}
-                <div className="pointer-events-none absolute inset-y-0 left-0 w-12 fade-edge-left mx-[-1]" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-12 fade-edge-right mx-[-1]" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-8 fade-edge-left mx-[-1]" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-8 fade-edge-right mx-[-1]" />
               </div>
             </section>
 
