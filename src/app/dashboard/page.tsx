@@ -25,6 +25,26 @@ import { DashboardSkeleton } from "@/components/skeleton-loaders";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 
+function withAlpha(color: string, alpha: number) {
+  if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
+  if (color.startsWith("#")) {
+    const hex = color.slice(1);
+    const full =
+      hex.length === 3
+        ? hex
+            .split("")
+            .map((c) => c + c)
+            .join("")
+        : hex;
+    const int = parseInt(full, 16);
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return color;
+}
+
 function getGroupedRecentTransactions(transactions: Transaction[]) {
   const grouped = transactions.reduce(
     (acc: Record<string, Transaction[]>, tx) => {
@@ -102,10 +122,11 @@ export default function DashboardPage() {
     return (
       <Card
         key={account.id}
-        className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
+        className="relative overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+        style={{ backgroundColor: withAlpha(account.color || "#94a3b8", 0.12) }}
         onClick={() => setSelectedAccount(account)}
       >
-        <CardContent className="p-2.5">
+        <CardContent className="px-3.5 py-2.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
               <div
@@ -135,7 +156,7 @@ export default function DashboardPage() {
   const addAccountCard = (
     <AddAccountDialog key="add-account">
       <Card className="border border-dashed border-primary/40 bg-card text-muted-foreground hover:border-primary/80 transition-colors cursor-pointer h-full">
-        <CardContent className="p-2.5 flex flex-col items-center justify-center gap-1">
+        <CardContent className="flex flex-col items-center justify-center gap-1">
           <IconPlus className="h-4 w-4" />
           <span className="text-xs">Tambah Akun Baru</span>
         </CardContent>
