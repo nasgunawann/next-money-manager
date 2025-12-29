@@ -40,13 +40,14 @@ export function ExpenseDonutChart({
       !totalExpense ||
       !cx ||
       !cy ||
-      !midAngle ||
-      !innerRadius ||
-      !outerRadius ||
+      midAngle === undefined ||
+      innerRadius === undefined ||
+      outerRadius === undefined ||
       !payload ||
-      !value
-    )
+      value === undefined
+    ) {
       return null;
+    }
     const percent = (value / totalExpense) * 100;
     if (percent < 5) return null; // hide on tiny slices to avoid overlap
 
@@ -54,6 +55,8 @@ export function ExpenseDonutChart({
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
     const IconComp = getCategoryIconComponent(payload.icon);
+    const ICON_SIZE = 16; // px (matches h-4 w-4)
+    const OFFSET = ICON_SIZE / 2;
     return (
       <g
         transform={`translate(${x},${y})`}
@@ -64,8 +67,7 @@ export function ExpenseDonutChart({
           transformOrigin: "center center",
         }}
       >
-        <circle r={11} fill={payload.color} opacity={0.95} />
-        <g transform="translate(-8 -8)">
+        <g transform={`translate(${-OFFSET},${-OFFSET})`}>
           <IconComp className="h-4 w-4 text-white" />
         </g>
       </g>
@@ -95,14 +97,21 @@ export function ExpenseDonutChart({
                 fill="#8884d8"
                 dataKey="value"
                 paddingAngle={2}
-                strokeWidth={0}
+                stroke="hsl(var(--background))"
+                strokeWidth={1.5}
+                cornerRadius={5}
                 animationDuration={500}
+                animationEasing="ease-out"
                 isAnimationActive={true}
                 label={renderIconLabel}
                 labelLine={false}
               >
                 {data.map((entry, i) => (
-                  <Cell key={`cell-${i}`} fill={entry.color} />
+                  <Cell
+                    key={`cell-${i}`}
+                    fill={entry.color}
+                    fillOpacity={0.9}
+                  />
                 ))}
               </Pie>
             </PieChart>

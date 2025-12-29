@@ -102,6 +102,33 @@ export default function ReportsPage() {
     0
   );
 
+  // Find earliest transaction month for prev button boundary
+  const earliestTransaction = transactions?.reduce((earliest, t) => {
+    const tDate = new Date(t.date);
+    return !earliest || tDate < earliest ? tDate : earliest;
+  }, null as Date | null);
+
+  const earliestMonth = earliestTransaction?.getMonth();
+  const earliestYear = earliestTransaction?.getFullYear();
+
+  // Disable prev when going back would go before earliest transaction
+  const isPrevDisabled =
+    !earliestTransaction ||
+    (earliestYear !== undefined &&
+      earliestMonth !== undefined &&
+      (parseInt(selectedYear) < earliestYear ||
+        (parseInt(selectedYear) === earliestYear &&
+          parseInt(selectedMonth) <= earliestMonth)));
+
+  // Disable "next" navigation when advancing would go beyond the current month
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const isNextDisabled =
+    parseInt(selectedYear) > currentYear ||
+    (parseInt(selectedYear) === currentYear &&
+      parseInt(selectedMonth) >= currentMonth);
+
   return (
     <AppLayout>
       <div className="p-4 md:p-8 max-w-2xl mx-auto">
@@ -109,9 +136,17 @@ export default function ReportsPage() {
         <div className="flex items-center justify-center gap-6 py-4 mb-6">
           <button
             onClick={handlePrevMonth}
-            className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
+            disabled={isPrevDisabled}
+            aria-disabled={isPrevDisabled}
+            className={`p-3 rounded-full transition-colors ${
+              isPrevDisabled
+                ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
+                : "bg-muted hover:bg-muted/80"
+            }`}
           >
-            <IconChevronLeft className="w-5 h-5" />
+            <IconChevronLeft
+              className={`w-5 h-5 ${isPrevDisabled ? "opacity-50" : ""}`}
+            />
           </button>
           <div className="text-center min-w-[200px]">
             <h2 className="text-4xl font-bold text-foreground">
@@ -123,10 +158,17 @@ export default function ReportsPage() {
           </div>
           <button
             onClick={handleNextMonth}
-            style={{ animation: "fade-icon 320ms ease forwards", opacity: 0 }}
-            className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
+            disabled={isNextDisabled}
+            aria-disabled={isNextDisabled}
+            className={`p-3 rounded-full transition-colors ${
+              isNextDisabled
+                ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
+                : "bg-muted hover:bg-muted/80"
+            }`}
           >
-            <IconChevronRight className="w-5 h-5" />
+            <IconChevronRight
+              className={`w-5 h-5 ${isNextDisabled ? "opacity-50" : ""}`}
+            />
           </button>
         </div>
 
