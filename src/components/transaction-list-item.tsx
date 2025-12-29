@@ -31,11 +31,11 @@ export function TransactionListItem({
       )}
       onClick={() => onClick?.(transaction)}
     >
-      <CardContent className="p-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+      <CardContent className="px-4 flex items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           <div
             className={cn(
-              "h-9 w-9 rounded-full flex items-center justify-center shrink-0",
+              "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
               transaction.type === "income"
                 ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                 : transaction.type === "expense"
@@ -44,13 +44,13 @@ export function TransactionListItem({
             )}
           >
             {transaction.type === "transfer" ? (
-              <IconArrowsLeftRight className="h-4.5 w-4.5" />
+              <IconArrowsLeftRight className="h-4 w-4" />
             ) : (
-              <CatIcon className="h-4.5 w-4.5" />
+              <CatIcon className="h-4 w-4" />
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-medium text-foreground text-sm leading-tight truncate">
+            <p className="font-medium text-foreground text-[13px] leading-tight truncate">
               {transaction.description ||
                 transaction.category?.name ||
                 "Transaksi"}

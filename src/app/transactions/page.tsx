@@ -514,7 +514,7 @@ export default function TransactionsPage() {
           ) : groupedTransactions.length ? (
             groupedTransactions.map((group) => (
               <div key={group.key} className="space-y-2">
-                <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wide">
                   {group.label}
                 </p>
                 <div className="space-y-2">

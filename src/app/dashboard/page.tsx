@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import useSessionGuard from "@/hooks/use-session-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
@@ -21,24 +22,12 @@ import { AddAccountDialog } from "@/components/add-account-dialog";
 import { AccountDetailDialog } from "@/components/account-detail-dialog";
 import { TransactionListItem } from "@/components/transaction-list-item";
 import { DashboardSkeleton } from "@/components/skeleton-loaders";
-import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 import { getAccountIconComponent } from "@/constants/account-icons";
+import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 
-import useSessionGuard from "@/hooks/use-session-guard";
-
-const getGroupedRecentTransactions = (transactions: Transaction[]) => {
-  const grouped = transactions
-    .filter((tx) => {
-      // Filter out the receiving side of transfers to show only one entry per transfer
-      if (tx.type === "transfer" && tx.related_transaction_id) {
-        if (tx.description?.includes("(dari")) {
-          return false;
-        }
-      }
-      return true;
-    })
-    .slice(0, 10)
-    .reduce<Record<string, Transaction[]>>((acc, tx) => {
+function getGroupedRecentTransactions(transactions: Transaction[]) {
+  const grouped = transactions.reduce(
+    (acc: Record<string, Transaction[]>, tx) => {
       const day = startOfDay(new Date(tx.date));
       let label = format(day, "dd MMMM yyyy", { locale: id });
       if (isToday(day)) label = "Hari ini";
@@ -47,10 +36,12 @@ const getGroupedRecentTransactions = (transactions: Transaction[]) => {
       if (!acc[label]) acc[label] = [];
       acc[label].push(tx);
       return acc;
-    }, {});
+    },
+    {}
+  );
 
   return Object.entries(grouped);
-};
+}
 
 export default function DashboardPage() {
   const sessionGuard = useSessionGuard();
@@ -114,28 +105,28 @@ export default function DashboardPage() {
         className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow bg-card cursor-pointer"
         onClick={() => setSelectedAccount(account)}
       >
-        <CardContent>
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className="h-12 w-12 rounded-full flex items-center justify-center text-white shrink-0"
-              style={{
-                backgroundColor: account.color || "#94a3b8",
-              }}
-            >
-              <AccountIcon className="h-6 w-6" />
+        <CardContent className="p-2.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-white shrink-0"
+                style={{ backgroundColor: account.color || "#94a3b8" }}
+              >
+                <AccountIcon className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-medium text-[13px] text-foreground truncate">
+                  {account.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatAccountType(account.type)}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-medium text-foreground truncate">
-                {account.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {formatAccountType(account.type)}
-              </p>
-            </div>
+            <p className="font-semibold text-base text-foreground shrink-0 text-right">
+              {formatCurrency(account.balance, profile?.currency)}
+            </p>
           </div>
-          <p className="font-semibold text-lg text-foreground">
-            {formatCurrency(account.balance, profile?.currency)}
-          </p>
         </CardContent>
       </Card>
     );
@@ -144,9 +135,9 @@ export default function DashboardPage() {
   const addAccountCard = (
     <AddAccountDialog key="add-account">
       <Card className="border border-dashed border-primary/40 bg-card text-muted-foreground hover:border-primary/80 transition-colors cursor-pointer h-full">
-        <CardContent className="p-4 flex flex-col items-center justify-center gap-2">
-          <IconPlus className="h-6 w-6" />
-          <span>Tambah Akun Baru</span>
+        <CardContent className="p-2.5 flex flex-col items-center justify-center gap-1">
+          <IconPlus className="h-4 w-4" />
+          <span className="text-xs">Tambah Akun Baru</span>
         </CardContent>
       </Card>
     </AddAccountDialog>
@@ -158,10 +149,10 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="p-4 md:p-8 space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="p-4 md:p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Left Column (Balance & Accounts) */}
-          <div className="md:col-span-2 space-y-5">
+          <div className="md:col-span-2 space-y-4">
             {/* Overview Hero */}
             <Card className="relative overflow-hidden border-none bg-linear-to-br from-[#4663f1] via-[#3552d8] to-[#1f37a7] text-white shadow-2xl">
               <CardContent className="p-5 md:p-7 space-y-4">
@@ -218,7 +209,7 @@ export default function DashboardPage() {
             {/* Accounts Section */}
             <section>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground text-lg">
+                <h3 className="font-semibold text-foreground text-base">
                   Akun Saya
                 </h3>
                 <Link href="/accounts">
@@ -257,9 +248,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Right Column (Recent Transactions - Desktop) */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <section>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-foreground text-lg">
                   Transaksi Terakhir
                 </h3>
@@ -270,12 +261,12 @@ export default function DashboardPage() {
                 </Link>
               </div>
               {transactions && transactions.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {getGroupedRecentTransactions(transactions)
                     .slice(0, 2)
                     .map(([label, items]) => (
                       <div key={label} className="space-y-2">
-                        <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
+                        <p className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wide">
                           {label}
                         </p>
                         <div className="space-y-2">
