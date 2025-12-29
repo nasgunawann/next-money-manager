@@ -6,13 +6,11 @@ import { useTransactions } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 import { ReportsSkeleton } from "@/components/skeleton-loaders";
 import { EmptyState, EmptyReportsIcon } from "@/components/empty-state";
-
-const RADIAN = Math.PI / 180;
+import { ExpenseDonutChart } from "@/components/expense-donut-chart";
 
 export default function ReportsPage() {
   const { data: profile } = useProfile();
@@ -104,63 +102,8 @@ export default function ReportsPage() {
     0
   );
 
-  const renderIconLabel = (props: {
-    cx?: number;
-    cy?: number;
-    midAngle?: number;
-    innerRadius?: number;
-    outerRadius?: number;
-    payload?: { color: string; icon: string };
-    value?: number;
-  }) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, payload, value } =
-      props;
-    if (
-      !totalExpense ||
-      !cx ||
-      !cy ||
-      !midAngle ||
-      !innerRadius ||
-      !outerRadius ||
-      !payload ||
-      !value
-    )
-      return null;
-    const percent = (value / totalExpense) * 100;
-    if (percent < 5) return null; // hide on tiny slices to avoid overlap
-
-    const radius = (innerRadius + outerRadius) / 2.05;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    const IconComp = getCategoryIconComponent(payload.icon);
-    return (
-      <g
-        transform={`translate(${x},${y})`}
-        pointerEvents="none"
-        style={{
-          animation: "fade-icon 320ms ease forwards",
-          opacity: 0,
-          transformOrigin: "center center",
-        }}
-      >
-        <circle r={11} fill={payload.color} opacity={0.95} />
-        <g transform="translate(-8 -8)">
-          <IconComp className="h-4 w-4 text-white" />
-        </g>
-      </g>
-    );
-  };
-
   return (
     <AppLayout>
-      <style>
-        {`
-          @keyframes fade-icon {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-        `}
-      </style>
       <div className="p-4 md:p-8 max-w-2xl mx-auto">
         {/* Month Navigation */}
         <div className="flex items-center justify-center gap-6 py-4 mb-6">
@@ -193,41 +136,11 @@ export default function ReportsPage() {
         ) : expenseByCategory.length > 0 ? (
           <div className="space-y-6">
             {/* Donut Chart */}
-            <div className="flex justify-center">
-              <div className="relative w-full max-w-[400px] aspect-square">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={expenseByCategory}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="60%"
-                      outerRadius="85%"
-                      fill="#8884d8"
-                      dataKey="value"
-                      paddingAngle={2}
-                      strokeWidth={0}
-                      animationDuration={500}
-                      isAnimationActive={true}
-                      label={renderIconLabel}
-                      labelLine={false}
-                    >
-                      {expenseByCategory.map((entry, i) => (
-                        <Cell key={`cell-${i}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <p className="text-3xl md:text-4xl font-bold text-foreground">
-                    {formatCurrency(totalExpense, profile?.currency)}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Total Pengeluaran
-                  </p>
-                </div>
-              </div>
-            </div>
+            <ExpenseDonutChart
+              data={expenseByCategory}
+              totalExpense={totalExpense}
+              currency={profile?.currency}
+            />
 
             {/* Category List - smaller cards */}
             <div className="space-y-3">

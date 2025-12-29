@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import useSessionGuard from "@/hooks/use-session-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
@@ -16,6 +16,8 @@ import {
   IconPlus,
   IconArrowUpRight,
   IconArrowDownLeft,
+  IconChevronLeft,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
@@ -24,6 +26,7 @@ import { TransactionListItem } from "@/components/transaction-list-item";
 import { DashboardSkeleton } from "@/components/skeleton-loaders";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
+import { ExpenseDonutChart } from "@/components/expense-donut-chart";
 
 function withAlpha(color: string, alpha: number) {
   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
@@ -71,6 +74,7 @@ export default function DashboardPage() {
     useTransactions();
 
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const totalBalance =
     accounts?.reduce((acc, account) => acc + account.balance, 0) || 0;
@@ -103,6 +107,48 @@ export default function DashboardPage() {
         );
       })
       .reduce((acc, t) => acc + t.amount, 0) || 0;
+
+  // Calculate expense by category for donut chart
+  const expenseByCategory = (() => {
+    const monthTx =
+      transactions?.filter((t) => {
+        const txDate = new Date(t.date);
+        return (
+          t.type === "expense" &&
+          txDate.getMonth() === currentMonth &&
+          txDate.getFullYear() === currentYear
+        );
+      }) || [];
+
+    const map = new Map<
+      string,
+      { name: string; value: number; color: string; icon?: string }
+    >();
+
+    monthTx.forEach((t) => {
+      const name = t.category?.name || "Lainnya";
+      const color = t.category?.color || "#94a3b8";
+      const icon = t.category?.icon || "more-horizontal";
+      const existing = map.get(name);
+      if (existing) {
+        existing.value += t.amount;
+      } else {
+        map.set(name, { name, value: t.amount, color, icon });
+      }
+    });
+
+    return Array.from(map.values()).sort((a, b) => b.value - a.value);
+  })();
+
+  const scrollCarousel = (direction: "left" | "right") => {
+    if (carouselRef.current) {
+      const scrollAmount = 280; // card width + gap
+      carouselRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   if (
     sessionGuard.isLoading ||
@@ -155,10 +201,12 @@ export default function DashboardPage() {
 
   const addAccountCard = (
     <AddAccountDialog key="add-account">
-      <Card className="border border-dashed border-primary/40 bg-card text-muted-foreground hover:border-primary/80 transition-colors cursor-pointer h-full">
-        <CardContent className="flex flex-col items-center justify-center gap-1">
-          <IconPlus className="h-4 w-4" />
-          <span className="text-xs">Tambah Akun Baru</span>
+      <Card className="border border-dashed border-primary/40 bg-card text-muted-foreground hover:border-primary/80 transition-colors cursor-pointer">
+        <CardContent className="px-3.5 py-2.5">
+          <div className="flex items-center justify-center gap-3 h-8">
+            <IconPlus className="h-4 w-4" />
+            <span className="text-xs font-medium">Tambah Akun Baru</span>
+          </div>
         </CardContent>
       </Card>
     </AddAccountDialog>
@@ -172,7 +220,7 @@ export default function DashboardPage() {
     <AppLayout>
       <div className="p-4 md:p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Left Column (Balance & Accounts) */}
+          {/* Left Column (Balance & Recent Transactions) */}
           <div className="md:col-span-2 space-y-4">
             {/* Overview Hero */}
             <Card className="relative overflow-hidden border-none bg-linear-to-br from-[#4663f1] via-[#3552d8] to-[#1f37a7] text-white shadow-2xl">
@@ -227,8 +275,8 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Accounts Section */}
-            <section>
+            {/* Mobile-only Accounts Section */}
+            <section className="md:hidden">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-foreground text-base">
                   Akun Saya
@@ -245,7 +293,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Mobile carousel */}
-              <div className="relative -mx-4 md:hidden">
+              <div className="relative -mx-4">
                 <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-8 no-scrollbar carousel-smooth">
                   {accounts?.map((account) => (
                     <div key={account.id} className="snap-center shrink-0 w-64">
@@ -259,24 +307,20 @@ export default function DashboardPage() {
                 <div className="pointer-events-none absolute inset-y-0 left-0 w-8 fade-edge-left" />
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-8 fade-edge-right" />
               </div>
-
-              {/* Desktop grid */}
-              <div className="hidden md:grid grid-cols-2 gap-4">
-                {accounts?.map((account) => renderAccountCard(account))}
-                {addAccountCard}
-              </div>
             </section>
-          </div>
 
-          {/* Right Column (Recent Transactions - Desktop) */}
-          <div className="space-y-4">
+            {/* Recent Transactions */}
             <section>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-foreground text-lg">
+                <h3 className="font-semibold text-foreground text-base">
                   Transaksi Terakhir
                 </h3>
                 <Link href="/transactions">
-                  <Button variant="ghost" size="sm" className="text-primary">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
+                  >
                     Lihat Semua
                   </Button>
                 </Link>
@@ -314,6 +358,96 @@ export default function DashboardPage() {
                   hint="Atau tekan tombol + di navigasi bawah"
                 />
               )}
+            </section>
+          </div>
+
+          {/* Right Column (Accounts Carousel & Donut Chart - Desktop Only) */}
+          <div className="hidden md:block space-y-4">
+            {/* Accounts Carousel */}
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground text-base">
+                  Akun Saya
+                </h3>
+                <Link href="/accounts">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
+                  >
+                    Lihat Semua
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="relative">
+                {/* Navigation Buttons */}
+                <button
+                  onClick={() => scrollCarousel("left")}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-background/80 backdrop-blur rounded-full shadow-md hover:bg-background transition-colors"
+                  aria-label="Previous account"
+                >
+                  <IconChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => scrollCarousel("right")}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-background/80 backdrop-blur rounded-full shadow-md hover:bg-background transition-colors"
+                  aria-label="Next account"
+                >
+                  <IconChevronRight className="w-4 h-4" />
+                </button>
+
+                {/* Carousel */}
+                <div
+                  ref={carouselRef}
+                  className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 no-scrollbar carousel-smooth px-8"
+                >
+                  {accounts?.map((account) => (
+                    <div
+                      key={account.id}
+                      className="snap-center shrink-0 w-full"
+                    >
+                      {renderAccountCard(account)}
+                    </div>
+                  ))}
+                  <div className="snap-center shrink-0 w-full">
+                    {addAccountCard}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Expense Donut Chart */}
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground text-base">
+                  Pengeluaran Bulan Ini
+                </h3>
+                <Link href="/reports">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary h-auto p-0 hover:bg-transparent hover:text-primary/80"
+                  >
+                    Lihat Detail
+                  </Button>
+                </Link>
+              </div>
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-4">
+                  {expenseByCategory.length > 0 ? (
+                    <ExpenseDonutChart
+                      data={expenseByCategory.slice(0, 5)}
+                      totalExpense={monthlyExpense}
+                      currency={profile?.currency}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
+                      Belum ada pengeluaran bulan ini
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </section>
           </div>
         </div>

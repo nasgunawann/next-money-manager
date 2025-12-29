@@ -45,10 +45,10 @@ export function AccountCardSkeleton({ count = 2 }: { count?: number }) {
 
 export function DashboardSkeleton() {
   return (
-    <div className="p-4 md:p-8 space-y-5">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Left Column */}
-        <div className="md:col-span-2 space-y-5">
+    <div className="p-4 md:p-6 space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Left Column (Balance & Recent Transactions) */}
+        <div className="md:col-span-2 space-y-4">
           {/* Hero Card */}
           <Card className="relative overflow-hidden border-none bg-linear-to-br from-[#4663f1] via-[#3552d8] to-[#1f37a7] text-white shadow-2xl">
             <CardContent className="p-5 md:p-7 space-y-4">
@@ -77,31 +77,59 @@ export function DashboardSkeleton() {
             </CardContent>
           </Card>
 
-          {/* Accounts Section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <Skeleton className="h-6 w-24" />
+          {/* Mobile Accounts Section */}
+          <section className="md:hidden">
+            <div className="flex items-center justify-between mb-3">
+              <Skeleton className="h-5 w-24" />
               <Skeleton className="h-4 w-20" />
             </div>
-            <div className="hidden md:grid grid-cols-2 gap-4">
-              <AccountCardSkeleton count={2} />
+            <div className="flex gap-3 overflow-x-auto">
+              <Skeleton className="h-20 w-64 shrink-0 rounded-lg" />
+              <Skeleton className="h-20 w-64 shrink-0 rounded-lg" />
             </div>
           </section>
-        </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
+          {/* Recent Transactions */}
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <Skeleton className="h-6 w-32" />
+            <div className="flex items-center justify-between mb-3">
+              <Skeleton className="h-5 w-32" />
               <Skeleton className="h-4 w-20" />
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="space-y-2">
                 <Skeleton className="h-3 w-16" />
                 <TransactionListSkeleton count={2} />
               </div>
             </div>
+          </section>
+        </div>
+
+        {/* Right Column (Accounts Carousel & Donut Chart - Desktop Only) */}
+        <div className="hidden md:block space-y-4">
+          {/* Accounts Carousel */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <div className="relative">
+              <Skeleton className="h-20 w-full rounded-lg" />
+            </div>
+          </section>
+
+          {/* Expense Donut Chart */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex justify-center">
+                  <Skeleton className="w-full max-w-[300px] aspect-square rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
           </section>
         </div>
       </div>
