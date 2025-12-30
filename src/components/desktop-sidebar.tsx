@@ -7,13 +7,13 @@ import {
   IconChartPie,
   IconWallet,
   IconUser,
-  IconLogout,
-  IconSettings,
+  IconPlus,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { AddTransactionDialog } from "@/components/add-transaction-dialog";
+import Image from "next/image";
 
 export function DesktopSidebar() {
   const pathname = usePathname();
@@ -25,7 +25,6 @@ export function DesktopSidebar() {
     { href: "/accounts", label: "Sumber Dana", icon: IconWallet },
     { href: "/reports", label: "Laporan", icon: IconChartPie },
     { href: "/profile", label: "Profil", icon: IconUser },
-    { href: "/settings", label: "Pengaturan", icon: IconSettings },
   ];
 
   // Prefetch all navigation links for faster navigation
@@ -36,18 +35,27 @@ export function DesktopSidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
   return (
     <aside className="hidden md:flex flex-col w-64 bg-sidebar border-r border-sidebar-border h-screen fixed left-0 top-0 z-50">
-      <div className="p-6 border-b border-sidebar-border">
-        <h1 className="text-xl font-bold text-sidebar-primary flex items-center gap-2">
-          <IconWallet className="h-6 w-6" />
-          MoneyManager
-        </h1>
+      <div className="p-4 border-b border-sidebar-border flex items-center justify-center">
+        <Image
+          src="/logo-sm.svg"
+          alt="Kaslo"
+          width={525}
+          height={464}
+          className="h-8 w-auto object-contain"
+          priority
+        />
+      </div>
+
+      {/* Add Transaction Button - Primary Action */}
+      <div className="px-4 pt-4 pb-2">
+        <AddTransactionDialog>
+          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all duration-200">
+            <IconPlus className="h-5 w-5 mr-2" />
+            Tambah Transaksi
+          </Button>
+        </AddTransactionDialog>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -78,17 +86,6 @@ export function DesktopSidebar() {
           );
         })}
       </nav>
-
-      <div className="p-4 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-150"
-          onClick={handleLogout}
-        >
-          <IconLogout className="mr-2 h-4 w-4" />
-          Keluar
-        </Button>
-      </div>
     </aside>
   );
 }

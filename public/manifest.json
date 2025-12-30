@@ -1,22 +1,67 @@
 {
-  "version": "0.3",
-  "name": "KasFlo — By Nanasgunung",
-  "short_name": "KasFlo",
-  "description": "Pencatatan transaksi dan pengendalian anggaran harian.",
+  "version": "0.5.1",
+  "name": "Kaslo — By Nanasgunung",
+  "short_name": "Kaslo",
+  "description": "Aplikasi pencatatan keuangan pribadi sederhana yang mudah digunakan.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
+  "categories": ["finance", "productivity"],
+  "dir": "ltr",
+  "lang": "id",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Transaksi",
+      "short_name": "Tambah",
+      "description": "Tambah transaksi baru",
+      "url": "/transactions?action=add",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Lihat dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

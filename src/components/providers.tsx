@@ -65,6 +65,37 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 60 * 1000, // 1 minute
+            gcTime: 5 * 60 * 1000, // 5 minutes - keep cached data longer (formerly cacheTime)
+            retry: (failureCount, error: unknown) => {
+              // Don't retry on 4xx errors (client errors)
+              const httpError = error as { status?: number };
+              if (httpError?.status && httpError.status >= 400 && httpError.status < 500) {
+                return false;
+              }
+              // Retry up to 3 times for other errors
+              return failureCount < 3;
+            },
+            retryDelay: (attemptIndex) => {
+              // Exponential backoff: 1s, 2s, 4s
+              return Math.min(1000 * 2 ** attemptIndex, 30000);
+            },
+            refetchOnWindowFocus: false, // Better for PWA - don't refetch on tab focus
+            refetchOnReconnect: true, // Refetch when back online
+            refetchOnMount: true, // Refetch when component mounts (but use cache if fresh)
+            networkMode: "online", // Only run queries when online (fallback to cache)
+          },
+          mutations: {
+            retry: (failureCount, error: unknown) => {
+              // Don't retry mutations on 4xx errors
+              const httpError = error as { status?: number };
+              if (httpError?.status && httpError.status >= 400 && httpError.status < 500) {
+                return false;
+              }
+              // Retry once for network errors
+              return failureCount < 1;
+            },
+            retryDelay: 1000,
+            networkMode: "online", // Only run mutations when online
           },
         },
       })

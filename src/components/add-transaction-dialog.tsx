@@ -41,13 +41,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  IconLoader2,
-  IconCalendar,
-  IconChevronRight,
-  IconPlus,
-} from "@tabler/icons-react";
-import { format } from "date-fns";
+import { IconLoader2, IconChevronRight, IconPlus } from "@tabler/icons-react";
 import {
   cn,
   formatCurrency,
@@ -56,12 +50,7 @@ import {
   numericInputToNumber,
   generateTempId,
 } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import DatePicker from "@/components/ui/date-picker";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 
@@ -171,10 +160,10 @@ export function AddTransactionDialog({
 
     setIsLoading(true);
 
-    const previousTransactions =
-      queryClient.getQueryData<Transaction[]>(["transactions"]);
-    const previousAccounts =
-      queryClient.getQueryData<Account[]>(["accounts"]);
+    const previousTransactions = queryClient.getQueryData<Transaction[]>([
+      "transactions",
+    ]);
+    const previousAccounts = queryClient.getQueryData<Account[]>(["accounts"]);
     const isoDate = date.toISOString();
     const optimisticId = generateTempId();
 
@@ -237,7 +226,10 @@ export function AddTransactionDialog({
         if (previousTransactions !== undefined) {
           queryClient.setQueryData(["transactions"], previousTransactions);
         } else {
-          queryClient.removeQueries({ queryKey: ["transactions"], exact: true });
+          queryClient.removeQueries({
+            queryKey: ["transactions"],
+            exact: true,
+          });
         }
       }
       if (previousAccounts !== undefined) {
@@ -264,7 +256,7 @@ export function AddTransactionDialog({
         const sourceDesc = description
           ? `${description} (ke ${selectedTargetAccount?.name})`
           : `Transfer ke ${selectedTargetAccount?.name}`;
-        
+
         const { data: tx1, error: tx1Error } = await supabase
           .from("transactions")
           .insert({
@@ -283,7 +275,7 @@ export function AddTransactionDialog({
         const targetDesc = description
           ? `${description} (dari ${selectedAccount?.name})`
           : `Transfer dari ${selectedAccount?.name}`;
-        
+
         const { data: tx2, error: tx2Error } = await supabase
           .from("transactions")
           .insert({
@@ -511,7 +503,7 @@ export function AddTransactionDialog({
             onClick={() => setAccountDrawerOpen(true)}
           >
             {selectedAccount ? (
-              <div className="flex items-center gap-3 text-left">
+              <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                 <div
                   className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                   style={{ backgroundColor: selectedAccount.color }}
@@ -524,9 +516,9 @@ export function AddTransactionDialog({
                     return <IconComp className="h-5 w-5" />;
                   })()}
                 </div>
-                <div>
-                  <p className="font-medium">{selectedAccount.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{selectedAccount.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {formatCurrency(selectedAccount.balance)}
                   </p>
                 </div>
@@ -550,7 +542,7 @@ export function AddTransactionDialog({
               onClick={() => setTargetAccountDrawerOpen(true)}
             >
               {selectedTargetAccount ? (
-                <div className="flex items-center gap-3 text-left">
+                <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                   <div
                     className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                     style={{ backgroundColor: selectedTargetAccount.color }}
@@ -563,9 +555,11 @@ export function AddTransactionDialog({
                       return <IconComp className="h-5 w-5" />;
                     })()}
                   </div>
-                  <div>
-                    <p className="font-medium">{selectedTargetAccount.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      {selectedTargetAccount.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {formatCurrency(selectedTargetAccount.balance)}
                     </p>
                   </div>
@@ -588,7 +582,7 @@ export function AddTransactionDialog({
               onClick={() => setCategoryDrawerOpen(true)}
             >
               {selectedCategory ? (
-                <div className="flex items-center gap-3 text-left">
+                <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                   <div
                     className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                     style={{ backgroundColor: selectedCategory.color }}
@@ -600,9 +594,11 @@ export function AddTransactionDialog({
                       return <IconComp className="h-5 w-5" />;
                     })()}
                   </div>
-                  <div>
-                    <p className="font-medium">{selectedCategory.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      {selectedCategory.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize truncate">
                       {type === "income" ? "Pemasukan" : "Pengeluaran"}
                     </p>
                   </div>
@@ -620,33 +616,14 @@ export function AddTransactionDialog({
 
       <div className="space-y-2">
         <Label>Tanggal</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <IconCalendar className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Pilih tanggal</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(selectedDate) => {
-                setDate(selectedDate);
-                if (selectedDate) {
-                  setIsDirty(true);
-                }
-              }}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <DatePicker
+          date={date}
+          onChange={(d) => {
+            setDate(d);
+            if (d) setIsDirty(true);
+          }}
+          placeholder="Pilih tanggal"
+        />
       </div>
 
       <div className="space-y-2">
@@ -878,7 +855,8 @@ export function AddTransactionDialog({
             })
           ) : (
             <div className="text-center text-muted-foreground text-sm py-8">
-              Belum ada kategori {type === "income" ? "pemasukan" : "pengeluaran"}.
+              Belum ada kategori{" "}
+              {type === "income" ? "pemasukan" : "pengeluaran"}.
             </div>
           )}
         </div>
@@ -909,7 +887,11 @@ export function AddTransactionDialog({
 
   return (
     <>
-      <Drawer open={open ?? isOpen} onOpenChange={handleOpenChange} modal={true}>
+      <Drawer
+        open={open ?? isOpen}
+        onOpenChange={handleOpenChange}
+        modal={true}
+      >
         {children && <DrawerTrigger asChild>{children}</DrawerTrigger>}
         <DrawerContent>
           <DrawerHeader className="text-left">

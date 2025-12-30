@@ -6,8 +6,11 @@ import { useTransactions } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { getCategoryIconComponent } from "@/constants/category-icons";
+import { ReportsSkeleton } from "@/components/skeleton-loaders";
+import { EmptyState, EmptyReportsIcon } from "@/components/empty-state";
+import { ExpenseDonutChart } from "@/components/expense-donut-chart";
 
 export default function ReportsPage() {
   const { data: profile } = useProfile();
@@ -76,18 +79,19 @@ export default function ReportsPage() {
     const monthTx = getMonthTransactions();
     const map = new Map<
       string,
-      { name: string; value: number; color: string }
+      { name: string; value: number; color: string; icon?: string }
     >();
     monthTx
       .filter((t) => t.type === "expense")
       .forEach((t) => {
         const name = t.category?.name || "Lainnya";
         const color = t.category?.color || "#94a3b8";
+        const icon = t.category?.icon || "more-horizontal";
         const existing = map.get(name);
         if (existing) {
           existing.value += t.amount;
         } else {
-          map.set(name, { name, value: t.amount, color });
+          map.set(name, { name, value: t.amount, color, icon });
         }
       });
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
@@ -98,6 +102,33 @@ export default function ReportsPage() {
     0
   );
 
+  // Find earliest transaction month for prev button boundary
+  const earliestTransaction = transactions?.reduce((earliest, t) => {
+    const tDate = new Date(t.date);
+    return !earliest || tDate < earliest ? tDate : earliest;
+  }, null as Date | null);
+
+  const earliestMonth = earliestTransaction?.getMonth();
+  const earliestYear = earliestTransaction?.getFullYear();
+
+  // Disable prev when going back would go before earliest transaction
+  const isPrevDisabled =
+    !earliestTransaction ||
+    (earliestYear !== undefined &&
+      earliestMonth !== undefined &&
+      (parseInt(selectedYear) < earliestYear ||
+        (parseInt(selectedYear) === earliestYear &&
+          parseInt(selectedMonth) <= earliestMonth)));
+
+  // Disable "next" navigation when advancing would go beyond the current month
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const isNextDisabled =
+    parseInt(selectedYear) > currentYear ||
+    (parseInt(selectedYear) === currentYear &&
+      parseInt(selectedMonth) >= currentMonth);
+
   return (
     <AppLayout>
       <div className="p-4 md:p-8 max-w-2xl mx-auto">
@@ -105,9 +136,17 @@ export default function ReportsPage() {
         <div className="flex items-center justify-center gap-6 py-4 mb-6">
           <button
             onClick={handlePrevMonth}
-            className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
+            disabled={isPrevDisabled}
+            aria-disabled={isPrevDisabled}
+            className={`p-3 rounded-full transition-colors ${
+              isPrevDisabled
+                ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
+                : "bg-muted hover:bg-muted/80"
+            }`}
           >
-            <IconChevronLeft className="w-5 h-5" />
+            <IconChevronLeft
+              className={`w-5 h-5 ${isPrevDisabled ? "opacity-50" : ""}`}
+            />
           </button>
           <div className="text-center min-w-[200px]">
             <h2 className="text-4xl font-bold text-foreground">
@@ -119,53 +158,31 @@ export default function ReportsPage() {
           </div>
           <button
             onClick={handleNextMonth}
-            className="p-3 bg-muted rounded-full hover:bg-muted/80 transition-colors"
+            disabled={isNextDisabled}
+            aria-disabled={isNextDisabled}
+            className={`p-3 rounded-full transition-colors ${
+              isNextDisabled
+                ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
+                : "bg-muted hover:bg-muted/80"
+            }`}
           >
-            <IconChevronRight className="w-5 h-5" />
+            <IconChevronRight
+              className={`w-5 h-5 ${isNextDisabled ? "opacity-50" : ""}`}
+            />
           </button>
         </div>
 
         {/* Content for the selected month */}
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          </div>
+          <ReportsSkeleton />
         ) : expenseByCategory.length > 0 ? (
           <div className="space-y-6">
             {/* Donut Chart */}
-            <div className="flex justify-center">
-              <div className="relative w-full max-w-[400px] aspect-square">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={expenseByCategory}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="60%"
-                      outerRadius="85%"
-                      fill="#8884d8"
-                      dataKey="value"
-                      paddingAngle={2}
-                      strokeWidth={0}
-                      animationDuration={500}
-                      isAnimationActive={true}
-                    >
-                      {expenseByCategory.map((entry, i) => (
-                        <Cell key={`cell-${i}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <p className="text-3xl md:text-4xl font-bold text-foreground">
-                    {formatCurrency(totalExpense, profile?.currency)}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Total Pengeluaran
-                  </p>
-                </div>
-              </div>
-            </div>
+            <ExpenseDonutChart
+              data={expenseByCategory}
+              totalExpense={totalExpense}
+              currency={profile?.currency}
+            />
 
             {/* Category List - smaller cards */}
             <div className="space-y-3">
@@ -181,7 +198,12 @@ export default function ReportsPage() {
                             className="h-8 w-8 rounded-full flex items-center justify-center text-white shrink-0"
                             style={{ backgroundColor: cat.color }}
                           >
-                            <span className="text-lg font-bold">•</span>
+                            {(() => {
+                              const IconComp = getCategoryIconComponent(
+                                cat.icon
+                              );
+                              return <IconComp className="h-5 w-5" />;
+                            })()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-foreground text-sm">
@@ -212,9 +234,13 @@ export default function ReportsPage() {
             </div>
           </div>
         ) : (
-          <p className="text-center text-muted-foreground py-12">
-            Tidak ada data pengeluaran
-          </p>
+          <EmptyState
+            icon={<EmptyReportsIcon />}
+            title="Belum Ada Data Pengeluaran"
+            hint={`Mulai catat pengeluaran di bulan ${
+              months[parseInt(selectedMonth)]
+            } untuk melihat analisis dan grafik`}
+          />
         )}
       </div>
     </AppLayout>

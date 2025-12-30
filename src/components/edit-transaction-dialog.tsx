@@ -37,12 +37,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   IconLoader2,
-  IconCalendar,
   IconTrash,
   IconChevronRight,
   IconPlus,
 } from "@tabler/icons-react";
-import { format } from "date-fns";
 import {
   cn,
   formatCurrency,
@@ -50,12 +48,7 @@ import {
   sanitizeNumericInput,
   numericInputToNumber,
 } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import DatePicker from "@/components/ui/date-picker";
 import { toast } from "sonner";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { getCategoryIconComponent } from "@/constants/category-icons";
@@ -248,7 +241,7 @@ export function EditTransactionDialog({
             disabled={isTransfer}
           >
             {selectedAccount ? (
-              <div className="flex items-center gap-3 text-left">
+              <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                 <div
                   className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                   style={{ backgroundColor: selectedAccount.color }}
@@ -261,9 +254,9 @@ export function EditTransactionDialog({
                     return <IconComp className="h-5 w-5" />;
                   })()}
                 </div>
-                <div>
-                  <p className="font-medium">{selectedAccount.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{selectedAccount.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {formatCurrency(selectedAccount.balance)}
                   </p>
                 </div>
@@ -288,7 +281,7 @@ export function EditTransactionDialog({
               disabled={isTransfer}
             >
               {selectedCategory ? (
-                <div className="flex items-center gap-3 text-left">
+                <div className="flex items-center gap-3 text-left min-w-0 flex-1">
                   <div
                     className="h-10 w-10 rounded-full flex items-center justify-center text-white"
                     style={{ backgroundColor: selectedCategory.color }}
@@ -300,9 +293,11 @@ export function EditTransactionDialog({
                       return <IconComp className="h-5 w-5" />;
                     })()}
                   </div>
-                  <div>
-                    <p className="font-medium">{selectedCategory.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      {selectedCategory.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize truncate">
                       {selectedCategory.type === "income"
                         ? "Pemasukan"
                         : "Pengeluaran"}
@@ -322,29 +317,12 @@ export function EditTransactionDialog({
 
       <div className="space-y-2">
         <Label>Tanggal</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
-              )}
-              disabled={isTransfer}
-            >
-              <IconCalendar className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Pilih tanggal</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <DatePicker
+          date={date}
+          onChange={setDate}
+          disabled={isTransfer}
+          placeholder="Pilih tanggal"
+        />
       </div>
 
       <div className="space-y-2">
