@@ -8,7 +8,7 @@ import { PWAOnboarding } from "@/components/pwa-onboarding";
 
 export default function Home() {
   const router = useRouter();
-  const [isPWA, setIsPWA] = useState(false);
+  const [isPWA, setIsPWA] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -33,7 +33,9 @@ export default function Home() {
     checkPWA();
   }, [router]);
 
-  // Show PWA onboarding if installed as PWA
+  // Defer rendering until we've checked PWA state to avoid flashing the wrong UI
+  if (isPWA === null) return null;
+
   if (isPWA) {
     return <PWAOnboarding />;
   }
