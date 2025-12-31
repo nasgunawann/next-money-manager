@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/card";
 import { IconLoader2 } from "@tabler/icons-react";
 
+const getSiteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/?$/, "") ||
+  window.location.origin;
+
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +38,7 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${getSiteUrl()}/auth/callback`,
         },
       });
 
@@ -42,7 +46,9 @@ export default function SignupPage() {
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar");
+      setError(
+        err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar"
+      );
     } finally {
       setLoading(false);
     }
@@ -53,12 +59,16 @@ export default function SignupPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${getSiteUrl()}/auth/callback`,
         },
       });
       if (error) throw error;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat mendaftar dengan Google");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Terjadi kesalahan saat mendaftar dengan Google"
+      );
     }
   };
 

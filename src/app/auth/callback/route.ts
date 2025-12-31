@@ -6,6 +6,16 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next") || "/dashboard";
+  const errorParam = requestUrl.searchParams.get("error");
+  const errorDescription = requestUrl.searchParams.get("error_description");
+
+  if (errorParam) {
+    const message = errorDescription || "OAuth gagal. Silakan coba lagi.";
+    console.error("OAuth error", { error: errorParam, errorDescription });
+    return NextResponse.redirect(
+      `${requestUrl.origin}/login?error=${encodeURIComponent(message)}`
+    );
+  }
 
   if (code) {
     const response = NextResponse.redirect(`${requestUrl.origin}${next}`);
@@ -31,6 +41,13 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return response;
     }
+
+    console.error("OAuth exchange failed", { error });
+    return NextResponse.redirect(
+      `${requestUrl.origin}/login?error=${encodeURIComponent(
+        "Gagal memproses login. Coba lagi."
+      )}`
+    );
   }
 
   // URL to redirect to after sign in process completes

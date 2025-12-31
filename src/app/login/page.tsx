@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/card";
 import { IconLoader2 } from "@tabler/icons-react";
 
+const getSiteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/?$/, "") ||
+  window.location.origin;
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +42,9 @@ export default function LoginPage() {
 
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat masuk");
+      setError(
+        err instanceof Error ? err.message : "Terjadi kesalahan saat masuk"
+      );
     } finally {
       setLoading(false);
     }
@@ -49,12 +55,16 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${getSiteUrl()}/auth/callback`,
         },
       });
       if (error) throw error;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat masuk dengan Google");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Terjadi kesalahan saat masuk dengan Google"
+      );
     }
   };
 
