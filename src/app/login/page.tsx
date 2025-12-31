@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -14,35 +18,68 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { IconLoader2 } from "@tabler/icons-react";
+import { IconLoader2, IconEye, IconEyeOff } from "@tabler/icons-react";
+import { toast } from "sonner";
+import Image from "next/image";
 
 const getSiteUrl = () =>
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/?$/, "") ||
   window.location.origin;
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+const loginSchema = z.object({
+  email: z.string().email("Format email tidak valid"),
+  password: z.string().min(1, "Kata sandi harus diisi"),
+  rememberMe: z.boolean().optional(),
+});
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+type LoginFormData = z.infer<typeof loginSchema>;
+
+export default function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: true,
+    },
+  });
+
+  const rememberMe = watch("rememberMe");
+
+  // Show error from OAuth callback if present
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      toast.error(decodeURIComponent(error));
+    }
+  }, [searchParams]);
+
+  const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
-    setError(null);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       });
 
       if (error) throw error;
 
+      toast.success("Berhasil masuk!");
       router.push("/dashboard");
     } catch (err) {
-      setError(
+      toast.error(
         err instanceof Error ? err.message : "Terjadi kesalahan saat masuk"
       );
     } finally {
@@ -60,7 +97,7 @@ export default function LoginPage() {
       });
       if (error) throw error;
     } catch (err) {
-      setError(
+      toast.error(
         err instanceof Error
           ? err.message
           : "Terjadi kesalahan saat masuk dengan Google"
@@ -69,16 +106,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Masuk</CardTitle>
-          <CardDescription className="text-center">
-            Selamat datang kembali! Silakan masuk ke akun Anda.
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 md:p-4">
+      <Card className="w-full max-w-md shadow-none border-none md:shadow-lg md:border">
+        <CardHeader className="space-y-1">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/logolight.svg"
+              alt="Kaslo"
+              width={200}
+              height={80}
+              className="dark:hidden"
+              priority
+            />
+            <Image
+              src="/logo-dark.svg"
+              alt="Kaslo"
+              width={200}
+              height={80}
+              className="hidden dark:block"
+              priority
+            />
+          </div>
+          <CardDescription className="text-center text-base">
+            Selamat datang kembali! Silakan masukkan akun Anda.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Email
@@ -87,29 +141,72 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="nama@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register("email")}
+                className={errors.email ? "border-red-500" : ""}
               />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Kata Sandi
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Kata Sandi
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Lupa kata sandi?
+                </Link>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  className={errors.password ? "border-red-500 pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? (
+                    <IconEyeOff className="h-4 w-4" />
+                  ) : (
+                    <IconEye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
-            {error && (
-              <div className="text-sm text-red-500 text-center">{error}</div>
-            )}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="rememberMe"
+                checked={rememberMe}
+                onCheckedChange={(checked) =>
+                  setValue("rememberMe", checked as boolean)
+                }
+              />
+              <label
+                htmlFor="rememberMe"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Ingat saya
+              </label>
+            </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full transition-all duration-200"
+              disabled={loading}
+            >
               {loading ? (
                 <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
@@ -117,12 +214,12 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="relative my-4">
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-card px-2 text-muted-foreground">
                 Atau lanjut dengan
               </span>
             </div>
@@ -131,11 +228,11 @@ export default function LoginPage() {
           <Button
             variant="outline"
             type="button"
-            className="w-full"
+            className="w-full hover:bg-gray-50 transition-colors duration-200"
             onClick={handleGoogleLogin}
           >
             <svg
-              className="mr-2 h-4 w-4"
+              className="mr-2 h-5 w-5"
               aria-hidden="true"
               focusable="false"
               data-prefix="fab"
@@ -149,14 +246,17 @@ export default function LoginPage() {
                 d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
               ></path>
             </svg>
-            Google
+            Lanjut dengan Google
           </Button>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Belum punya akun?{" "}
-            <Link href="/signup" className="text-blue-600 hover:underline">
-              Daftar sekarang
+            <Link
+              href="/signup"
+              className="text-primary hover:underline font-medium"
+            >
+              Daftar akun Anda
             </Link>
           </p>
         </CardFooter>

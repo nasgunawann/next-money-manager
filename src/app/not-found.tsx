@@ -1,4 +1,5 @@
-import Link from "next/link";
+"use client";
+
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
@@ -11,8 +12,15 @@ export default function NotFound() {
           Maaf, halaman yang Anda cari tidak dapat ditemukan atau telah
           dipindahkan.
         </p>
-        <Button asChild>
-          <Link href="/dashboard">Kembali ke Dashboard</Link>
+        <Button
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              if (window.history.length > 1) window.history.back();
+              else window.location.href = "/";
+            }
+          }}
+        >
+          Kembali
         </Button>
       </div>
     </div>
