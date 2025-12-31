@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,6 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { IconLoader2, IconEye, IconEyeOff } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -27,7 +26,7 @@ const getSiteUrl = () =>
   window.location.origin;
 
 const loginSchema = z.object({
-  email: z.string().email("Format email tidak valid"),
+  email: z.email("Format email tidak valid"),
   password: z.string().min(1, "Kata sandi harus diisi"),
   rememberMe: z.boolean().optional(),
 });
@@ -38,7 +37,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const {
     register,
@@ -57,13 +55,16 @@ export default function LoginPage() {
 
   const rememberMe = watch("rememberMe");
 
-  // Show error from OAuth callback if present
+  // Show error from OAuth callback if present (use window search params to avoid server-side hook requirements)
   useEffect(() => {
-    const error = searchParams.get("error");
-    if (error) {
-      toast.error(decodeURIComponent(error));
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const error = params.get("error");
+      if (error) {
+        toast.error(decodeURIComponent(error));
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);

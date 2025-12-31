@@ -1,24 +1,43 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { createServerClient } from "@supabase/ssr";
+"use client";
 
-export default async function Home() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-      },
-    }
-  );
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import LandingPage from "@/components/landing-page";
+import { PWAOnboarding } from "@/components/pwa-onboarding";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function Home() {
+  const router = useRouter();
+  const [isPWA, setIsPWA] = useState(false);
 
-  redirect(user ? "/dashboard" : "/login");
+  useEffect(() => {
+    // Check if user is already logged in
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace("/dashboard");
+      }
+    });
+
+    // Detect if running as PWA
+    const checkPWA = () => {
+      const navigatorWithStandalone = window.navigator as Navigator & {
+        standalone?: boolean;
+      };
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        navigatorWithStandalone.standalone === true ||
+        document.referrer.includes("android-app://");
+      setIsPWA(isStandalone);
+    };
+
+    checkPWA();
+  }, [router]);
+
+  // Show PWA onboarding if installed as PWA
+  if (isPWA) {
+    return <PWAOnboarding />;
+  }
+
+  // Show landing page for web browsers
+  return <LandingPage />;
 }
