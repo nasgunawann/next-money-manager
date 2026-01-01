@@ -6,16 +6,28 @@ import {
   IconChartBar,
   IconDeviceMobile,
 } from "@tabler/icons-react";
+import { motion } from "framer-motion";
 
 export function PWAOnboarding() {
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-background">
       {/* Left Section */}
-      <div className="relative flex flex-col justify-between p-8 md:p-12 bg-background dark:bg-background overflow-hidden border-b md:border-b-0 md:border-r border-border max-h-screen">
+      <div
+        className="relative flex flex-col justify-between p-8 md:p-12 bg-background dark:bg-background bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb,59,130,246),0.15),transparent_35%),radial-gradient(circle_at_center,rgba(var(--primary-rgb,59,130,246),0.15),transparent_80%),radial-gradient(rgba(var(--primary-rgb,59,130,246),0.14)_1px,transparent_1px)] overflow-hidden border-b md:border-b-0 md:border-r border-border max-h-screen"
+        style={{
+          backgroundSize: "auto, auto, 22px 22px",
+          backgroundPosition: "center, center, 0 0",
+        }}
+      >
         {/* Top Content */}
         <div className="space-y-3 md:space-y-6 relative z-10">
           {/* Logo */}
-          <div className="flex items-center justify-center md:justify-start gap-3">
+          <motion.div
+            className="flex items-center justify-center md:justify-start gap-3"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <Image
               src="/logo-dark.svg"
               alt="Kaslo Logo"
@@ -30,9 +42,14 @@ export function PWAOnboarding() {
               height={30}
               className="dark:hidden md:w-[150px] md:h-10"
             />
-          </div>
+          </motion.div>
 
-          <div className="text-center md:text-left">
+          <motion.div
+            className="text-center md:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             <h1 className="text-3xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-foreground">
               Kelola Keuangan Anda
               <br />
@@ -42,11 +59,16 @@ export function PWAOnboarding() {
               Pantau pengeluaran, kelola anggaran, dan capai tujuan finansial
               Anda.
             </p>
-          </div>
+          </motion.div>
         </div>
 
         {/* Mockup - pushed to bottom naturally */}
-        <div className="mt-auto -mb-8 sm:-mb-16 md:-mb-32 flex justify-center pointer-events-none">
+        <motion.div
+          className="mt-auto -mb-8 sm:-mb-16 md:-mb-32 flex justify-center pointer-events-none"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+        >
           <div className="relative h-[280px] sm:h-[280px] md:h-[400px] lg:h-[500px] xl:h-[550px] overflow-hidden">
             <Image
               src="/mockup.png"
@@ -58,7 +80,7 @@ export function PWAOnboarding() {
               priority
             />
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Right Section */}
