@@ -20,7 +20,7 @@ export function PWAOnboarding() {
   );
 
   return (
-    <div className="min-h-screen grid md:grid-cols-2 bg-background">
+    <div className="min-h-screen h-screen overflow-hidden md:overflow-auto grid md:grid-cols-2 bg-background">
       {/* Left Section */}
       <div
         className="relative flex flex-col justify-between p-8 md:p-12 bg-background dark:bg-background bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb,59,130,246),0.15),transparent_35%),radial-gradient(circle_at_center,rgba(var(--primary-rgb,59,130,246),0.15),transparent_80%),radial-gradient(rgba(var(--primary-rgb,59,130,246),0.14)_1px,transparent_1px)] overflow-hidden border-b md:border-b-0 md:border-r border-border max-h-screen"
