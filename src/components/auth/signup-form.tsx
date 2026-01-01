@@ -149,7 +149,7 @@ export function SignupForm({ embedded = false }: { embedded?: boolean }) {
       </p>
       <Button
         variant="outline"
-        onClick={() => router.push("/login")}
+        onClick={() => router.push("/")}
         className="w-full"
       >
         Kembali ke Halaman Masuk
@@ -372,7 +372,7 @@ export function SignupForm({ embedded = false }: { embedded?: boolean }) {
             variant="outline"
             onClick={() => {
               setSuccess(false);
-              router.push("/login");
+              router.push("/");
             }}
             className="w-full"
           >
@@ -399,7 +399,7 @@ export function SignupForm({ embedded = false }: { embedded?: boolean }) {
           <CardFooter className="flex justify-center">
             <Button
               variant="outline"
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/")}
               className="hover:bg-gray-50 transition-colors duration-200"
             >
               Kembali ke Halaman Masuk

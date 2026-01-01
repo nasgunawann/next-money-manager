@@ -45,7 +45,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/");
     toast.success("Berhasil keluar");
     setIsUserMenuOpen(false);
   };
