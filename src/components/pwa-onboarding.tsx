@@ -1,12 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  IconShieldCheck,
-  IconChartBar,
-  IconDeviceMobile,
-} from "@tabler/icons-react";
 import { motion } from "framer-motion";
+import { SignupForm } from "@/components/auth/signup-form";
+import { LoginForm } from "@/components/auth/login-form";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 export function PWAOnboarding() {
   return (
@@ -85,7 +91,8 @@ export function PWAOnboarding() {
 
       {/* Right Section */}
       <div className="flex flex-col items-center justify-center p-8 md:p-12 bg-card md:bg-background">
-        <div className="w-full max-w-md space-y-3 md:space-y-8 text-center">
+        {/* Desktop: buttons inline */}
+        <div className="hidden md:block w-full max-w-md space-y-3 md:space-y-8 text-center">
           <div className="space-y-1 md:space-y-2">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
               Mulai Mencatat Sekarang!
@@ -132,6 +139,82 @@ export function PWAOnboarding() {
               Kebijakan Privasi
             </Link>
           </p>
+        </div>
+
+        {/* Mobile: two drawers, one per action */}
+        <div className="w-full max-w-md space-y-3 text-center md:hidden">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight">
+              Mulai Mencatat Sekarang!
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Daftar atau masuk untuk melanjutkan
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button className="w-full h-11 text-sm font-semibold shadow-lg shadow-primary/20">
+                  Daftar Akun Baru
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="pb-6 max-h-[80vh] overflow-y-auto">
+                <DrawerHeader>
+                  <DrawerTitle className="text-xl font-bold">
+                    Daftar Akun Baru
+                  </DrawerTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Isi formulir untuk membuat akun
+                  </p>
+                </DrawerHeader>
+                <div className="px-4 pb-4">
+                  <SignupForm embedded />
+                </div>
+              </DrawerContent>
+            </Drawer>
+
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full h-11 text-sm font-semibold bg-background hover:bg-accent/10"
+                >
+                  Masuk ke Akun
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="pb-6 max-h-[80vh] overflow-y-auto">
+                <DrawerHeader>
+                  <DrawerTitle className="text-xl font-bold">
+                    Masuk ke Akun
+                  </DrawerTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Gunakan email dan kata sandi Anda
+                  </p>
+                </DrawerHeader>
+                <div className="px-4 pb-4">
+                  <LoginForm embedded />
+                </div>
+              </DrawerContent>
+            </Drawer>
+
+            <p className="text-xs text-muted-foreground pt-1">
+              Dengan mendaftar, Anda menyetujui
+              <Link
+                href="/terms"
+                className="text-primary hover:underline underline-offset-4 ml-1"
+              >
+                Syarat & Ketentuan
+              </Link>{" "}
+              dan
+              <Link
+                href="/privacy"
+                className="text-primary hover:underline underline-offset-4 ml-1"
+              >
+                Kebijakan Privasi
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
