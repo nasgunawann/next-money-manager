@@ -77,11 +77,11 @@ export function LoginForm({ embedded = false }: { embedded?: boolean }) {
 
       toast.success("Berhasil masuk!");
       router.push("/dashboard");
+      // Keep loading state true during redirect
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Terjadi kesalahan saat masuk"
       );
-    } finally {
       setLoading(false);
     }
   };
@@ -108,7 +108,10 @@ export function LoginForm({ embedded = false }: { embedded?: boolean }) {
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">
+          <label
+            htmlFor="email"
+            className="block text-left text-sm font-medium"
+          >
             Email
           </label>
           <Input
@@ -124,7 +127,10 @@ export function LoginForm({ embedded = false }: { embedded?: boolean }) {
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-medium">
+            <label
+              htmlFor="password"
+              className="block text-left text-sm font-medium"
+            >
               Kata Sandi
             </label>
             <Link

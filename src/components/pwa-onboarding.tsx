@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { SignupForm } from "@/components/auth/signup-form";
 import { LoginForm } from "@/components/auth/login-form";
 import {
@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/drawer";
 
 export function PWAOnboarding() {
+  const [activeForm, setActiveForm] = useState<"none" | "login" | "signup">(
+    "none"
+  );
+
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-background">
       {/* Left Section */}
@@ -93,52 +97,84 @@ export function PWAOnboarding() {
       <div className="flex flex-col items-center justify-center p-8 md:p-12 bg-card md:bg-background">
         {/* Desktop: buttons inline */}
         <div className="hidden md:block w-full max-w-md space-y-3 md:space-y-8 text-center">
-          <div className="space-y-1 md:space-y-2">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
-              Mulai Mencatat Sekarang!
-            </h2>
-            <p className="text-md md:text-base text-muted-foreground">
-              Daftar atau masuk untuk melanjutkan
-            </p>
-          </div>
+          {/* Title/description moved into action/form blocks so they animate together */}
 
-          <div className="space-y-2 md:space-y-4">
-            <Link href="/signup" className="block w-full">
-              <Button
-                size="lg"
-                className="w-full h-10 md:h-14 text-sm md:text-base font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
+          <AnimatePresence mode="wait">
+            {activeForm === "none" ? (
+              <motion.div
+                key="actions"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 100 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-2 md:space-y-4"
               >
-                Daftar Akun Baru
-              </Button>
-            </Link>
+                <div className="space-y-1 md:space-y-2">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
+                    Mulai Mencatat Sekarang!
+                  </h2>
+                  <p className="text-md md:text-base text-muted-foreground">
+                    Daftar atau masuk untuk melanjutkan
+                  </p>
+                </div>
+                <Button
+                  size="lg"
+                  className="w-full h-10 md:h-14 text-sm md:text-base font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
+                  onClick={() => setActiveForm("signup")}
+                >
+                  Daftar Akun Baru
+                </Button>
 
-            <Link href="/login" className="block w-full">
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full h-10 md:h-14 text-sm md:text-base font-semibold bg-background hover:bg-accent/10 transition-all hover:scale-[1.02]"
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-10 md:h-14 text-sm md:text-base font-semibold bg-background hover:bg-accent/10 transition-all hover:scale-[1.02]"
+                  onClick={() => setActiveForm("login")}
+                >
+                  Masuk ke Akun
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={activeForm}
+                initial={{ opacity: 0, x: -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.3 }}
+                className="relative space-y-4"
               >
-                Masuk ke Akun
-              </Button>
-            </Link>
-          </div>
+                <div className="space-y-1">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
+                    {activeForm === "signup"
+                      ? "Daftar Akun Baru"
+                      : "Masuk ke Akun"}
+                  </h2>
+                  <p className="text-md md:text-base text-muted-foreground">
+                    {activeForm === "signup"
+                      ? "Isi formulir untuk membuat akun"
+                      : "Gunakan email dan kata sandi Anda"}
+                  </p>
+                </div>
 
-          <p className="text-xs text-muted-foreground pt-0 md:pt-4">
-            Dengan mendaftar, Anda menyetujui{" "}
-            <Link
-              href="/terms"
-              className="text-primary hover:underline underline-offset-4"
-            >
-              Syarat & Ketentuan
-            </Link>{" "}
-            dan{" "}
-            <Link
-              href="/privacy"
-              className="text-primary hover:underline underline-offset-4"
-            >
-              Kebijakan Privasi
-            </Link>
-          </p>
+                <div className="flex justify-end">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="text-sm shadow-md"
+                    onClick={() => setActiveForm("none")}
+                  >
+                    Kembali
+                  </Button>
+                </div>
+
+                {activeForm === "signup" ? (
+                  <SignupForm embedded />
+                ) : (
+                  <LoginForm embedded />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Mobile: two drawers, one per action */}
@@ -197,23 +233,6 @@ export function PWAOnboarding() {
                 </div>
               </DrawerContent>
             </Drawer>
-
-            <p className="text-xs text-muted-foreground pt-1">
-              Dengan mendaftar, Anda menyetujui
-              <Link
-                href="/terms"
-                className="text-primary hover:underline underline-offset-4 ml-1"
-              >
-                Syarat & Ketentuan
-              </Link>{" "}
-              dan
-              <Link
-                href="/privacy"
-                className="text-primary hover:underline underline-offset-4 ml-1"
-              >
-                Kebijakan Privasi
-              </Link>
-            </p>
           </div>
         </div>
       </div>

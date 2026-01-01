@@ -161,7 +161,10 @@ export function SignupForm({ embedded = false }: { embedded?: boolean }) {
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">
+          <label
+            htmlFor="email"
+            className="block text-left text-sm font-medium"
+          >
             Email
           </label>
           <Input
@@ -176,7 +179,10 @@ export function SignupForm({ embedded = false }: { embedded?: boolean }) {
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium">
+          <label
+            htmlFor="password"
+            className="block text-left text-sm font-medium"
+          >
             Kata Sandi
           </label>
           <div className="relative">
@@ -263,7 +269,10 @@ export function SignupForm({ embedded = false }: { embedded?: boolean }) {
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="confirmPassword" className="text-sm font-medium">
+          <label
+            htmlFor="confirmPassword"
+            className="block text-left text-sm font-medium"
+          >
             Konfirmasi Kata Sandi
           </label>
           <div className="relative">
@@ -340,6 +349,17 @@ export function SignupForm({ embedded = false }: { embedded?: boolean }) {
         </svg>
         Lanjut dengan Google
       </Button>
+
+      <p className="text-xs text-muted-foreground text-center">
+        Dengan mendaftar, Anda menyetujui
+        <Link href="/terms" className="text-primary hover:underline ml-1">
+          Syarat & Ketentuan
+        </Link>{" "}
+        dan
+        <Link href="/privacy" className="text-primary hover:underline ml-1">
+          Kebijakan Privasi
+        </Link>
+      </p>
     </>
   );
 
