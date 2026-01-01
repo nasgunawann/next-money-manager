@@ -41,5 +41,5 @@ export default function Home() {
   }
 
   // Show landing page for web browsers
-  return <LandingPage />;
+  return <PWAOnboarding />;
 }
