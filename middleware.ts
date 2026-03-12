@@ -37,13 +37,12 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Redirect root to login (or dashboard if logged in)
+  // Redirect root to dashboard if logged in (allow landing page for non-authenticated)
   if (request.nextUrl.pathname === "/") {
     if (user) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
-    } else {
-      return NextResponse.redirect(new URL("/login", request.url));
     }
+    return response;
   }
 
   // Protected routes
@@ -52,10 +51,11 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/onboarding") ||
     request.nextUrl.pathname.startsWith("/profile") ||
     request.nextUrl.pathname.startsWith("/transactions") ||
-    request.nextUrl.pathname.startsWith("/reports")
+    request.nextUrl.pathname.startsWith("/reports") ||
+    request.nextUrl.pathname.startsWith("/accounts")
   ) {
     if (!user) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
