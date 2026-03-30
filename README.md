@@ -1,4 +1,4 @@
-# Kaslo - Next Money Manager
+# Kaslo - Aplikasi Pencatat Finansial Pribadi
 
 Kaslo adalah aplikasi manajemen keuangan pribadi berbasis **Next.js + Supabase** untuk mencatat pemasukan, pengeluaran, transfer antar akun, serta memantau ringkasan keuangan bulanan.
 
