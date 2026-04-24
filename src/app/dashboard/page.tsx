@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import useSessionGuard from "@/hooks/use-session-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
@@ -39,6 +39,8 @@ import {
   UPDATE_FEATURES,
   MINOR_FIXES,
 } from "@/constants/updates";
+
+import { IconFileDownload } from "@tabler/icons-react";
 
 function withAlpha(color: string, alpha: number) {
   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
@@ -182,6 +184,24 @@ export default function DashboardPage() {
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
   })();
 
+  // Filtered transactions for the current month's report
+  const currentMonthTransactions = useMemo(() => {
+    return (
+      transactions?.filter((t) => {
+        const txDate = new Date(t.date);
+        return (
+          txDate.getMonth() === currentMonth &&
+          txDate.getFullYear() === currentYear
+        );
+      }) || []
+    );
+  }, [transactions, currentMonth, currentYear]);
+
+  const reportPeriodLabel = new Date().toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  });
+
   if (
     sessionGuard.isLoading ||
     profileLoading ||
@@ -284,13 +304,11 @@ export default function DashboardPage() {
                       )}
                     </button>
                   </div>
-                  <p className="text-[13px] font-medium text-white/90 mt-0.5">
-                    Laporan bulan{" "}
-                    {new Date().toLocaleDateString("id-ID", {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
+                  <div className="flex items-center justify-between gap-2 mt-0.5">
+                    <p className="text-[13px] font-medium text-white/90">
+                      Laporan bulan {reportPeriodLabel}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="rounded-3xl bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-2.5 shadow-inner border border-white/10">
