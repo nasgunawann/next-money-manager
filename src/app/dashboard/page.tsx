@@ -6,7 +6,7 @@ import useSessionGuard from "@/hooks/use-session-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, formatAccountType } from "@/lib/utils";
+import { formatCurrency, formatAccountType, getCurrencySymbol } from "@/lib/utils";
 import { format, isToday, isYesterday, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 import type { Transaction } from "@/hooks/use-transactions";
@@ -18,6 +18,8 @@ import {
   IconArrowDownLeft,
   IconChevronLeft,
   IconChevronRight,
+  IconEye,
+  IconEyeOff,
 } from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
@@ -28,6 +30,7 @@ import { getAccountIconComponent } from "@/constants/account-icons";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 import { ExpenseDonutChart } from "@/components/expense-donut-chart";
+import { useAmountVisibility } from "@/hooks/use-amount-visibility";
 
 function withAlpha(color: string, alpha: number) {
   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
@@ -77,6 +80,12 @@ export default function DashboardPage() {
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const { visible: amountVisible, toggle: toggleAmountVisible } =
+    useAmountVisibility();
+
+  const currencySymbol = getCurrencySymbol(profile?.currency);
+  const maskAmount = (value: number) =>
+    amountVisible ? formatCurrency(value, profile?.currency) : `${currencySymbol} ••••••`;
 
   const totalBalance =
     accounts?.reduce((acc, account) => acc + account.balance, 0) || 0;
@@ -185,8 +194,10 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <p className="font-semibold text-base text-foreground shrink-0 text-right">
-              {formatCurrency(account.balance, profile?.currency)}
+            <p className="font-semibold text-base text-foreground shrink-0 text-right tabular-nums">
+              {amountVisible
+                ? formatCurrency(account.balance, profile?.currency)
+                : `${currencySymbol} ••••••`}
             </p>
           </div>
         </CardContent>
@@ -225,9 +236,22 @@ export default function DashboardPage() {
                     Total Saldo
                   </p>
                   <div className="flex items-center gap-3">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                      {formatCurrency(totalBalance, profile?.currency)}
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight tabular-nums">
+                      {amountVisible
+                        ? formatCurrency(totalBalance, profile?.currency)
+                        : `${currencySymbol} ••••••`}
                     </h2>
+                    <button
+                      onClick={toggleAmountVisible}
+                      aria-label={amountVisible ? "Sembunyikan saldo" : "Tampilkan saldo"}
+                      className="text-white/60 hover:text-white transition-colors rounded-full p-1 hover:bg-white/10"
+                    >
+                      {amountVisible ? (
+                        <IconEye className="h-5 w-5" />
+                      ) : (
+                        <IconEyeOff className="h-5 w-5" />
+                      )}
+                    </button>
                   </div>
                   <p className="text-[13px] font-medium text-white/90 mt-0.5">
                     Laporan bulan{" "}
@@ -247,8 +271,8 @@ export default function DashboardPage() {
                       <p className="text-[10px] text-white/70 uppercase tracking-wide">
                         Pendapatan
                       </p>
-                      <p className="text-sm font-semibold text-white leading-tight">
-                        {formatCurrency(monthlyIncome, profile?.currency)}
+                      <p className="text-sm font-semibold text-white leading-tight tabular-nums">
+                        {maskAmount(monthlyIncome)}
                       </p>
                     </div>
                   </div>
@@ -261,8 +285,8 @@ export default function DashboardPage() {
                       <p className="text-[10px] text-white/70 uppercase tracking-wide">
                         Pengeluaran
                       </p>
-                      <p className="text-sm font-semibold text-white leading-tight">
-                        {formatCurrency(monthlyExpense, profile?.currency)}
+                      <p className="text-sm font-semibold text-white leading-tight tabular-nums">
+                        {maskAmount(monthlyExpense)}
                       </p>
                     </div>
                   </div>
@@ -369,6 +393,7 @@ export default function DashboardPage() {
                               key={transaction.id}
                               transaction={transaction}
                               currency={profile?.currency}
+                              amountVisible={amountVisible}
                             />
                           ))}
                         </div>
@@ -416,6 +441,7 @@ export default function DashboardPage() {
                         data={expenseByCategory.slice(0, 5)}
                         totalExpense={monthlyExpense}
                         currency={profile?.currency}
+                        amountVisible={amountVisible}
                       />
 
                       {/* Category Breakdown */}
@@ -441,11 +467,13 @@ export default function DashboardPage() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
-                                  <p className="text-xs text-muted-foreground">
-                                    {formatCurrency(
-                                      cat.value,
-                                      profile?.currency
-                                    )}
+                                  <p className="text-xs text-muted-foreground tabular-nums">
+                                    {amountVisible
+                                      ? formatCurrency(
+                                          cat.value,
+                                          profile?.currency
+                                        )
+                                      : `${currencySymbol} ••••••`}
                                   </p>
                                   <p className="text-xs font-semibold text-foreground w-10 text-right">
                                     {percent.toFixed(1)}%
