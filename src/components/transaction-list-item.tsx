@@ -1,6 +1,6 @@
 "use client";
 
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency, getCurrencySymbol, cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { IconArrowsLeftRight } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
@@ -13,6 +13,7 @@ interface TransactionListItemProps {
   currency?: string;
   onClick?: (transaction: Transaction) => void;
   showTime?: boolean;
+  amountVisible?: boolean;
 }
 
 export function TransactionListItem({
@@ -20,6 +21,7 @@ export function TransactionListItem({
   currency,
   onClick,
   showTime = true,
+  amountVisible = true,
 }: TransactionListItemProps) {
   const CatIcon = getCategoryIconComponent(transaction.category?.icon);
 
@@ -66,7 +68,7 @@ export function TransactionListItem({
         </div>
         <p
           className={cn(
-            "font-semibold text-sm whitespace-nowrap text-right shrink-0",
+            "font-semibold text-sm whitespace-nowrap text-right shrink-0 tabular-nums",
             transaction.type === "income"
               ? "text-green-600 dark:text-green-400"
               : transaction.type === "expense"
@@ -74,12 +76,18 @@ export function TransactionListItem({
               : "text-blue-600 dark:text-blue-400"
           )}
         >
-          {transaction.type === "income"
-            ? "+"
-            : transaction.type === "expense"
-            ? "-"
-            : ""}{" "}
-          {formatCurrency(transaction.amount, currency)}
+          {amountVisible ? (
+            <>
+              {transaction.type === "income"
+                ? "+"
+                : transaction.type === "expense"
+                ? "-"
+                : ""}{" "}
+              {formatCurrency(transaction.amount, currency)}
+            </>
+          ) : (
+            `${getCurrencySymbol(currency)} ••••••`
+          )}
         </p>
       </CardContent>
     </Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 
@@ -18,12 +18,14 @@ interface ExpenseDonutChartProps {
   data: ExpenseData[];
   totalExpense: number;
   currency?: string;
+  amountVisible?: boolean;
 }
 
 export function ExpenseDonutChart({
   data,
   totalExpense,
   currency,
+  amountVisible = true,
 }: ExpenseDonutChartProps) {
   const renderIconLabel = (props: {
     cx?: number;
@@ -117,8 +119,10 @@ export function ExpenseDonutChart({
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <p className="text-2xl font-bold text-foreground">
-              {formatCurrency(totalExpense, currency)}
+            <p className="text-2xl font-bold text-foreground tabular-nums">
+              {amountVisible
+                ? formatCurrency(totalExpense, currency)
+                : `${getCurrencySymbol(currency)} ••••••`}
             </p>
             <p className="text-sm text-muted-foreground">
               Total Pengeluaran

@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { AppLayout } from "@/components/app-layout";
 import { useTransactions } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
-import { formatCurrency } from "@/lib/utils";
+import { useAccounts } from "@/hooks/use-accounts";
+import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { IconChevronLeft, IconChevronRight, IconFileDownload } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 import { ReportsSkeleton } from "@/components/skeleton-loaders";
 import { EmptyState, EmptyReportsIcon } from "@/components/empty-state";
 import { ExpenseDonutChart } from "@/components/expense-donut-chart";
+import { MonthlyReportPDF } from "@/components/monthly-report-pdf";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 export default function ReportsPage() {
   const { data: profile } = useProfile();
@@ -22,6 +30,11 @@ export default function ReportsPage() {
   const [selectedYear, setSelectedYear] = useState<string>(
     new Date().getFullYear().toString()
   );
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const months = [
     "Januari",
@@ -97,10 +110,44 @@ export default function ReportsPage() {
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
   })();
 
+  const totalIncome = getMonthTransactions().reduce(
+    (sum, t) => (t.type === "income" ? sum + t.amount : sum),
+    0
+  );
+
+  const totalTransfer = getMonthTransactions().reduce(
+    (sum, t) => (t.type === "transfer" ? sum + t.amount : sum),
+    0
+  );
+
   const totalExpense = getMonthTransactions().reduce(
     (sum, t) => (t.type === "expense" ? sum + t.amount : sum),
     0
   );
+
+  const { data: accounts } = useAccounts();
+
+  const currentTotalBalance = accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0;
+
+  const initialBalance = transactions?.reduce((balance, t) => {
+    const tDate = new Date(t.date);
+    const selMonth = parseInt(selectedMonth);
+    const selYear = parseInt(selectedYear);
+
+    // Tentukan batas awal bulan yang dipilih
+    const startOfSelectedMonth = new Date(selYear, selMonth, 1);
+
+    // Jika transaksi terjadi PADA atau SETELAH awal bulan yang dipilih,
+    // kita kurangi (pemasukan) atau tambahkan (pengeluaran) dari saldo saat ini 
+    // untuk mendapatkan saldo di masa lalu.
+    if (tDate >= startOfSelectedMonth) {
+      if (t.type === "income") return balance - t.amount;
+      if (t.type === "expense") return balance + t.amount;
+    }
+    return balance;
+  }, currentTotalBalance) || 0;
+
+  const reportPeriodLabel = `${months[parseInt(selectedMonth)]} ${selectedYear}`;
 
   // Find earliest transaction month for prev button boundary
   const earliestTransaction = transactions?.reduce((earliest, t) => {
@@ -138,11 +185,10 @@ export default function ReportsPage() {
             onClick={handlePrevMonth}
             disabled={isPrevDisabled}
             aria-disabled={isPrevDisabled}
-            className={`p-3 rounded-full transition-colors ${
-              isPrevDisabled
-                ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
-                : "bg-muted hover:bg-muted/80"
-            }`}
+            className={`p-3 rounded-full transition-colors ${isPrevDisabled
+              ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
+              : "bg-muted hover:bg-muted/80"
+              }`}
           >
             <IconChevronLeft
               className={`w-5 h-5 ${isPrevDisabled ? "opacity-50" : ""}`}
@@ -160,17 +206,51 @@ export default function ReportsPage() {
             onClick={handleNextMonth}
             disabled={isNextDisabled}
             aria-disabled={isNextDisabled}
-            className={`p-3 rounded-full transition-colors ${
-              isNextDisabled
-                ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
-                : "bg-muted hover:bg-muted/80"
-            }`}
+            className={`p-3 rounded-full transition-colors ${isNextDisabled
+              ? "bg-muted/50 cursor-not-allowed hover:bg-muted/50"
+              : "bg-muted hover:bg-muted/80"
+              }`}
           >
             <IconChevronRight
               className={`w-5 h-5 ${isNextDisabled ? "opacity-50" : ""}`}
             />
           </button>
         </div>
+
+        {/* Action Bar */}
+        {!isLoading && getMonthTransactions().length > 0 && isClient && (
+          <div className="flex justify-center mb-6">
+            <PDFDownloadLink
+              document={
+                <MonthlyReportPDF
+                  transactions={getMonthTransactions()}
+                  profileName={profile?.full_name || "User"}
+                  period={reportPeriodLabel}
+                  currency={getCurrencySymbol(profile?.currency)}
+                  stats={{
+                    totalIncome,
+                    totalExpense,
+                    totalTransfer,
+                    balance: totalIncome - totalExpense,
+                    initialBalance,
+                  }}
+                  categories={expenseByCategory}
+                />
+              }
+              fileName={`Kaslo-Laporan_${reportPeriodLabel.replace(" ", "_")}.pdf`}
+            >
+              {({ loading }) => (
+                <button
+                  disabled={loading}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#4663f1] hover:bg-[#3552d8] text-white rounded-xl text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50"
+                >
+                  <IconFileDownload className="h-4 w-4" />
+                  {loading ? "Menyiapkan PDF..." : "Unduh Laporan (PDF)"}
+                </button>
+              )}
+            </PDFDownloadLink>
+          </div>
+        )}
 
         {/* Content for the selected month */}
         {isLoading ? (
@@ -237,9 +317,8 @@ export default function ReportsPage() {
           <EmptyState
             icon={<EmptyReportsIcon />}
             title="Belum Ada Data Pengeluaran"
-            hint={`Mulai catat pengeluaran di bulan ${
-              months[parseInt(selectedMonth)]
-            } untuk melihat analisis dan grafik`}
+            hint={`Mulai catat pengeluaran di bulan ${months[parseInt(selectedMonth)]
+              } untuk melihat analisis dan grafik`}
           />
         )}
       </div>

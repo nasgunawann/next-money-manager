@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import useSessionGuard from "@/hooks/use-session-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
-import { formatCurrency, formatAccountType } from "@/lib/utils";
+import { formatCurrency, formatAccountType, getCurrencySymbol } from "@/lib/utils";
 import { format, isToday, isYesterday, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 import type { Transaction } from "@/hooks/use-transactions";
@@ -18,6 +18,8 @@ import {
   IconArrowDownLeft,
   IconChevronLeft,
   IconChevronRight,
+  IconEye,
+  IconEyeOff,
 } from "@tabler/icons-react";
 import { AppLayout } from "@/components/app-layout";
 import { AddAccountDialog } from "@/components/add-account-dialog";
@@ -28,6 +30,17 @@ import { getAccountIconComponent } from "@/constants/account-icons";
 import { getCategoryIconComponent } from "@/constants/category-icons";
 import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 import { ExpenseDonutChart } from "@/components/expense-donut-chart";
+import { useAmountVisibility } from "@/hooks/use-amount-visibility";
+import { WhatsNewDialog } from "@/components/whats-new-dialog";
+import {
+  LATEST_UPDATE_ID,
+  UPDATE_TITLE,
+  UPDATE_VERSION,
+  UPDATE_FEATURES,
+  MINOR_FIXES,
+} from "@/constants/updates";
+
+import { IconFileDownload } from "@tabler/icons-react";
 
 function withAlpha(color: string, alpha: number) {
   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
@@ -76,7 +89,36 @@ export default function DashboardPage() {
 
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const { visible: amountVisible, toggle: toggleAmountVisible } =
+    useAmountVisibility();
+
+  // Show "What's New" dialog once per update version
+  useEffect(() => {
+    const STORAGE_KEY = "last_seen_update";
+    try {
+      const seen = localStorage.getItem(STORAGE_KEY);
+      if (seen !== LATEST_UPDATE_ID) {
+        setWhatsNewOpen(true);
+      }
+    } catch {
+      // localStorage unavailable — silently skip
+    }
+  }, []);
+
+  const handleWhatsNewClose = () => {
+    setWhatsNewOpen(false);
+    try {
+      localStorage.setItem("last_seen_update", LATEST_UPDATE_ID);
+    } catch {
+      // ignore
+    }
+  };
+
+  const currencySymbol = getCurrencySymbol(profile?.currency);
+  const maskAmount = (value: number) =>
+    amountVisible ? formatCurrency(value, profile?.currency) : `${currencySymbol} ••••••`;
 
   const totalBalance =
     accounts?.reduce((acc, account) => acc + account.balance, 0) || 0;
@@ -142,6 +184,24 @@ export default function DashboardPage() {
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
   })();
 
+  // Filtered transactions for the current month's report
+  const currentMonthTransactions = useMemo(() => {
+    return (
+      transactions?.filter((t) => {
+        const txDate = new Date(t.date);
+        return (
+          txDate.getMonth() === currentMonth &&
+          txDate.getFullYear() === currentYear
+        );
+      }) || []
+    );
+  }, [transactions, currentMonth, currentYear]);
+
+  const reportPeriodLabel = new Date().toLocaleDateString("id-ID", {
+    month: "long",
+    year: "numeric",
+  });
+
   if (
     sessionGuard.isLoading ||
     profileLoading ||
@@ -185,8 +245,10 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <p className="font-semibold text-base text-foreground shrink-0 text-right">
-              {formatCurrency(account.balance, profile?.currency)}
+            <p className="font-semibold text-base text-foreground shrink-0 text-right tabular-nums">
+              {amountVisible
+                ? formatCurrency(account.balance, profile?.currency)
+                : `${currencySymbol} ••••••`}
             </p>
           </div>
         </CardContent>
@@ -225,17 +287,28 @@ export default function DashboardPage() {
                     Total Saldo
                   </p>
                   <div className="flex items-center gap-3">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                      {formatCurrency(totalBalance, profile?.currency)}
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight tabular-nums">
+                      {amountVisible
+                        ? formatCurrency(totalBalance, profile?.currency)
+                        : `${currencySymbol} ••••••`}
                     </h2>
+                    <button
+                      onClick={toggleAmountVisible}
+                      aria-label={amountVisible ? "Sembunyikan saldo" : "Tampilkan saldo"}
+                      className="text-white/60 hover:text-white transition-colors rounded-full p-1 hover:bg-white/10"
+                    >
+                      {amountVisible ? (
+                        <IconEye className="h-5 w-5" />
+                      ) : (
+                        <IconEyeOff className="h-5 w-5" />
+                      )}
+                    </button>
                   </div>
-                  <p className="text-[13px] font-medium text-white/90 mt-0.5">
-                    Laporan bulan{" "}
-                    {new Date().toLocaleDateString("id-ID", {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
+                  <div className="flex items-center justify-between gap-2 mt-0.5">
+                    <p className="text-[13px] font-medium text-white/90">
+                      Laporan bulan {reportPeriodLabel}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="rounded-3xl bg-white/15 backdrop-blur grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-2.5 shadow-inner border border-white/10">
@@ -247,8 +320,8 @@ export default function DashboardPage() {
                       <p className="text-[10px] text-white/70 uppercase tracking-wide">
                         Pendapatan
                       </p>
-                      <p className="text-sm font-semibold text-white leading-tight">
-                        {formatCurrency(monthlyIncome, profile?.currency)}
+                      <p className="text-sm font-semibold text-white leading-tight tabular-nums">
+                        {maskAmount(monthlyIncome)}
                       </p>
                     </div>
                   </div>
@@ -261,8 +334,8 @@ export default function DashboardPage() {
                       <p className="text-[10px] text-white/70 uppercase tracking-wide">
                         Pengeluaran
                       </p>
-                      <p className="text-sm font-semibold text-white leading-tight">
-                        {formatCurrency(monthlyExpense, profile?.currency)}
+                      <p className="text-sm font-semibold text-white leading-tight tabular-nums">
+                        {maskAmount(monthlyExpense)}
                       </p>
                     </div>
                   </div>
@@ -369,6 +442,7 @@ export default function DashboardPage() {
                               key={transaction.id}
                               transaction={transaction}
                               currency={profile?.currency}
+                              amountVisible={amountVisible}
                             />
                           ))}
                         </div>
@@ -416,6 +490,7 @@ export default function DashboardPage() {
                         data={expenseByCategory.slice(0, 5)}
                         totalExpense={monthlyExpense}
                         currency={profile?.currency}
+                        amountVisible={amountVisible}
                       />
 
                       {/* Category Breakdown */}
@@ -441,11 +516,13 @@ export default function DashboardPage() {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
-                                  <p className="text-xs text-muted-foreground">
-                                    {formatCurrency(
-                                      cat.value,
-                                      profile?.currency
-                                    )}
+                                  <p className="text-xs text-muted-foreground tabular-nums">
+                                    {amountVisible
+                                      ? formatCurrency(
+                                          cat.value,
+                                          profile?.currency
+                                        )
+                                      : `${currencySymbol} ••••••`}
                                   </p>
                                   <p className="text-xs font-semibold text-foreground w-10 text-right">
                                     {percent.toFixed(1)}%
@@ -488,6 +565,15 @@ export default function DashboardPage() {
             setTimeout(() => setSelectedAccount(null), 300);
           }
         }}
+      />
+
+      <WhatsNewDialog
+        open={whatsNewOpen}
+        onClose={handleWhatsNewClose}
+        title={UPDATE_TITLE}
+        version={UPDATE_VERSION}
+        features={UPDATE_FEATURES}
+        minorFixes={MINOR_FIXES}
       />
     </AppLayout>
   );
