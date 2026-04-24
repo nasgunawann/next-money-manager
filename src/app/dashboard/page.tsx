@@ -128,41 +128,34 @@ export default function DashboardPage() {
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
-  const monthlyIncome =
-    transactions
-      ?.filter((t) => {
-        const txDate = new Date(t.date);
-        return (
-          t.type === "income" &&
-          txDate.getMonth() === currentMonth &&
-          txDate.getFullYear() === currentYear
-        );
-      })
-      .reduce((acc, t) => acc + t.amount, 0) || 0;
-
-  const monthlyExpense =
-    transactions
-      ?.filter((t) => {
-        const txDate = new Date(t.date);
-        return (
-          t.type === "expense" &&
-          txDate.getMonth() === currentMonth &&
-          txDate.getFullYear() === currentYear
-        );
-      })
-      .reduce((acc, t) => acc + t.amount, 0) || 0;
-
-  // Calculate expense by category for donut chart
-  const expenseByCategory = (() => {
-    const monthTx =
+  // Filtered transactions for the current month's report
+  const currentMonthTransactions = useMemo(() => {
+    return (
       transactions?.filter((t) => {
         const txDate = new Date(t.date);
         return (
-          t.type === "expense" &&
           txDate.getMonth() === currentMonth &&
           txDate.getFullYear() === currentYear
         );
-      }) || [];
+      }) || []
+    );
+  }, [transactions, currentMonth, currentYear]);
+
+  const monthlyIncome = useMemo(() => {
+    return currentMonthTransactions
+      .filter((t) => t.type === "income")
+      .reduce((acc, t) => acc + t.amount, 0);
+  }, [currentMonthTransactions]);
+
+  const monthlyExpense = useMemo(() => {
+    return currentMonthTransactions
+      .filter((t) => t.type === "expense")
+      .reduce((acc, t) => acc + t.amount, 0);
+  }, [currentMonthTransactions]);
+
+  // Calculate expense by category for donut chart
+  const expenseByCategory = useMemo(() => {
+    const monthTx = currentMonthTransactions.filter((t) => t.type === "expense");
 
     const map = new Map<
       string,
@@ -182,20 +175,9 @@ export default function DashboardPage() {
     });
 
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
-  })();
+  }, [currentMonthTransactions]);
 
-  // Filtered transactions for the current month's report
-  const currentMonthTransactions = useMemo(() => {
-    return (
-      transactions?.filter((t) => {
-        const txDate = new Date(t.date);
-        return (
-          txDate.getMonth() === currentMonth &&
-          txDate.getFullYear() === currentYear
-        );
-      }) || []
-    );
-  }, [transactions, currentMonth, currentYear]);
+
 
   const reportPeriodLabel = new Date().toLocaleDateString("id-ID", {
     month: "long",

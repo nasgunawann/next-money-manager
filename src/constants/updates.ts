@@ -1,6 +1,6 @@
-export const LATEST_UPDATE_ID = "2026-04-24-pdf-report";
-export const UPDATE_VERSION = "Beta v0.2.1";
-export const UPDATE_TITLE = "Ada yang baru!";
+export const LATEST_UPDATE_ID = "2026-04-24-reorder-update";
+export const UPDATE_VERSION = "Beta v0.3.0";
+export const UPDATE_TITLE = "Update: Atur Posisi Sesuka Hati!";
 
 export interface UpdateFeature {
   title: string;
@@ -9,21 +9,16 @@ export interface UpdateFeature {
 
 export const UPDATE_FEATURES: UpdateFeature[] = [
   {
-    title: "📢 Pesan Update",
-    description: "Sekarang pengguna bisa tahu ada yang baru di setiap update melalui pesan ini, hanya muncul sekali saja.",
+    title: "🔃 Atur Urutan Akun",
+    description: "Kini Kamu bisa mengatur urutan Sumber Dana dengan Drag & Drop di halaman Akun. Letakkan rekening utama Kamu di paling atas!",
   },
   {
-    title: "👀 Sembunyikan Saldo",
-    description: "Ketuk ikon mata di samping saldo untuk menjaga privasi nominal uang Anda.",
+    title: "✨ Menambah Animasi",
+    description: "Saat mengatur urutan sumber dana, akan ada efek animasi dan getaran saat memindahkan kartu akun.",
   },
-  {
-    title: "📁 E-Statement PDF",
-    description: "Ekspor laporan bulanan profesional dengan detail pemasukan, pengeluaran, dan selisih saldo. Akses di menu Laporan!",
-  },
+
 ];
 
-// List simpel untuk perbaikan kecil
 export const MINOR_FIXES: string[] = [
-  //"update kecil",
-  "Terdapat bug kolom deskripsi saat input transaksi terkadang hilang, solusi masih dicari.",
+  " Dashboard dan Laporan kini lebih cepat karena optimasi logika perhitungan data yang baru."
 ];
