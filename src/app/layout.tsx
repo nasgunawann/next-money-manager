@@ -35,8 +35,8 @@ const geistMono = Geist_Mono({
   ],
 });
 
-import Providers from "@/components/providers";
-import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
+import Providers from "@/components/shared/providers";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 
 export const metadata: Metadata = {
   title: "Kaslo",

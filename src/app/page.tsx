@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import LandingPage from "@/components/landing-page";
-import { PWAOnboarding } from "@/components/pwa-onboarding";
+import LandingPage from "@/components/landing/landing-page";
+import { PWAOnboarding } from "@/components/pwa/pwa-onboarding";
 
 export default function Home() {
   const router = useRouter();

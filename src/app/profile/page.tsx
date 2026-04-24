@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { AppLayout } from "@/components/app-layout";
+import { AppLayout } from "@/components/layout/app-layout";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

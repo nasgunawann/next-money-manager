@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { AddTransactionDialog } from "@/components/add-transaction-dialog";
+import { AddTransactionDialog } from "@/components/dialogs/add-transaction-dialog";
 import Image from "next/image";
 
 export function DesktopSidebar() {

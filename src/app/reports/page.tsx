@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { AppLayout } from "@/components/app-layout";
+import { AppLayout } from "@/components/layout/app-layout";
 import { useTransactions, type Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts } from "@/hooks/use-accounts";
@@ -10,10 +10,10 @@ import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { IconChevronLeft, IconChevronRight, IconFileDownload } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
-import { ReportsSkeleton } from "@/components/skeleton-loaders";
-import { EmptyState, EmptyReportsIcon } from "@/components/empty-state";
-import { ExpenseDonutChart } from "@/components/expense-donut-chart";
-import { MonthlyReportPDF } from "@/components/monthly-report-pdf";
+import { ReportsSkeleton } from "@/components/shared/skeleton-loaders";
+import { EmptyState, EmptyReportsIcon } from "@/components/shared/empty-state";
+import { ExpenseDonutChart } from "@/components/data-display/expense-donut-chart";
+import { MonthlyReportPDF } from "@/components/reports/monthly-report-pdf";
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),

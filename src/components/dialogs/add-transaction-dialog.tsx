@@ -7,9 +7,9 @@ import { useAccounts } from "@/hooks/use-accounts";
 import type { Account } from "@/hooks/use-accounts";
 import type { Transaction } from "@/hooks/use-transactions";
 import { useCategories } from "@/hooks/use-categories";
-import { ManageCategoriesDialog } from "@/components/manage-categories-dialog";
-import { AddAccountDialog } from "@/components/add-account-dialog";
-import { AddCategoryDialog } from "@/components/add-category-dialog";
+import { ManageCategoriesDialog } from "@/components/dialogs/manage-categories-dialog";
+import { AddAccountDialog } from "@/components/dialogs/add-account-dialog";
+import { AddCategoryDialog } from "@/components/dialogs/add-category-dialog";
 import {
   Dialog,
   DialogContent,

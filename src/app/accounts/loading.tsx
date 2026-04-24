@@ -1,6 +1,6 @@
 "use client";
 
-import { AppLayout } from "@/components/app-layout";
+import { AppLayout } from "@/components/layout/app-layout";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AccountsLoading() {

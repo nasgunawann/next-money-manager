@@ -33,9 +33,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { IconPencil, IconTrash, IconX, IconLoader2 } from "@tabler/icons-react";
 import type { Account } from "@/hooks/use-accounts";
-import { EditAccountDialog } from "@/components/edit-account-dialog";
-import { TransactionListItem } from "@/components/transaction-list-item";
-import { EmptyListIcon } from "@/components/empty-state";
+import { EditAccountDialog } from "@/components/dialogs/edit-account-dialog";
+import { TransactionListItem } from "@/components/data-display/transaction-list-item";
+import { EmptyListIcon } from "@/components/shared/empty-state";
 import { getAccountIconComponent } from "@/constants/account-icons";
 
 interface AccountDetailDialogProps {

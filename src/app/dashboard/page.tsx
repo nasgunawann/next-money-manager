@@ -21,17 +21,17 @@ import {
   IconEye,
   IconEyeOff,
 } from "@tabler/icons-react";
-import { AppLayout } from "@/components/app-layout";
-import { AddAccountDialog } from "@/components/add-account-dialog";
-import { AccountDetailDialog } from "@/components/account-detail-dialog";
-import { TransactionListItem } from "@/components/transaction-list-item";
-import { DashboardSkeleton } from "@/components/skeleton-loaders";
+import { AppLayout } from "@/components/layout/app-layout";
+import { AddAccountDialog } from "@/components/dialogs/add-account-dialog";
+import { AccountDetailDialog } from "@/components/dialogs/account-detail-dialog";
+import { TransactionListItem } from "@/components/data-display/transaction-list-item";
+import { DashboardSkeleton } from "@/components/shared/skeleton-loaders";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { getCategoryIconComponent } from "@/constants/category-icons";
-import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
-import { ExpenseDonutChart } from "@/components/expense-donut-chart";
+import { EmptyState, EmptyTransactionsIcon } from "@/components/shared/empty-state";
+import { ExpenseDonutChart } from "@/components/data-display/expense-donut-chart";
 import { useAmountVisibility } from "@/hooks/use-amount-visibility";
-import { WhatsNewDialog } from "@/components/whats-new-dialog";
+import { WhatsNewDialog } from "@/components/dialogs/whats-new-dialog";
 import {
   LATEST_UPDATE_ID,
   UPDATE_TITLE,

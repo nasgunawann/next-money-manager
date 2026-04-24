@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AppLayout } from "@/components/app-layout";
+import { AppLayout } from "@/components/layout/app-layout";
 import { useTransactions, Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { useCategories } from "@/hooks/use-categories";
@@ -33,10 +33,10 @@ import {
   IconX,
   IconAdjustments,
 } from "@tabler/icons-react";
-import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
-import { TransactionListItem } from "@/components/transaction-list-item";
-import { TransactionListSkeleton } from "@/components/skeleton-loaders";
-import { EmptyState, EmptySearchIcon } from "@/components/empty-state";
+import { EditTransactionDialog } from "@/components/dialogs/edit-transaction-dialog";
+import { TransactionListItem } from "@/components/data-display/transaction-list-item";
+import { TransactionListSkeleton } from "@/components/shared/skeleton-loaders";
+import { EmptyState, EmptySearchIcon } from "@/components/shared/empty-state";
 import { format, isToday, isYesterday, parseISO, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 import { CATEGORY_ICON_MAP } from "@/constants/category-icons";

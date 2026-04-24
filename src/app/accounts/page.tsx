@@ -16,15 +16,15 @@ import {
   IconX 
 } from "@tabler/icons-react";
 import { getAccountIconComponent } from "@/constants/account-icons";
-import { AppLayout } from "@/components/app-layout";
-import { AddAccountDialog } from "@/components/add-account-dialog";
-import { AccountDetailDialog } from "@/components/account-detail-dialog";
-import { AccountsPageSkeleton } from "@/components/skeleton-loaders";
+import { AppLayout } from "@/components/layout/app-layout";
+import { AddAccountDialog } from "@/components/dialogs/add-account-dialog";
+import { AccountDetailDialog } from "@/components/dialogs/account-detail-dialog";
+import { AccountsPageSkeleton } from "@/components/shared/skeleton-loaders";
 import {
   EmptyState,
   EmptyAccountsIcon,
   EmptySearchIcon,
-} from "@/components/empty-state";
+} from "@/components/shared/empty-state";
 import {
   Select,
   SelectContent,
@@ -232,10 +232,6 @@ export default function AccountsPage() {
       <div className="p-4 md:p-6 space-y-4 max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Sumber Dana</h1>
-            <p className="text-sm text-muted-foreground">Kelola rekening, e-wallet, dan dompet Anda</p>
-          </div>
           {!isReordering && accounts && accounts.length > 1 && (
             <Button 
               variant="outline" 
