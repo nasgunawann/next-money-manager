@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import useSessionGuard from "@/hooks/use-session-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts, Account } from "@/hooks/use-accounts";
@@ -31,6 +31,14 @@ import { getCategoryIconComponent } from "@/constants/category-icons";
 import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
 import { ExpenseDonutChart } from "@/components/expense-donut-chart";
 import { useAmountVisibility } from "@/hooks/use-amount-visibility";
+import { WhatsNewDialog } from "@/components/whats-new-dialog";
+import {
+  LATEST_UPDATE_ID,
+  UPDATE_TITLE,
+  UPDATE_VERSION,
+  UPDATE_FEATURES,
+  MINOR_FIXES,
+} from "@/constants/updates";
 
 function withAlpha(color: string, alpha: number) {
   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
@@ -79,9 +87,32 @@ export default function DashboardPage() {
 
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const { visible: amountVisible, toggle: toggleAmountVisible } =
     useAmountVisibility();
+
+  // Show "What's New" dialog once per update version
+  useEffect(() => {
+    const STORAGE_KEY = "last_seen_update";
+    try {
+      const seen = localStorage.getItem(STORAGE_KEY);
+      if (seen !== LATEST_UPDATE_ID) {
+        setWhatsNewOpen(true);
+      }
+    } catch {
+      // localStorage unavailable — silently skip
+    }
+  }, []);
+
+  const handleWhatsNewClose = () => {
+    setWhatsNewOpen(false);
+    try {
+      localStorage.setItem("last_seen_update", LATEST_UPDATE_ID);
+    } catch {
+      // ignore
+    }
+  };
 
   const currencySymbol = getCurrencySymbol(profile?.currency);
   const maskAmount = (value: number) =>
@@ -516,6 +547,15 @@ export default function DashboardPage() {
             setTimeout(() => setSelectedAccount(null), 300);
           }
         }}
+      />
+
+      <WhatsNewDialog
+        open={whatsNewOpen}
+        onClose={handleWhatsNewClose}
+        title={UPDATE_TITLE}
+        version={UPDATE_VERSION}
+        features={UPDATE_FEATURES}
+        minorFixes={MINOR_FIXES}
       />
     </AppLayout>
   );
