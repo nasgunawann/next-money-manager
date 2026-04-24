@@ -68,7 +68,7 @@ export function WhatsNewDialog({
           {minorFixes.length > 0 && (
             <div className="pt-4 border-t border-border">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                Perbaikan Lainnya
+                Lainnya
               </p>
               <ul className="space-y-1.5">
                 {minorFixes.map((fix, i) => (
