@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { SignupForm } from "@/components/auth/signup-form";
 import { LoginForm } from "@/components/auth/login-form";
@@ -14,9 +15,13 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-export function PWAOnboarding() {
+export function PWAOnboarding({
+  initialForm = "none",
+}: {
+  initialForm?: "none" | "login" | "signup";
+} = {}) {
   const [activeForm, setActiveForm] = useState<"none" | "login" | "signup">(
-    "none"
+    initialForm
   );
 
   return (
@@ -33,25 +38,27 @@ export function PWAOnboarding() {
         <div className="space-y-3 md:space-y-6 relative z-10">
           {/* Logo */}
           <motion.div
-            className="flex items-center justify-center md:justify-start gap-3"
+            className="flex items-center justify-center md:justify-start"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Image
-              src="/logo-dark.svg"
-              alt="Kaslo Logo"
-              width={100}
-              height={30}
-              className="hidden dark:block md:w-[150px] md:h-10"
-            />
-            <Image
-              src="/logolight.svg"
-              alt="Kaslo Logo"
-              width={100}
-              height={30}
-              className="dark:hidden md:w-[150px] md:h-10"
-            />
+            <Link href="/" className="flex items-center gap-3">
+              <Image
+                src="/logo-dark.svg"
+                alt="Kaslo Logo"
+                width={100}
+                height={30}
+                className="hidden dark:block md:w-[150px] md:h-10"
+              />
+              <Image
+                src="/logolight.svg"
+                alt="Kaslo Logo"
+                width={100}
+                height={30}
+                className="dark:hidden md:w-[150px] md:h-10"
+              />
+            </Link>
           </motion.div>
 
           <motion.div
@@ -81,11 +88,20 @@ export function PWAOnboarding() {
         >
           <div className="relative h-[280px] sm:h-[280px] md:h-[400px] lg:h-[500px] xl:h-[550px] overflow-hidden">
             <Image
-              src="/mockup.png"
-              alt="App Mockup"
+              src="/dashboard-dark.png"
+              alt="App Mockup Dark"
               width={1659}
               height={1395}
-              className="object-cover object-top"
+              className="hidden dark:block object-cover object-top"
+              quality={100}
+              priority
+            />
+            <Image
+              src="/dashboard-light.png"
+              alt="App Mockup Light"
+              width={1659}
+              height={1395}
+              className="dark:hidden object-cover object-top"
               quality={100}
               priority
             />
