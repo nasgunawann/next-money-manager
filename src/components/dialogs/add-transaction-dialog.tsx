@@ -19,6 +19,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Drawer,
   DrawerContent,
   DrawerDescription,
@@ -88,6 +93,7 @@ export function AddTransactionDialog({
   const [targetAccountDrawerOpen, setTargetAccountDrawerOpen] = useState(false);
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
   const [keypadDrawerOpen, setKeypadDrawerOpen] = useState(false);
+  const [keypadPopoverOpen, setKeypadPopoverOpen] = useState(false);
 
   useEffect(() => {
     if (type === "transfer" && categoryId) {
@@ -475,29 +481,50 @@ export function AddTransactionDialog({
       <div className="space-y-2">
         <Label htmlFor="amount">Jumlah</Label>
         <div className="relative">
-          <span className="absolute left-3 top-2.5 text-muted-foreground">
+          <span className="absolute left-3 top-2.5 text-muted-foreground z-10 pointer-events-none">
             Rp
           </span>
-          <Input
-            id="amount"
-            type="text"
-            inputMode={isDesktop ? "numeric" : "none"}
-            readOnly={!isDesktop}
-            autoComplete="off"
-            placeholder="0"
-            className="pl-9 text-lg font-semibold cursor-text"
-            value={formatNumericInput(amount)}
-            onClick={() => {
-              if (!isDesktop) setKeypadDrawerOpen(true);
-            }}
-            onChange={(e) => {
-              if (isDesktop) {
-                setAmount(sanitizeNumericInput(e.target.value));
-                setIsDirty(true);
-              }
-            }}
-            required
-          />
+          {isDesktop ? (
+            <Popover open={keypadPopoverOpen} onOpenChange={setKeypadPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Input
+                  id="amount"
+                  type="text"
+                  inputMode="none"
+                  readOnly
+                  autoComplete="off"
+                  placeholder="0"
+                  className="pl-9 text-lg font-semibold cursor-pointer"
+                  value={formatNumericInput(amount)}
+                  required
+                />
+              </PopoverTrigger>
+              <PopoverContent className="w-[340px] p-0" side="right" align="start" sideOffset={16}>
+                <CalculatorKeypad
+                  initialValue={sanitizeNumericInput(amount) || "0"}
+                  onConfirm={(val) => {
+                    setAmount(val.toString());
+                    setIsDirty(true);
+                    setKeypadPopoverOpen(false);
+                  }}
+                  onCancel={() => setKeypadPopoverOpen(false)}
+                />
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Input
+              id="amount"
+              type="text"
+              inputMode="none"
+              readOnly
+              autoComplete="off"
+              placeholder="0"
+              className="pl-9 text-lg font-semibold cursor-pointer"
+              value={formatNumericInput(amount)}
+              onClick={() => setKeypadDrawerOpen(true)}
+              required
+            />
+          )}
         </div>
       </div>
 

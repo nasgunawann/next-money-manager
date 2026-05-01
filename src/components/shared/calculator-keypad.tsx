@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { IconBackspace, IconCheck, IconDivide, IconMinus, IconPlus, IconX } from "@tabler/icons-react";
+import { IconBackspace, IconCheck, IconDivide, IconMinus, IconPlus, IconX, IconEqual } from "@tabler/icons-react";
 import { cn, formatNumericInput } from "@/lib/utils";
 
 interface CalculatorKeypadProps {
@@ -19,6 +19,7 @@ export function CalculatorKeypad({
   const [expression, setExpression] = useState(initialValue || "0");
   const [result, setResult] = useState<number | null>(null);
   const [isError, setIsError] = useState(false);
+  const [isAllSelected, setIsAllSelected] = useState(false);
 
   // Safely evaluate simple math expressions
   const evaluateExpression = useCallback((expr: string): number | null => {
@@ -61,10 +62,10 @@ export function CalculatorKeypad({
     }
   }, [expression, evaluateExpression]);
 
-  const handleInput = (char: string) => {
-    if (expression.length >= 20) return; // Guard: Max length 20 characters
-
+  const handleInput = useCallback((char: string) => {
     setExpression((prev) => {
+      if (prev.length >= 20) return prev; // Guard: Max length 20 characters
+
       // Guard: Prevent starting with invalid operators
       const isOperator = (c: string) => ["+", "-", "×", "÷"].includes(c);
       if (prev === "0" && isOperator(char) && char !== "-") {
@@ -85,30 +86,100 @@ export function CalculatorKeypad({
 
       return prev + char;
     });
-  };
+  }, []);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     setExpression((prev) => {
       if (prev.length <= 1) return "0";
       return prev.slice(0, -1);
     });
-  };
+  }, []);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setExpression("0");
     setResult(0);
     setIsError(false);
-  };
+    setIsAllSelected(false);
+  }, []);
 
   const isOperator = (c: string) => ["+", "-", "×", "÷"].includes(c);
   const isIncomplete = isOperator(expression.slice(-1));
   const canConfirm = !isError && !isIncomplete;
 
-  const handleConfirm = () => {
+  const handleEvaluate = useCallback(() => {
+    if (isError || isIncomplete) return;
+    const val = evaluateExpression(expression);
+    if (val !== null) {
+      setExpression(val.toString());
+    }
+  }, [expression, evaluateExpression, isError, isIncomplete]);
+
+  const handleConfirm = useCallback(() => {
     if (!canConfirm) return;
     const finalValue = result !== null ? result : evaluateExpression(expression) || 0;
     onConfirm(Math.abs(Number(finalValue)));
-  };
+  }, [canConfirm, result, expression, evaluateExpression, onConfirm]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Allow default behavior for actual form inputs
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        // Only ignore if it's NOT our specific readonly input
+        if (!e.target.readOnly) return;
+      }
+
+      const key = e.key;
+
+      if ((e.ctrlKey || e.metaKey) && key.toLowerCase() === "a") {
+        e.preventDefault();
+        setIsAllSelected(true);
+        return;
+      }
+
+      if (isAllSelected) {
+        if (key === "Backspace" || key === "Delete") {
+          e.preventDefault();
+          handleClear();
+          return;
+        } else if (key !== "Shift" && key !== "Control" && key !== "Alt" && key !== "Meta") {
+          handleClear();
+          // let it fall through to handle the new input
+        }
+      }
+      
+      if (/[0-9]/.test(key)) {
+        e.preventDefault();
+        handleInput(key);
+      } else if (key === "+" || key === "-") {
+        e.preventDefault();
+        handleInput(key);
+      } else if (key === "*" || key.toLowerCase() === "x") {
+        e.preventDefault();
+        handleInput("×");
+      } else if (key === "/") {
+        e.preventDefault();
+        handleInput("÷");
+      } else if (key === "Backspace") {
+        e.preventDefault();
+        handleDelete();
+      } else if (key === "Enter") {
+        e.preventDefault();
+        handleConfirm();
+      } else if (key === "=") {
+        e.preventDefault();
+        handleEvaluate();
+      } else if (key === "Escape") {
+        e.preventDefault();
+        if (onCancel) onCancel();
+      } else if (key.toLowerCase() === "c") {
+        e.preventDefault();
+        handleClear();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleInput, handleDelete, handleConfirm, handleClear, handleEvaluate, onCancel, isAllSelected]);
 
   const Button = ({
     children,
@@ -201,7 +272,12 @@ export function CalculatorKeypad({
         </div>
 
         <div className="text-right w-full">
-          <div className="text-lg text-muted-foreground font-medium tracking-wide break-all">
+          <div className={cn(
+            "text-lg font-medium tracking-wide break-all transition-colors inline-block",
+            isAllSelected 
+              ? "bg-primary/20 text-primary px-1 rounded" 
+              : "text-muted-foreground"
+          )}>
             {expression.replace(/\d+/g, (match) => match.replace(/\B(?=(\d{3})+(?!\d))/g, "."))}
           </div>
           <div className="text-4xl font-bold tracking-tight mt-1 text-foreground">
@@ -242,19 +318,21 @@ export function CalculatorKeypad({
         <Button onClick={() => handleInput("1")}>1</Button>
         <Button onClick={() => handleInput("2")}>2</Button>
         <Button onClick={() => handleInput("3")}>3</Button>
-
-        <Button 
-          variant="confirm" 
-          onClick={handleConfirm} 
-          className="row-span-2 h-full"
-          disabled={!canConfirm}
-        >
-          <IconCheck size={28} />
+        <Button variant="operator" onClick={handleEvaluate}>
+          <IconEqual size={24} />
         </Button>
 
         <Button onClick={() => handleInput("0")}>0</Button>
         <Button onClick={() => handleInput("00")}>00</Button>
         <Button onClick={() => handleInput("000")}>000</Button>
+        <Button 
+          variant="confirm" 
+          onClick={handleConfirm} 
+          className="h-full"
+          disabled={!canConfirm}
+        >
+          <IconCheck size={28} />
+        </Button>
       </div>
     </div>
   );
