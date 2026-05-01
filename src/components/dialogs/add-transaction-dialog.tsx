@@ -54,6 +54,7 @@ import {
   formatNumericInput,
   sanitizeNumericInput,
   numericInputToNumber,
+  getCurrencySymbol,
   generateTempId,
 } from "@/lib/utils";
 import DatePicker from "@/components/ui/date-picker";
@@ -482,7 +483,7 @@ export function AddTransactionDialog({
         <Label htmlFor="amount">Jumlah</Label>
         <div className="relative">
           <span className="absolute left-3 top-2.5 text-muted-foreground z-10 pointer-events-none">
-            Rp
+            {getCurrencySymbol()}
           </span>
           {isDesktop ? (
             <Popover open={keypadPopoverOpen} onOpenChange={setKeypadPopoverOpen}>
@@ -502,6 +503,7 @@ export function AddTransactionDialog({
               <PopoverContent className="w-[340px] p-0" side="right" align="start" sideOffset={16}>
                 <CalculatorKeypad
                   initialValue={sanitizeNumericInput(amount) || "0"}
+                  currencySymbol={getCurrencySymbol()}
                   onConfirm={(val) => {
                     setAmount(val.toString());
                     setIsDirty(true);
@@ -911,6 +913,7 @@ export function AddTransactionDialog({
         <div className="pb-8">
           <CalculatorKeypad
             initialValue={sanitizeNumericInput(amount) || "0"}
+            currencySymbol={getCurrencySymbol()}
             onConfirm={(val) => {
               setAmount(val.toString());
               setIsDirty(true);

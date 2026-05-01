@@ -7,12 +7,14 @@ import { cn, formatNumericInput } from "@/lib/utils";
 
 interface CalculatorKeypadProps {
   initialValue?: string;
+  currencySymbol?: string;
   onConfirm: (amount: number) => void;
   onCancel?: () => void;
 }
 
 export function CalculatorKeypad({
   initialValue = "",
+  currencySymbol = "Rp",
   onConfirm,
   onCancel,
 }: CalculatorKeypadProps) {
@@ -40,7 +42,8 @@ export function CalculatorKeypad({
 
       if (typeof evaluated === "number" && !isNaN(evaluated)) {
         if (!isFinite(evaluated)) return Infinity;
-        return evaluated;
+        // Round to nearest integer for currency (IDR usually doesn't have decimals)
+        return Math.round(evaluated);
       }
       return null;
     } catch {
@@ -285,7 +288,7 @@ export function CalculatorKeypad({
               <span className="text-destructive">Error</span>
             ) : (
               <>
-                {result !== null && result < 0 ? "-" : ""}Rp {result !== null ? formatNumericInput(Math.abs(result).toString()) : "0"}
+                {result !== null && result < 0 ? "-" : ""}{currencySymbol} {result !== null ? formatNumericInput(Math.abs(result).toString()) : "0"}
               </>
             )}
           </div>
