@@ -40,8 +40,6 @@ import {
   MINOR_FIXES,
 } from "@/constants/updates";
 
-import { IconFileDownload } from "@tabler/icons-react";
-
 function withAlpha(color: string, alpha: number) {
   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
   if (color.startsWith("#")) {

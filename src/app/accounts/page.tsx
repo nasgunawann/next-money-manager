@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion} from "framer-motion";
 
 // DnD Kit Imports
 import {
