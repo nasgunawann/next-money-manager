@@ -10,6 +10,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { ManageCategoriesDialog } from "@/components/dialogs/manage-categories-dialog";
 import { AddAccountDialog } from "@/components/dialogs/add-account-dialog";
 import { AddCategoryDialog } from "@/components/dialogs/add-category-dialog";
+import { CalculatorKeypad } from "@/components/shared/calculator-keypad";
 import {
   Dialog,
   DialogContent,
@@ -86,6 +87,7 @@ export function AddTransactionDialog({
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
   const [targetAccountDrawerOpen, setTargetAccountDrawerOpen] = useState(false);
   const [categoryDrawerOpen, setCategoryDrawerOpen] = useState(false);
+  const [keypadDrawerOpen, setKeypadDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (type === "transfer" && categoryId) {
@@ -479,14 +481,20 @@ export function AddTransactionDialog({
           <Input
             id="amount"
             type="text"
-            inputMode="numeric"
+            inputMode={isDesktop ? "numeric" : "none"}
+            readOnly={!isDesktop}
             autoComplete="off"
             placeholder="0"
-            className="pl-9 text-lg font-semibold"
+            className="pl-9 text-lg font-semibold cursor-text"
             value={formatNumericInput(amount)}
+            onClick={() => {
+              if (!isDesktop) setKeypadDrawerOpen(true);
+            }}
             onChange={(e) => {
-              setAmount(sanitizeNumericInput(e.target.value));
-              setIsDirty(true);
+              if (isDesktop) {
+                setAmount(sanitizeNumericInput(e.target.value));
+                setIsDirty(true);
+              }
             }}
             required
           />
@@ -864,6 +872,30 @@ export function AddTransactionDialog({
     </Drawer>
   );
 
+  const keypadDrawer = (
+    <Drawer open={keypadDrawerOpen} onOpenChange={setKeypadDrawerOpen}>
+      <DrawerContent className="bg-zinc-50 dark:bg-zinc-950">
+        <DrawerHeader className="text-left sr-only">
+          <DrawerTitle>Kalkulator Input</DrawerTitle>
+          <DrawerDescription>
+            Masukkan jumlah transaksi atau hitung terlebih dahulu.
+          </DrawerDescription>
+        </DrawerHeader>
+        <div className="pb-8">
+          <CalculatorKeypad
+            initialValue={sanitizeNumericInput(amount) || "0"}
+            onConfirm={(val) => {
+              setAmount(val.toString());
+              setIsDirty(true);
+              setKeypadDrawerOpen(false);
+            }}
+            onCancel={() => setKeypadDrawerOpen(false)}
+          />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+
   if (isDesktop) {
     return (
       <>
@@ -879,6 +911,7 @@ export function AddTransactionDialog({
         {accountDrawer}
         {targetDrawer}
         {categoryDrawer}
+        {keypadDrawer}
         {errorDialog}
         {unsavedDialog}
       </>
@@ -903,6 +936,7 @@ export function AddTransactionDialog({
       {accountDrawer}
       {targetDrawer}
       {categoryDrawer}
+      {keypadDrawer}
       {errorDialog}
       {unsavedDialog}
     </>
