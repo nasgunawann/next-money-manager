@@ -39,7 +39,8 @@ export const UPDATES_HISTORY: UpdateInfo[] = [
     minorFixes: [
       "Dashboard dan Laporan kini lebih cepat karena optimasi logika perhitungan data yang baru",
       "Perbaikan peringatan build pada dokumen PDF Laporan Bulanan.",
-      "Penyempurnaan tata letak dialog transaksi untuk layar lebar agar tidak menutupi form."
+      "Penyempurnaan tata letak dialog transaksi untuk layar lebar agar tidak menutupi form.",
+      "Peningkatan keamanan melalui migrasi Server Actions dan implementasi Optimistic UI.",
     ]
   },
   {

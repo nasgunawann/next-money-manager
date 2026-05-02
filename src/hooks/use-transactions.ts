@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import {
+  createTransactionAction,
+  updateTransactionAction,
+  deleteTransactionAction,
+} from "@/app/actions/transactions";
 
 export interface Transaction {
   id: string;
@@ -40,126 +45,59 @@ export function useTransactions() {
     mutationFn: async (
       newTransaction: Omit<Transaction, "id" | "account" | "category">
     ) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // 1. Insert Transaction
-      const { data: transaction, error: txError } = await supabase
-        .from("transactions")
-        .insert({ ...newTransaction, user_id: user.id })
-        .select()
-        .single();
-
-      if (txError) throw txError;
-
-      // 2. Update Account Balance
-      let balanceChange = 0;
-      if (newTransaction.type === "income") {
-        balanceChange = newTransaction.amount;
-      } else if (newTransaction.type === "expense") {
-        balanceChange = -newTransaction.amount;
-      }
-
-      if (balanceChange !== 0) {
-        const { error: balanceError } = await supabase.rpc(
-          "increment_balance",
-          {
-            account_id: newTransaction.account_id,
-            amount: balanceChange,
-          }
-        );
-        if (balanceError) throw balanceError;
-      }
-
-      return transaction;
+      return createTransactionAction(newTransaction);
     },
-    onSuccess: () => {
+    onMutate: async (newTx) => {
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
+      const previousTx = queryClient.getQueryData<Transaction[]>(["transactions"]);
+
+      // Optimistic update
+      const optimisticTx: Transaction = {
+        ...newTx,
+        id: crypto.randomUUID(), // temporary ID
+      };
+
+      queryClient.setQueryData<Transaction[]>(["transactions"], (old) => {
+        return old ? [optimisticTx, ...old] : [optimisticTx];
+      });
+
+      return { previousTx };
+    },
+    onError: (err, newTx, context) => {
+      if (context?.previousTx) {
+        queryClient.setQueryData(["transactions"], context.previousTx);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      ...updates
-    }: Partial<Transaction> & { id: string }) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // 1. Get old transaction to revert balance
-      const { data: oldTx } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (!oldTx) throw new Error("Transaction not found");
-
-      // 2. Revert old balance
-      let revertAmount = 0;
-      if (oldTx.type === "income") revertAmount = -oldTx.amount;
-      if (oldTx.type === "expense") revertAmount = oldTx.amount;
-
-      if (oldTx.type !== "transfer") {
-        await supabase.rpc("increment_balance", {
-          account_id: oldTx.account_id,
-          amount: revertAmount,
-        });
-      }
-
-      // 3. Check balance for expenses (after reverting old amount)
-      if (updates.type === "expense" || (oldTx.type === "expense" && !updates.type)) {
-        const newAmount = updates.amount ?? oldTx.amount;
-        const accountId = updates.account_id ?? oldTx.account_id;
-        
-        const { data: account } = await supabase
-          .from("accounts")
-          .select("balance")
-          .eq("id", accountId)
-          .single();
-
-        if (account && account.balance < newAmount) {
-          // Revert the balance back since validation failed
-          if (oldTx.type !== "transfer") {
-            await supabase.rpc("increment_balance", {
-              account_id: oldTx.account_id,
-              amount: -revertAmount,
-            });
-          }
-          throw new Error("Saldo tidak mencukupi untuk pengeluaran ini");
-        }
-      }
-
-      // 4. Update Transaction
-      const { data: updatedTx, error } = await supabase
-        .from("transactions")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // 5. Apply new balance
-      if (updatedTx.type !== "transfer") {
-        let newAmount = 0;
-        if (updatedTx.type === "income") newAmount = updatedTx.amount;
-        if (updatedTx.type === "expense") newAmount = -updatedTx.amount;
-
-        await supabase.rpc("increment_balance", {
-          account_id: updatedTx.account_id,
-          amount: newAmount,
-        });
-      }
-
-      return updatedTx;
+    mutationFn: async (updates: Partial<Transaction> & { id: string }) => {
+      return updateTransactionAction(updates);
     },
-    onSuccess: () => {
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
+      const previousTx = queryClient.getQueryData<Transaction[]>(["transactions"]);
+
+      // Optimistic update
+      queryClient.setQueryData<Transaction[]>(["transactions"], (old) => {
+        if (!old) return old;
+        return old.map((tx) =>
+          tx.id === updates.id ? { ...tx, ...updates } : tx
+        );
+      });
+
+      return { previousTx };
+    },
+    onError: (err, updates, context) => {
+      if (context?.previousTx) {
+        queryClient.setQueryData(["transactions"], context.previousTx);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
@@ -167,66 +105,26 @@ export function useTransactions() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // 1. Get transaction to revert balance
-      const { data: tx } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (!tx) throw new Error("Transaction not found");
-
-      // 2. Revert balance based on transaction type
-      if (tx.type === "income") {
-        await supabase.rpc("increment_balance", {
-          account_id: tx.account_id,
-          amount: -tx.amount,
-        });
-      } else if (tx.type === "expense") {
-        await supabase.rpc("increment_balance", {
-          account_id: tx.account_id,
-          amount: tx.amount,
-        });
-      } else if (tx.type === "transfer") {
-        // For transfer: revert both accounts
-        // This transaction took money OUT of the account_id, so add it back
-        await supabase.rpc("increment_balance", {
-          account_id: tx.account_id,
-          amount: tx.amount,
-        });
-
-        // Find and revert the related transaction (the receiving side)
-        if (tx.related_transaction_id) {
-          const { data: relatedTx } = await supabase
-            .from("transactions")
-            .select("*")
-            .eq("id", tx.related_transaction_id)
-            .single();
-
-          if (relatedTx) {
-            // Remove money from the account that received it
-            await supabase.rpc("increment_balance", {
-              account_id: relatedTx.account_id,
-              amount: -relatedTx.amount,
-            });
-
-            // Delete the related transaction too
-            await supabase
-              .from("transactions")
-              .delete()
-              .eq("id", relatedTx.id);
-          }
-        }
-      }
-
-      // 3. Delete the main transaction
-      const { error } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", id);
-      if (error) throw error;
+      return deleteTransactionAction(id);
     },
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["transactions"] });
+      const previousTx = queryClient.getQueryData<Transaction[]>(["transactions"]);
+
+      // Optimistic update
+      queryClient.setQueryData<Transaction[]>(["transactions"], (old) => {
+        if (!old) return old;
+        return old.filter((tx) => tx.id !== id);
+      });
+
+      return { previousTx };
+    },
+    onError: (err, id, context) => {
+      if (context?.previousTx) {
+        queryClient.setQueryData(["transactions"], context.previousTx);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
