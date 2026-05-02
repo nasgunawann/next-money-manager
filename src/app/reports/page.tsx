@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { AppLayout } from "@/components/layout/app-layout";
 import { useTransactions, type Transaction } from "@/hooks/use-transactions";
@@ -21,6 +22,7 @@ const PDFDownloadLink = dynamic(
 );
 
 export default function ReportsPage() {
+  const router = useRouter();
   const { data: profile } = useProfile();
   const { data: transactions, isLoading } = useTransactions();
 
@@ -91,7 +93,7 @@ export default function ReportsPage() {
   const expenseByCategory = useMemo(() => {
     const map = new Map<
       string,
-      { name: string; value: number; color: string; icon?: string }
+      { name: string; value: number; color: string; icon?: string; id?: string }
     >();
     monthTransactions
       .filter((t) => t.type === "expense")
@@ -99,11 +101,12 @@ export default function ReportsPage() {
         const name = t.category?.name || "Lainnya";
         const color = t.category?.color || "#94a3b8";
         const icon = t.category?.icon || "more-horizontal";
+        const id = t.category_id || "others";
         const existing = map.get(name);
         if (existing) {
           existing.value += t.amount;
         } else {
-          map.set(name, { name, value: t.amount, color, icon });
+          map.set(name, { name, value: t.amount, color, icon, id });
         }
       });
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
@@ -269,7 +272,19 @@ export default function ReportsPage() {
                 const percent =
                   totalExpense > 0 ? (cat.value / totalExpense) * 100 : 0;
                 return (
-                  <Card key={i} className="border-none shadow-sm p-2">
+                  <Card
+                    key={i}
+                    className="border-none shadow-sm p-2 cursor-pointer hover:bg-muted/50 transition-colors active:scale-[0.98]"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      params.set("month", selectedMonth);
+                      params.set("year", selectedYear);
+                      if (cat.id && cat.id !== "others") {
+                        params.set("category", cat.id);
+                      }
+                      router.push(`/transactions?${params.toString()}`);
+                    }}
+                  >
                     <CardContent className="p-2">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 flex-1">
