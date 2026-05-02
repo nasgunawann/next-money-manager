@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { updateAccountsOrderAction } from "@/app/actions/accounts";
 
 export interface Account {
   id: string;
@@ -44,25 +45,29 @@ export function useUpdateAccountsOrder() {
 
   return useMutation({
     mutationFn: async (updates: { id: string; sort_order: number }[]) => {
-      const promises = updates.map((u) =>
-        supabase
-          .from("accounts")
-          .update({ sort_order: u.sort_order })
-          .eq("id", u.id)
-      );
+      await updateAccountsOrderAction(updates);
+    },
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ["accounts"] });
+      const previousAccounts = queryClient.getQueryData<Account[]>(["accounts"]);
 
-      const results = await Promise.all(promises);
-      const errors = results.filter((r) => r.error).map((r) => r.error);
+      // Optimistic update
+      queryClient.setQueryData<Account[]>(["accounts"], (old) => {
+        if (!old) return old;
+        return old.map(acc => {
+          const update = updates.find(u => u.id === acc.id);
+          return update ? { ...acc, sort_order: update.sort_order } : acc;
+        }).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      });
 
-      if (errors.length > 0) {
-        // Jika gagal karena kolom tidak ada, beri tahu user lebih spesifik
-        if (errors.some(e => e?.message?.includes("sort_order"))) {
-          throw new Error("Kolom 'sort_order' belum ada di database. Silakan tambah kolom tersebut di Supabase.");
-        }
-        throw new Error("Gagal mengupdate urutan beberapa akun");
+      return { previousAccounts };
+    },
+    onError: (err, updates, context) => {
+      if (context?.previousAccounts) {
+        queryClient.setQueryData(["accounts"], context.previousAccounts);
       }
     },
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
   });
