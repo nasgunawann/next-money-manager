@@ -1,5 +1,6 @@
 "use server";
 
+import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@/lib/supabase/server";
 import {
   createTransactionSchema,
@@ -10,7 +11,7 @@ import {
 
 // Helper to verify account ownership
 async function verifyAccountOwnership(
-  supabase: any,
+  supabase: ReturnType<typeof createServerClient>,
   accountId: string,
   userId: string
 ) {

@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
   },
   // Compress output
   compress: true,
+  // Transpile ESM packages
+  transpilePackages: ["@react-pdf/renderer"],
 };
 
 export default withSerwist(nextConfig);
