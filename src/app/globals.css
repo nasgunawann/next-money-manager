@@ -45,11 +45,6 @@
   --sidebar-accent-foreground: oklch(0.25 0.015 260);
   --sidebar-border: oklch(0.9 0.008 260);
   --sidebar-ring: oklch(0.55 0.22 260);
-  --font-sans: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-serif: Georgia, "Times New Roman", Times, serif;
-  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, "Liberation Mono", "Courier New", monospace;
   --radius: 1.4rem;
   --shadow-x: 0px;
   --shadow-y: 2px;
@@ -116,11 +111,6 @@
   --sidebar-accent-foreground: oklch(0.7 0.2 260);
   --sidebar-border: oklch(0.32 0.012 260);
   --sidebar-ring: oklch(0.7 0.2 260);
-  --font-sans: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-serif: Georgia, "Times New Roman", Times, serif;
-  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, "Liberation Mono", "Courier New", monospace;
   --radius: 1.4rem;
   --shadow-x: 0px;
   --shadow-y: 2px;
@@ -204,6 +194,7 @@
 }
 
 body {
+  font-family: var(--font-sans);
   letter-spacing: var(--tracking-normal);
 }
 
