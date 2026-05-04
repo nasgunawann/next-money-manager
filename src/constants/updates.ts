@@ -16,7 +16,7 @@ export const UPDATES_HISTORY: UpdateInfo[] = [
   {
     id: "040526-pwa-ux-hotfix",
     version: "Beta v0.3.2",
-    title: "Startup Lebih Mulus!",
+    title: "HOTFIX: Startup Lebih Mulus!",
     date: "2026-05-04",
     features: [
       {
