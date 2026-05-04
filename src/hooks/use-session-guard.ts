@@ -18,7 +18,10 @@ export default function useSessionGuard() {
       cachedStatus = nextStatus;
       if (!isMounted) return;
       setStatus(nextStatus);
-      if (nextStatus === "unauthenticated") {
+      
+      // Only redirect if we are explicitly unauthenticated
+      // This avoids flashing the login page during transitions or if getUser is slow
+      if (nextStatus === "unauthenticated" && window.location.pathname !== "/login") {
         router.replace("/login");
       }
     };

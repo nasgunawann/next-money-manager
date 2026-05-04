@@ -9,12 +9,15 @@ import { PWAOnboarding } from "@/components/pwa/pwa-onboarding";
 export default function Home() {
   const router = useRouter();
   const [isPWA, setIsPWA] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is already logged in
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         router.replace("/dashboard");
+      } else {
+        setLoading(false);
       }
     });
 
@@ -33,7 +36,9 @@ export default function Home() {
     checkPWA();
   }, [router]);
 
-  // We no longer defer rendering with null to ensure SEO crawlers see the LandingPage content during SSR
+  if (loading) {
+    return <div className="min-h-screen bg-background" />;
+  }
 
   if (isPWA) {
     return <PWAOnboarding />;

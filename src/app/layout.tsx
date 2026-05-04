@@ -97,6 +97,37 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var isRoot = window.location.pathname === '/';
+                  if (!isRoot) return;
+
+                  var storage = window.localStorage;
+                  var hasSession = false;
+                  for (var i = 0; i < storage.length; i++) {
+                    var key = storage.key(i);
+                    if (key && key.indexOf('-auth-token') !== -1) {
+                      var session = storage.getItem(key);
+                      if (session && session !== 'null') {
+                        hasSession = true;
+                        break;
+                      }
+                    }
+                  }
+                  
+                  if (hasSession) {
+                    window.location.replace('/dashboard');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased`}
       >

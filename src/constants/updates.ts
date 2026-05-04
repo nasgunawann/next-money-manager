@@ -14,6 +14,26 @@ export interface UpdateInfo {
 
 export const UPDATES_HISTORY: UpdateInfo[] = [
   {
+    id: "040526-pwa-ux-hotfix",
+    version: "Beta v0.3.2",
+    title: "HOTFIX: Startup Lebih Mulus!",
+    date: "2026-05-04",
+    features: [
+      {
+        title: "🚀 Instant Startup",
+        description: "Login jadi lebih cepat! Tidak ada lagi 'flash' halaman landing saat Anda membuka aplikasi dalam keadaan sudah login.",
+      },
+      {
+        title: "🛠️ PWA UX Improvement",
+        description: "Aplikasi kini mendeteksi status login Anda lebih awal untuk navigasi yang lebih mulus di mode PWA.",
+      }
+    ],
+    minorFixes: [
+      "Perbaikan flash halaman login saat memuat dashboard.",
+      "Optimasi sistem guard sesi untuk pengalaman navigasi yang lebih stabil."
+    ]
+  },
+  {
     id: "260424-reorder-calculator-update",
     version: "Beta v0.3.1",
     title: "Ada yang baru!",
