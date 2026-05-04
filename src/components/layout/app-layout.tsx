@@ -1,7 +1,7 @@
 "use client";
 
-import { MobileNav } from "@/components/mobile-nav";
-import { DesktopSidebar } from "@/components/desktop-sidebar";
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { DesktopSidebar } from "@/components/layout/desktop-sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";

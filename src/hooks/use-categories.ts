@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { deleteCategoryAction } from "@/app/actions/categories";
 
 export interface Category {
   id: string;
@@ -59,43 +60,26 @@ export function useCategories() {
 
   const deleteMutation = useMutation({
     mutationFn: async (categoryId: string) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Check if category is user-made
-      const { data: category } = await supabase
-        .from("categories")
-        .select("user_id")
-        .eq("id", categoryId)
-        .single();
-
-      if (!category || category.user_id !== user.id) {
-        throw new Error("Hanya kategori buatan Anda yang dapat dihapus");
-      }
-
-      // Check if category is used in transactions
-      const { data: transactions } = await supabase
-        .from("transactions")
-        .select("id")
-        .eq("category_id", categoryId)
-        .limit(1);
-
-      if (transactions && transactions.length > 0) {
-        throw new Error(
-          "Kategori sedang digunakan dalam transaksi. Tidak dapat dihapus."
-        );
-      }
-
-      const { error } = await supabase
-        .from("categories")
-        .delete()
-        .eq("id", categoryId);
-
-      if (error) throw error;
+      await deleteCategoryAction({ id: categoryId });
     },
-    onSuccess: () => {
+    onMutate: async (categoryId) => {
+      await queryClient.cancelQueries({ queryKey: ["categories"] });
+      const previousCategories = queryClient.getQueryData<Category[]>(["categories"]);
+
+      // Optimistic update
+      queryClient.setQueryData<Category[]>(["categories"], (old) => {
+        if (!old) return old;
+        return old.filter((cat) => cat.id !== categoryId);
+      });
+
+      return { previousCategories };
+    },
+    onError: (err, categoryId, context) => {
+      if (context?.previousCategories) {
+        queryClient.setQueryData(["categories"], context.previousCategories);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
   });

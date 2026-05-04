@@ -21,17 +21,17 @@ import {
   IconEye,
   IconEyeOff,
 } from "@tabler/icons-react";
-import { AppLayout } from "@/components/app-layout";
-import { AddAccountDialog } from "@/components/add-account-dialog";
-import { AccountDetailDialog } from "@/components/account-detail-dialog";
-import { TransactionListItem } from "@/components/transaction-list-item";
-import { DashboardSkeleton } from "@/components/skeleton-loaders";
+import { AppLayout } from "@/components/layout/app-layout";
+import { AddAccountDialog } from "@/components/dialogs/add-account-dialog";
+import { AccountDetailDialog } from "@/components/dialogs/account-detail-dialog";
+import { TransactionListItem } from "@/components/data-display/transaction-list-item";
+import { DashboardSkeleton } from "@/components/shared/skeleton-loaders";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { getCategoryIconComponent } from "@/constants/category-icons";
-import { EmptyState, EmptyTransactionsIcon } from "@/components/empty-state";
-import { ExpenseDonutChart } from "@/components/expense-donut-chart";
+import { EmptyState, EmptyTransactionsIcon } from "@/components/shared/empty-state";
+import { ExpenseDonutChart } from "@/components/data-display/expense-donut-chart";
 import { useAmountVisibility } from "@/hooks/use-amount-visibility";
-import { WhatsNewDialog } from "@/components/whats-new-dialog";
+import { WhatsNewDialog } from "@/components/dialogs/whats-new-dialog";
 import {
   LATEST_UPDATE_ID,
   UPDATE_TITLE,
@@ -39,8 +39,6 @@ import {
   UPDATE_FEATURES,
   MINOR_FIXES,
 } from "@/constants/updates";
-
-import { IconFileDownload } from "@tabler/icons-react";
 
 function withAlpha(color: string, alpha: number) {
   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
@@ -128,41 +126,34 @@ export default function DashboardPage() {
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
-  const monthlyIncome =
-    transactions
-      ?.filter((t) => {
-        const txDate = new Date(t.date);
-        return (
-          t.type === "income" &&
-          txDate.getMonth() === currentMonth &&
-          txDate.getFullYear() === currentYear
-        );
-      })
-      .reduce((acc, t) => acc + t.amount, 0) || 0;
-
-  const monthlyExpense =
-    transactions
-      ?.filter((t) => {
-        const txDate = new Date(t.date);
-        return (
-          t.type === "expense" &&
-          txDate.getMonth() === currentMonth &&
-          txDate.getFullYear() === currentYear
-        );
-      })
-      .reduce((acc, t) => acc + t.amount, 0) || 0;
-
-  // Calculate expense by category for donut chart
-  const expenseByCategory = (() => {
-    const monthTx =
+  // Filtered transactions for the current month's report
+  const currentMonthTransactions = useMemo(() => {
+    return (
       transactions?.filter((t) => {
         const txDate = new Date(t.date);
         return (
-          t.type === "expense" &&
           txDate.getMonth() === currentMonth &&
           txDate.getFullYear() === currentYear
         );
-      }) || [];
+      }) || []
+    );
+  }, [transactions, currentMonth, currentYear]);
+
+  const monthlyIncome = useMemo(() => {
+    return currentMonthTransactions
+      .filter((t) => t.type === "income")
+      .reduce((acc, t) => acc + t.amount, 0);
+  }, [currentMonthTransactions]);
+
+  const monthlyExpense = useMemo(() => {
+    return currentMonthTransactions
+      .filter((t) => t.type === "expense")
+      .reduce((acc, t) => acc + t.amount, 0);
+  }, [currentMonthTransactions]);
+
+  // Calculate expense by category for donut chart
+  const expenseByCategory = useMemo(() => {
+    const monthTx = currentMonthTransactions.filter((t) => t.type === "expense");
 
     const map = new Map<
       string,
@@ -182,20 +173,9 @@ export default function DashboardPage() {
     });
 
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
-  })();
+  }, [currentMonthTransactions]);
 
-  // Filtered transactions for the current month's report
-  const currentMonthTransactions = useMemo(() => {
-    return (
-      transactions?.filter((t) => {
-        const txDate = new Date(t.date);
-        return (
-          txDate.getMonth() === currentMonth &&
-          txDate.getFullYear() === currentYear
-        );
-      }) || []
-    );
-  }, [transactions, currentMonth, currentYear]);
+
 
   const reportPeriodLabel = new Date().toLocaleDateString("id-ID", {
     month: "long",

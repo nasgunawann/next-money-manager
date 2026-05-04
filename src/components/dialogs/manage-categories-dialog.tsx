@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useCategories } from "@/hooks/use-categories";
-import { AddCategoryDialog } from "@/components/add-category-dialog";
+import { AddCategoryDialog } from "@/components/dialogs/add-category-dialog";
 import { useProfile } from "@/hooks/use-profile";
 import {
   Dialog,

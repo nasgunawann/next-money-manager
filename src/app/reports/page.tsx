@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { AppLayout } from "@/components/app-layout";
-import { useTransactions } from "@/hooks/use-transactions";
+import { AppLayout } from "@/components/layout/app-layout";
+import { useTransactions, type Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { useAccounts } from "@/hooks/use-accounts";
 import { formatCurrency, getCurrencySymbol } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { IconChevronLeft, IconChevronRight, IconFileDownload } from "@tabler/icons-react";
 import { getCategoryIconComponent } from "@/constants/category-icons";
-import { ReportsSkeleton } from "@/components/skeleton-loaders";
-import { EmptyState, EmptyReportsIcon } from "@/components/empty-state";
-import { ExpenseDonutChart } from "@/components/expense-donut-chart";
-import { MonthlyReportPDF } from "@/components/monthly-report-pdf";
+import { ReportsSkeleton } from "@/components/shared/skeleton-loaders";
+import { EmptyState, EmptyReportsIcon } from "@/components/shared/empty-state";
+import { ExpenseDonutChart } from "@/components/data-display/expense-donut-chart";
+import { MonthlyReportPDF } from "@/components/reports/monthly-report-pdf";
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
@@ -21,6 +22,7 @@ const PDFDownloadLink = dynamic(
 );
 
 export default function ReportsPage() {
+  const router = useRouter();
   const { data: profile } = useProfile();
   const { data: transactions, isLoading } = useTransactions();
 
@@ -77,7 +79,7 @@ export default function ReportsPage() {
     setSelectedYear(year.toString());
   };
 
-  const getMonthTransactions = () => {
+  const monthTransactions = useMemo<Transaction[]>(() => {
     const month = parseInt(selectedMonth);
     const year = parseInt(selectedYear);
     return (
@@ -86,74 +88,74 @@ export default function ReportsPage() {
         return d.getMonth() === month && d.getFullYear() === year;
       }) || []
     );
-  };
+  }, [transactions, selectedMonth, selectedYear]);
 
-  const expenseByCategory = (() => {
-    const monthTx = getMonthTransactions();
+  const expenseByCategory = useMemo(() => {
     const map = new Map<
       string,
-      { name: string; value: number; color: string; icon?: string }
+      { name: string; value: number; color: string; icon?: string; id?: string }
     >();
-    monthTx
+    monthTransactions
       .filter((t) => t.type === "expense")
       .forEach((t) => {
         const name = t.category?.name || "Lainnya";
         const color = t.category?.color || "#94a3b8";
         const icon = t.category?.icon || "more-horizontal";
+        const id = t.category_id || "others";
         const existing = map.get(name);
         if (existing) {
           existing.value += t.amount;
         } else {
-          map.set(name, { name, value: t.amount, color, icon });
+          map.set(name, { name, value: t.amount, color, icon, id });
         }
       });
     return Array.from(map.values()).sort((a, b) => b.value - a.value);
-  })();
+  }, [monthTransactions]);
 
-  const totalIncome = getMonthTransactions().reduce(
-    (sum, t) => (t.type === "income" ? sum + t.amount : sum),
-    0
-  );
-
-  const totalTransfer = getMonthTransactions().reduce(
-    (sum, t) => (t.type === "transfer" ? sum + t.amount : sum),
-    0
-  );
-
-  const totalExpense = getMonthTransactions().reduce(
-    (sum, t) => (t.type === "expense" ? sum + t.amount : sum),
-    0
-  );
+  const { totalIncome, totalExpense, totalTransfer } = useMemo(() => {
+    return monthTransactions.reduce(
+      (acc, t) => {
+        if (t.type === "income") acc.totalIncome += t.amount;
+        else if (t.type === "expense") acc.totalExpense += t.amount;
+        else if (t.type === "transfer") acc.totalTransfer += t.amount;
+        return acc;
+      },
+      { totalIncome: 0, totalExpense: 0, totalTransfer: 0 }
+    );
+  }, [monthTransactions]);
 
   const { data: accounts } = useAccounts();
 
-  const currentTotalBalance = accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0;
+  const currentTotalBalance = useMemo(() => {
+    return accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0;
+  }, [accounts]);
 
-  const initialBalance = transactions?.reduce((balance, t) => {
-    const tDate = new Date(t.date);
-    const selMonth = parseInt(selectedMonth);
-    const selYear = parseInt(selectedYear);
+  const initialBalance = useMemo(() => {
+    return (
+      transactions?.reduce((balance, t) => {
+        const tDate = new Date(t.date);
+        const selMonth = parseInt(selectedMonth);
+        const selYear = parseInt(selectedYear);
+        const startOfSelectedMonth = new Date(selYear, selMonth, 1);
 
-    // Tentukan batas awal bulan yang dipilih
-    const startOfSelectedMonth = new Date(selYear, selMonth, 1);
-
-    // Jika transaksi terjadi PADA atau SETELAH awal bulan yang dipilih,
-    // kita kurangi (pemasukan) atau tambahkan (pengeluaran) dari saldo saat ini 
-    // untuk mendapatkan saldo di masa lalu.
-    if (tDate >= startOfSelectedMonth) {
-      if (t.type === "income") return balance - t.amount;
-      if (t.type === "expense") return balance + t.amount;
-    }
-    return balance;
-  }, currentTotalBalance) || 0;
+        if (tDate >= startOfSelectedMonth) {
+          if (t.type === "income") return balance - t.amount;
+          if (t.type === "expense") return balance + t.amount;
+        }
+        return balance;
+      }, currentTotalBalance) || 0
+    );
+  }, [transactions, selectedMonth, selectedYear, currentTotalBalance]);
 
   const reportPeriodLabel = `${months[parseInt(selectedMonth)]} ${selectedYear}`;
 
   // Find earliest transaction month for prev button boundary
-  const earliestTransaction = transactions?.reduce((earliest, t) => {
-    const tDate = new Date(t.date);
-    return !earliest || tDate < earliest ? tDate : earliest;
-  }, null as Date | null);
+  const earliestTransaction = useMemo(() => {
+    return transactions?.reduce((earliest, t) => {
+      const tDate = new Date(t.date);
+      return !earliest || tDate < earliest ? tDate : earliest;
+    }, null as Date | null);
+  }, [transactions]);
 
   const earliestMonth = earliestTransaction?.getMonth();
   const earliestYear = earliestTransaction?.getFullYear();
@@ -218,12 +220,12 @@ export default function ReportsPage() {
         </div>
 
         {/* Action Bar */}
-        {!isLoading && getMonthTransactions().length > 0 && isClient && (
+        {!isLoading && monthTransactions.length > 0 && isClient && (
           <div className="flex justify-center mb-6">
             <PDFDownloadLink
               document={
                 <MonthlyReportPDF
-                  transactions={getMonthTransactions()}
+                  transactions={monthTransactions}
                   profileName={profile?.full_name || "User"}
                   period={reportPeriodLabel}
                   currency={getCurrencySymbol(profile?.currency)}
@@ -270,7 +272,19 @@ export default function ReportsPage() {
                 const percent =
                   totalExpense > 0 ? (cat.value / totalExpense) * 100 : 0;
                 return (
-                  <Card key={i} className="border-none shadow-sm p-2">
+                  <Card
+                    key={i}
+                    className="border-none shadow-sm p-2 cursor-pointer hover:bg-muted/50 transition-colors active:scale-[0.98]"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      params.set("month", selectedMonth);
+                      params.set("year", selectedYear);
+                      if (cat.id && cat.id !== "others") {
+                        params.set("category", cat.id);
+                      }
+                      router.push(`/transactions?${params.toString()}`);
+                    }}
+                  >
                     <CardContent className="p-2">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 flex-1">

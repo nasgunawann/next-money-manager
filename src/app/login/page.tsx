@@ -1,7 +1,7 @@
 "use client";
 
-import { LoginForm } from "@/components/auth/login-form";
+import { PWAOnboarding } from "@/components/pwa/pwa-onboarding";
 
 export default function LoginPage() {
-  return <LoginForm />;
+  return <PWAOnboarding initialForm="login" />;
 }

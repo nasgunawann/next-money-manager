@@ -35,8 +35,8 @@ const geistMono = Geist_Mono({
   ],
 });
 
-import Providers from "@/components/providers";
-import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
+import Providers from "@/components/shared/providers";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 
 export const metadata: Metadata = {
   title: "Kaslo",
@@ -96,7 +96,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased`}
       >

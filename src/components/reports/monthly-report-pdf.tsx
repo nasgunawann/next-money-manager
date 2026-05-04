@@ -171,6 +171,7 @@ export function MonthlyReportPDF({
       <Page size="A4" style={styles.page}>
         {/* Logo Section */}
         <View style={{ marginBottom: 10 }}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           <Image src="/logolight.svg" style={styles.logo} />
         </View>
 

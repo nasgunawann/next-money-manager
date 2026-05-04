@@ -1,7 +1,7 @@
 "use client";
 
-import { SignupForm } from "@/components/auth/signup-form";
+import { PWAOnboarding } from "@/components/pwa/pwa-onboarding";
 
 export default function SignupPage() {
-  return <SignupForm />;
+  return <PWAOnboarding initialForm="signup" />;
 }

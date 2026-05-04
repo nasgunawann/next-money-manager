@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { AppLayout } from "@/components/app-layout";
+import { useEffect, useMemo, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { AppLayout } from "@/components/layout/app-layout";
 import { useTransactions, Transaction } from "@/hooks/use-transactions";
 import { useProfile } from "@/hooks/use-profile";
 import { useCategories } from "@/hooks/use-categories";
@@ -33,16 +34,17 @@ import {
   IconX,
   IconAdjustments,
 } from "@tabler/icons-react";
-import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
-import { TransactionListItem } from "@/components/transaction-list-item";
-import { TransactionListSkeleton } from "@/components/skeleton-loaders";
-import { EmptyState, EmptySearchIcon } from "@/components/empty-state";
+import { EditTransactionDialog } from "@/components/dialogs/edit-transaction-dialog";
+import { TransactionListItem } from "@/components/data-display/transaction-list-item";
+import { TransactionListSkeleton } from "@/components/shared/skeleton-loaders";
+import { EmptyState, EmptySearchIcon } from "@/components/shared/empty-state";
 import { format, isToday, isYesterday, parseISO, startOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 import { CATEGORY_ICON_MAP } from "@/constants/category-icons";
 import { ACCOUNT_ICON_MAP } from "@/constants/account-icons";
 
-export default function TransactionsPage() {
+function TransactionsContent() {
+  const searchParams = useSearchParams();
   const { data: profile } = useProfile();
   const { data: transactionsData, isLoading } = useTransactions();
   const { data: categories } = useCategories();
@@ -82,6 +84,20 @@ export default function TransactionsPage() {
     setSelectedTransaction(transaction);
     setIsEditOpen(true);
   };
+
+  // Sync with URL search params
+  useEffect(() => {
+    const month = searchParams.get("month");
+    const year = searchParams.get("year");
+    const category = searchParams.get("category");
+
+    if (month) setSelectedMonth(month);
+    if (year) setSelectedYear(year);
+    if (category) {
+      setSelectedCategories([category]);
+      setTypeFilter("expense");
+    }
+  }, [searchParams]);
 
   const filteredTransactions = useMemo(
     () =>
@@ -557,5 +573,13 @@ export default function TransactionsPage() {
         onOpenChange={setIsEditOpen}
       />
     </AppLayout>
+  );
+}
+
+export default function TransactionsPage() {
+  return (
+    <Suspense fallback={<AppLayout><TransactionListSkeleton count={10} /></AppLayout>}>
+      <TransactionsContent />
+    </Suspense>
   );
 }

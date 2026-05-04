@@ -10,7 +10,7 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { AddTransactionDialog } from "./add-transaction-dialog";
+import { AddTransactionDialog } from "@/components/dialogs/add-transaction-dialog";
 import { useState, useEffect } from "react";
 
 export function MobileNav() {

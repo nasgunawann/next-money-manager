@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import LandingPage from "@/components/landing-page";
-import { PWAOnboarding } from "@/components/pwa-onboarding";
+import LandingPage from "@/components/landing/landing-page";
+import { PWAOnboarding } from "@/components/pwa/pwa-onboarding";
 
 export default function Home() {
   const router = useRouter();
-  const [isPWA, setIsPWA] = useState<boolean | null>(null);
+  const [isPWA, setIsPWA] = useState<boolean>(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -33,13 +33,12 @@ export default function Home() {
     checkPWA();
   }, [router]);
 
-  // Defer rendering until we've checked PWA state to avoid flashing the wrong UI
-  if (isPWA === null) return null;
+  // We no longer defer rendering with null to ensure SEO crawlers see the LandingPage content during SSR
 
   if (isPWA) {
     return <PWAOnboarding />;
   }
 
   // Show landing page for web browsers
-  return <PWAOnboarding />;
+  return <LandingPage />;
 }
