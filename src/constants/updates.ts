@@ -16,7 +16,7 @@ export const UPDATES_HISTORY: UpdateInfo[] = [
   {
     id: "050526-calc-performance",
     version: "Beta v0.3.3",
-    title: "PERF: Input Makin Sat-set!",
+    title: "Patch: Input Makin Sat-set!",
     date: "2026-05-05",
     features: [
       {
