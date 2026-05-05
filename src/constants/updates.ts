@@ -14,6 +14,27 @@ export interface UpdateInfo {
 
 export const UPDATES_HISTORY: UpdateInfo[] = [
   {
+    id: "050526-calc-performance",
+    version: "Beta v0.3.3",
+    title: "Patch: Input Makin Sat-set!",
+    date: "2026-05-05",
+    features: [
+      {
+        title: "⚡ Ultra-Responsive Calculator",
+        description: "Input angka kini jauh lebih ringan! Kami membuang beban render berat agar kalkulator tetap smooth di HP spek menengah.",
+      },
+      {
+        title: "📳 Refined Haptics",
+        description: "Efek getar saat mengetik kini lebih responsif dan hemat energi.",
+      }
+    ],
+    minorFixes: [
+      "Optimisasi render pada komponen keypad.",
+      "Penghapusan efek visual berat yang tidak perlu.",
+      "Perbaikan bug duplikasi kode di internal kalkulator.",
+    ],
+  },
+  {
     id: "040526-pwa-ux-hotfix",
     version: "Beta v0.3.2",
     title: "HOTFIX: Startup Lebih Mulus!",
