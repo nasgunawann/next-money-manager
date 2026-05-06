@@ -42,6 +42,10 @@ export const metadata: Metadata = {
   title: "Kaslo",
   description: "Pencatatan transaksi dan pengendalian anggaran harian.",
   manifest: "/manifest.json",
+  metadataBase: new URL("https://kaslo.nanasgunung.com"),
+  alternates: {
+    canonical: "/",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -50,7 +54,6 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  // Enhanced PWA metadata
   applicationName: "Kaslo",
   referrer: "origin-when-cross-origin",
   keywords: [
@@ -65,6 +68,20 @@ export const metadata: Metadata = {
   authors: [{ name: "Nanasgunung" }],
   creator: "Nanasgunung",
   publisher: "Nanasgunung",
+  verification: {
+    google: "OKh7wKUmUFZBm-Ma4Vy6uGKJb8BdNKPYrrpg-fpFHVE",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     type: "website",
     siteName: "Kaslo",
