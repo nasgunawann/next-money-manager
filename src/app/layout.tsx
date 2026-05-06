@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   title: "Kaslo",
   description: "Pencatatan transaksi dan pengendalian anggaran harian.",
   manifest: "/manifest.json",
-  metadataBase: new URL("https://kaslo.nanasgunung.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://kaslo.nanasgunung.com"),
   alternates: {
     canonical: "/",
   },
