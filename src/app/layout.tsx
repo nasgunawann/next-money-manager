@@ -37,10 +37,14 @@ const geistMono = Geist_Mono({
 
 import Providers from "@/components/shared/providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
-  title: "Kaslo",
-  description: "Pencatatan transaksi dan pengendalian anggaran harian.",
+  title: {
+    default: "Kaslo - Catat Uang Keluar. Selesai.",
+    template: "%s | Kaslo",
+  },
+  description: "Aplikasi manajemen keuangan pribadi untuk mencatat transaksi dan pengendalian anggaran harian secara aman dan mudah.",
   manifest: "/manifest.json",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://kaslo.nanasgunung.com"),
   alternates: {
@@ -57,13 +61,12 @@ export const metadata: Metadata = {
   applicationName: "Kaslo",
   referrer: "origin-when-cross-origin",
   keywords: [
-    "money",
-    "finance",
-    "budget",
-    "transaksi",
-    "keuangan",
-    "pengeluaran",
-    "pemasukan",
+    "money manager",
+    "finance tracker",
+    "catat keuangan",
+    "anggaran harian",
+    "kaslo",
+    "manajemen uang",
   ],
   authors: [{ name: "Nanasgunung" }],
   creator: "Nanasgunung",
@@ -85,13 +88,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Kaslo",
-    title: "Kaslo - Money Manager",
-    description: "Pencatatan transaksi dan pengendalian anggaran harian.",
+    title: "Kaslo - Manajemen Keuangan Pribadi",
+    description: "Aplikasi manajemen keuangan pribadi untuk mencatat transaksi dan pengendalian anggaran harian secara aman dan mudah.",
+    images: [
+      {
+        url: "/dekstopmobile.png",
+        width: 1200,
+        height: 630,
+        alt: "Kaslo Dashboard Preview",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
-    title: "Kaslo - Money Manager",
-    description: "Pencatatan transaksi dan pengendalian anggaran harian.",
+    card: "summary_large_image",
+    title: "Kaslo - Manajemen Keuangan Pribadi",
+    description: "Catat transaksi dan kendalikan anggaran harianmu dengan mudah.",
+    images: ["/dekstopmobile.png"],
   },
 };
 
@@ -149,6 +161,7 @@ export default function RootLayout({
         className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
+          <JsonLd />
           <ServiceWorkerRegistration />
           {children}
           <Toaster position="top-center" richColors />
