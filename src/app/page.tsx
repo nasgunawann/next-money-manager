@@ -1,49 +1,15 @@
-"use client";
+import { Metadata } from "next";
+import HomeContent from "./home-content";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import LandingPage from "@/components/landing/landing-page";
-import { PWAOnboarding } from "@/components/pwa/pwa-onboarding";
+export const metadata: Metadata = {
+  title: "Kaslo - Catat Uang Keluar. Selesai.",
+  description: "Bantu catat alur kas-lo dengan mudah, aman, dan tanpa iklan. Pantau kesehatan finansial kamu dalam satu genggaman.",
+  openGraph: {
+    title: "Kaslo - Manajemen Keuangan Pribadi yang Sederhana",
+    description: "Berhenti menebak ke mana uangmu pergi. Lihat datanya dengan Kaslo.",
+  },
+};
 
 export default function Home() {
-  const router = useRouter();
-  const [isPWA, setIsPWA] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        router.replace("/dashboard");
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Detect if running as PWA
-    const checkPWA = () => {
-      const navigatorWithStandalone = window.navigator as Navigator & {
-        standalone?: boolean;
-      };
-      const isStandalone =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        navigatorWithStandalone.standalone === true ||
-        document.referrer.includes("android-app://");
-      setIsPWA(isStandalone);
-    };
-
-    checkPWA();
-  }, [router]);
-
-  if (loading) {
-    return <div className="min-h-screen bg-background" />;
-  }
-
-  if (isPWA) {
-    return <PWAOnboarding />;
-  }
-
-  // Show landing page for web browsers
-  return <LandingPage />;
+  return <HomeContent />;
 }
