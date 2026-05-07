@@ -2,10 +2,10 @@ import { Metadata } from "next";
 import HomeContent from "./home-content";
 
 export const metadata: Metadata = {
-  title: "Kaslo - Manajemen Keuangan: Catat Uang Keluar, Selesai!",
+  title: "Kaslo - Catat Uang Keluar. Selesai.",
   description: "Kaslo adalah aplikasi manajemen keuangan pribadi yang membantu Anda mencatat transaksi harian, menyusun anggaran cerdas, dan memantau kesehatan finansial secara aman dan tanpa iklan.",
   openGraph: {
-    title: "Kaslo - Manajemen Keuangan: Catat Uang Keluar, Selesai!",
+    title: "Kaslo - Atur Keuanganmu: Catat Uang Keluar, Selesai!",
     description: "Berhenti menebak ke mana uangmu pergi. Pantau setiap rupiah dengan laporan visual yang mudah dipahami. Coba Kaslo sekarang, gratis dan aman!",
     images: [
       {
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kaslo - Manajemen Keuangan Pribadi yang Sederhana",
+    title: "Kaslo - Atur Keuanganmu: Catat Uang Keluar, Selesai!",
     description: "Catat transaksi dan kendalikan anggaran harianmu dengan mudah dalam satu genggaman. Tanpa iklan dan 100% aman.",
     images: ["https://kaslo.nanasgunung.com/dekstopmobile.png"],
   },
