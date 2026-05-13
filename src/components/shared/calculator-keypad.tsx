@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import { IconBackspace, IconCheck, IconDivide, IconMinus, IconPlus, IconX, IconEqual } from "@tabler/icons-react";
 import { cn, formatNumericInput } from "@/lib/utils";
 

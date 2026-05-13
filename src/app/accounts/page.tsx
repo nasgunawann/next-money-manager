@@ -396,7 +396,7 @@ export default function AccountsPage() {
                 <div key={type} className="space-y-3">
                   <div className="flex items-center justify-between border-b border-border/50 pb-2">
                     <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                      {formatAccountType(type as any)}
+                      {formatAccountType(type)}
                     </h3>
                     <p className="text-sm font-bold text-foreground/80">
                       Sub-total: {formatCurrency(group.total, profile?.currency)}
