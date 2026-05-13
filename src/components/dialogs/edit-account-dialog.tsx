@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { IconLoader2, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
@@ -71,6 +72,7 @@ export function EditAccountDialog({
   const [type, setType] = useState(DEFAULT_ICON_OPTION.type);
   const [color, setColor] = useState(COLORS[6]);
   const [iconKey, setIconKey] = useState(DEFAULT_ICON_OPTION.key);
+  const [isMainBalance, setIsMainBalance] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -84,14 +86,36 @@ export function EditAccountDialog({
         ? account.icon
         : account.type;
       setIconKey(preferredKey || DEFAULT_ICON_OPTION.key);
+      setIsMainBalance(account.is_main_balance ?? true);
     }
   }, [account]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!account || !name) return;
-
+ 
     setIsLoading(true);
+    
+    // Simpan data lama untuk rollback jika gagal
+    const previousAccounts = queryClient.getQueryData<Account[]>(["accounts"]);
+    
+    // Update cache secara optimis
+    queryClient.setQueryData<Account[]>(["accounts"], (old) => {
+      if (!old) return old;
+      return old.map((acc) => 
+        acc.id === account.id 
+          ? { 
+              ...acc, 
+              name, 
+              type, 
+              color, 
+              icon: iconKey, 
+              is_main_balance: isMainBalance 
+            } 
+          : acc
+      );
+    });
+ 
     try {
       const { error } = await supabase
         .from("accounts")
@@ -100,15 +124,20 @@ export function EditAccountDialog({
           type,
           color,
           icon: iconKey,
+          is_main_balance: isMainBalance,
         })
         .eq("id", account.id);
-
+ 
       if (error) throw error;
-
+ 
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating account:", error);
+      // Rollback jika terjadi error
+      if (previousAccounts) {
+        queryClient.setQueryData(["accounts"], previousAccounts);
+      }
       setErrorMessage("Gagal memperbarui akun. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
@@ -195,6 +224,25 @@ export function EditAccountDialog({
               onClick={() => setColor(c)}
             />
           ))}
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-2 py-2">
+        <Checkbox
+          id="edit-isMainBalance"
+          checked={isMainBalance}
+          onCheckedChange={(checked) => setIsMainBalance(checked === true)}
+        />
+        <div className="grid gap-1.5 leading-none">
+          <Label
+            htmlFor="edit-isMainBalance"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          >
+            Sertakan dalam Saldo Utama
+          </Label>
+          <p className="text-[11px] text-muted-foreground">
+            Jika aktif, saldo ini akan dihitung dalam ringkasan dashboard.
+          </p>
         </div>
       </div>
 

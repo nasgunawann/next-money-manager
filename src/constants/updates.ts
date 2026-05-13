@@ -14,6 +14,35 @@ export interface UpdateInfo {
 
 export const UPDATES_HISTORY: UpdateInfo[] = [
   {
+    id: "130526-main-balance-grouping",
+    version: "Beta v0.4.0",
+    title: "Update: Dashboard & Aset Lebih Rapi!",
+    date: "2026-05-13",
+    features: [
+      {
+        title: "🎯 Seleksi Saldo Utama",
+        description: "Kini Kamu bisa memilih akun mana saja yang ingin dihitung di Dashboard. Cocok untuk memisahkan dana aktif dan aset jangka panjang!",
+      },
+      {
+        title: "📂 Pengelompokan Aset",
+        description: "Halaman Akun kini lebih rapi dengan grouping otomatis per tipe (Bank, Tunai, E-wallet) lengkap dengan sub-totalnya.",
+      },
+      {
+        title: "⚡ Instant Edit & Delete",
+        description: "Berkat Optimistic UI, perubahan warna atau penghapusan akun kini terasa instan tanpa loading yang mengganggu.",
+      },
+      {
+        title: "🎨 Visual Refresh",
+        description: "Warna aksen yang konsisten di semua halaman dan ikon indikator baru untuk akun yang tersembunyi dari dashboard.",
+      }
+    ],
+    minorFixes: [
+      "Sinkronisasi data antar dialog (Edit & Detail) kini berjalan real-time.",
+      "Optimasi perhitungan total aset di halaman akun.",
+      "Peningkatan responsivitas grid akun pada perangkat mobile.",
+    ],
+  },
+  {
     id: "050526-calc-performance",
     version: "Beta v0.3.3",
     title: "Patch: Input Makin Sat-set!",

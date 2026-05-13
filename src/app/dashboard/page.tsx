@@ -119,7 +119,7 @@ export default function DashboardPage() {
     amountVisible ? formatCurrency(value, profile?.currency) : `${currencySymbol} ••••••`;
 
   const totalBalance =
-    accounts?.reduce((acc, account) => acc + account.balance, 0) || 0;
+    accounts?.reduce((acc, account) => acc + (account.is_main_balance !== false ? account.balance : 0), 0) || 0;
 
   // Get current month's transactions
   const now = new Date();
@@ -264,7 +264,7 @@ export default function DashboardPage() {
               <CardContent className="p-4 md:p-5 space-y-3">
                 <div className="flex flex-col gap-0.5">
                   <p className="text-[11px] font-semibold tracking-wide text-white/90 uppercase">
-                    Total Saldo
+                    Saldo Utama
                   </p>
                   <div className="flex items-center gap-3">
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight tabular-nums">
@@ -376,11 +376,13 @@ export default function DashboardPage() {
                   ref={carouselRef}
                   className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-8 no-scrollbar carousel-smooth"
                 >
-                  {accounts?.map((account) => (
-                    <div key={account.id} className="snap-center shrink-0 w-64">
-                      {renderAccountCard(account)}
-                    </div>
-                  ))}
+                  {accounts
+                    ?.filter((a) => a.is_main_balance !== false)
+                    .map((account) => (
+                      <div key={account.id} className="snap-center shrink-0 w-64">
+                        {renderAccountCard(account)}
+                      </div>
+                    ))}
                   <div className="snap-center shrink-0 w-64">
                     {addAccountCard}
                   </div>

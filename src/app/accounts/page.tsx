@@ -7,13 +7,14 @@ import { formatCurrency, formatAccountType } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  IconPlus, 
-  IconSearch, 
-  IconGripVertical, 
-  IconArrowsSort, 
-  IconCheck, 
-  IconX 
+import {
+  IconPlus,
+  IconSearch,
+  IconGripVertical,
+  IconArrowsSort,
+  IconCheck,
+  IconX,
+  IconEyeDotted
 } from "@tabler/icons-react";
 import { getAccountIconComponent } from "@/constants/account-icons";
 import { AppLayout } from "@/components/layout/app-layout";
@@ -33,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { motion} from "framer-motion";
+import { motion } from "framer-motion";
 
 // DnD Kit Imports
 import {
@@ -54,8 +55,28 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
-// Komponen Item yang bisa di-drag
+ 
+ function withAlpha(color: string, alpha: number) {
+   if (!color) return `rgba(148, 163, 184, ${alpha})`; // slate-400 fallback
+   if (color.startsWith("#")) {
+     const hex = color.slice(1);
+     const full =
+       hex.length === 3
+         ? hex
+             .split("")
+             .map((c) => c + c)
+             .join("")
+         : hex;
+     const int = parseInt(full, 16);
+     const r = (int >> 16) & 255;
+     const g = (int >> 8) & 255;
+     const b = int & 255;
+     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+   }
+   return color;
+ }
+ 
+ // Komponen Item yang bisa di-drag
 function SortableAccountItem({ account, currency, isReordering }: { account: Account, currency?: string, isReordering: boolean }) {
   const {
     attributes,
@@ -93,28 +114,36 @@ function SortableAccountItem({ account, currency, isReordering }: { account: Acc
         variants={wiggleVariants}
         animate={isReordering && !isDragging ? "wiggle" : "idle"}
       >
-        <Card className={`border-none shadow-sm backdrop-blur-sm transition-colors ${isDragging ? "bg-primary/10 ring-2 ring-primary/50" : "bg-card/50"}`}>
+        <Card 
+          className={`border-none shadow-sm backdrop-blur-sm transition-colors ${isDragging ? "ring-2 ring-primary/50" : ""}`}
+          style={{ backgroundColor: withAlpha(account.color || "#94a3b8", 0.12) }}
+        >
           <CardContent className="p-3 flex items-center gap-3">
-            <div 
-              {...attributes} 
-              {...listeners} 
+            <div
+              {...attributes}
+              {...listeners}
               className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-muted rounded-md transition-colors"
               style={{ touchAction: "none" }}
             >
               <IconGripVertical className="h-5 w-5 text-muted-foreground" />
             </div>
-            
+
             <div
               className="h-9 w-9 rounded-full flex items-center justify-center text-white shrink-0"
               style={{ backgroundColor: account.color || "#94a3b8" }}
             >
               <Icon className="h-4.5 w-4.5" />
             </div>
-            
+
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-foreground truncate">
-                {account.name}
-              </p>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <p className="font-semibold text-sm text-foreground truncate">
+                  {account.name}
+                </p>
+                {account.is_main_balance === false && (
+                  <IconEyeDotted className="h-4 w-4 text-amber-500 shrink-0" />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {formatAccountType(account.type)}
               </p>
@@ -162,6 +191,25 @@ export default function AccountsPage() {
       return matchesSearch && matchesType;
     }) || [];
   }, [accounts, localAccounts, searchQuery, filterType, isReordering]);
+  
+  // Grouped accounts calculation
+  const groupedAccounts = useMemo(() => {
+    if (isReordering) return null;
+    
+    const groups: Record<string, { accounts: Account[], total: number }> = {};
+    
+    filteredAccounts.forEach(account => {
+      if (!groups[account.type]) {
+        groups[account.type] = { accounts: [], total: 0 };
+      }
+      groups[account.type].accounts.push(account);
+      groups[account.type].total += account.balance;
+    });
+    
+    return groups;
+  }, [filteredAccounts, isReordering]);
+
+  const orderedTypes = ["cash", "bank", "ewallet", "savings"] as const;
 
   // DnD Sensors
   const sensors = useSensors(
@@ -197,7 +245,7 @@ export default function AccountsPage() {
         const newIndex = items.findIndex((i) => i.id === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
-      
+
       // Getaran halus saat kartu berpindah posisi
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate(30);
@@ -233,9 +281,9 @@ export default function AccountsPage() {
         {/* Header Section */}
         <div className="flex items-center justify-between">
           {!isReordering && accounts && accounts.length > 1 && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="gap-2"
               onClick={() => {
                 if (accounts) setLocalAccounts([...accounts]);
@@ -328,10 +376,10 @@ export default function AccountsPage() {
             >
               <div className="space-y-3">
                 {localAccounts.map((account) => (
-                  <SortableAccountItem 
-                    key={account.id} 
-                    account={account} 
-                    currency={profile?.currency} 
+                  <SortableAccountItem
+                    key={account.id}
+                    account={account}
+                    currency={profile?.currency}
                     isReordering={isReordering}
                   />
                 ))}
@@ -339,42 +387,68 @@ export default function AccountsPage() {
             </SortableContext>
           </DndContext>
         ) : filteredAccounts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {filteredAccounts.map((account) => {
-              const Icon = getAccountIconComponent(account.icon, account.type);
+          <div className="space-y-8">
+            {orderedTypes.map(type => {
+              const group = groupedAccounts?.[type];
+              if (!group || group.accounts.length === 0) return null;
+              
               return (
-                <Card
-                  key={account.id}
-                  className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer bg-card/60"
-                  onClick={() => setSelectedAccount(account)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-8 w-8 rounded-full flex items-center justify-center text-white shrink-0"
-                          style={{
-                            backgroundColor: account.color || "#94a3b8",
-                          }}
+                <div key={type} className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-border/50 pb-2">
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                      {formatAccountType(type as any)}
+                    </h3>
+                    <p className="text-sm font-bold text-foreground/80">
+                      Sub-total: {formatCurrency(group.total, profile?.currency)}
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {group.accounts.map((account) => {
+                      const Icon = getAccountIconComponent(account.icon, account.type);
+                      return (
+                        <Card
+                          key={account.id}
+                          className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                          style={{ backgroundColor: withAlpha(account.color || "#94a3b8", 0.12) }}
+                          onClick={() => setSelectedAccount(account)}
                         >
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-[13px] text-foreground truncate">
-                            {account.name}
-                          </p>
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">
-                            {formatAccountType(account.type)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <p className="text-base font-black text-foreground tabular-nums">
-                        {formatCurrency(account.balance, profile?.currency)}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                          <CardContent className="p-3">
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="h-8 w-8 rounded-full flex items-center justify-center text-white shrink-0"
+                                  style={{
+                                    backgroundColor: account.color || "#94a3b8",
+                                  }}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1 min-w-0">
+                                    <p className="font-bold text-[13px] text-foreground truncate">
+                                      {account.name}
+                                    </p>
+                                    {account.is_main_balance === false && (
+                                      <IconEyeDotted className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                                    )}
+                                  </div>
+                                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">
+                                    {formatAccountType(account.type)}
+                                  </p>
+                                </div>
+                              </div>
+        
+                              <p className="text-base font-black text-foreground tabular-nums">
+                                {formatCurrency(account.balance, profile?.currency)}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>

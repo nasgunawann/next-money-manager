@@ -34,6 +34,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { IconLoader2 } from "@tabler/icons-react";
 import {
@@ -82,6 +83,7 @@ export function AddAccountDialog({
   const [balance, setBalance] = useState("");
   const [color, setColor] = useState(COLORS[6]); // Default Blue
   const [iconKey, setIconKey] = useState(DEFAULT_ICON_OPTION.key);
+  const [isMainBalance, setIsMainBalance] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -93,6 +95,7 @@ export function AddAccountDialog({
     setBalance("");
     setColor(COLORS[6]);
     setIconKey(DEFAULT_ICON_OPTION.key);
+    setIsMainBalance(true);
     setIsDirty(false);
   };
 
@@ -133,6 +136,7 @@ export function AddAccountDialog({
       balance: numericBalance,
       color,
       icon: iconKey,
+      is_main_balance: isMainBalance,
     };
 
     queryClient.setQueryData<Account[]>(["accounts"], (old = []) => [
@@ -150,6 +154,7 @@ export function AddAccountDialog({
           balance: numericBalance,
           color,
           icon: iconKey,
+          is_main_balance: isMainBalance,
         })
         .select()
         .single();
@@ -321,6 +326,28 @@ export function AddAccountDialog({
               }}
             />
           ))}
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-2 py-2">
+        <Checkbox
+          id="isMainBalance"
+          checked={isMainBalance}
+          onCheckedChange={(checked) => {
+            setIsMainBalance(checked === true);
+            setIsDirty(true);
+          }}
+        />
+        <div className="grid gap-1.5 leading-none">
+          <Label
+            htmlFor="isMainBalance"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          >
+            Sertakan dalam Saldo Utama
+          </Label>
+          <p className="text-[11px] text-muted-foreground">
+            Jika aktif, saldo ini akan dihitung dalam ringkasan dashboard.
+          </p>
         </div>
       </div>
 

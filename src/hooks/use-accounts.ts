@@ -10,6 +10,7 @@ export interface Account {
   color: string;
   icon: string;
   sort_order?: number;
+  is_main_balance?: boolean;
 }
 
 export function useAccounts() {

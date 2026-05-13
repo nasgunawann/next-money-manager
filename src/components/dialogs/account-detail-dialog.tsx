@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useProfile } from "@/hooks/use-profile";
+import { useAccounts } from "@/hooks/use-accounts";
 import { useTransactions } from "@/hooks/use-transactions";
 import { formatCurrency, formatAccountType } from "@/lib/utils";
 import {
@@ -52,16 +53,20 @@ export function AccountDetailDialog({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data: profile } = useProfile();
   const { data: transactions } = useTransactions();
+  const { data: accounts } = useAccounts();
   const queryClient = useQueryClient();
-
+ 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!account) return null;
-
-  const AccountIcon = getAccountIconComponent(account.icon, account.type);
+ 
+  // Gunakan data terbaru dari cache jika ada
+  const currentAccount = accounts?.find(a => a.id === account.id) || account;
+ 
+  const AccountIcon = getAccountIconComponent(currentAccount.icon, currentAccount.type);
 
   // Get transactions for this account
   const accountTransactions =
@@ -69,15 +74,19 @@ export function AccountDetailDialog({
 
   const handleDelete = async () => {
     if (!account) return;
-
+ 
     setIsDeleting(true);
+    
+    // Simpan data lama untuk rollback
+    const previousAccounts = queryClient.getQueryData<Account[]>(["accounts"]);
+ 
     try {
-      // Check if there are transactions for this account
+      // Cek apakah ada transaksi (Server-side check tetap diperlukan untuk keamanan)
       const { count } = await supabase
         .from("transactions")
         .select("*", { count: "exact", head: true })
         .eq("account_id", account.id);
-
+ 
       if (count && count > 0) {
         setErrorMessage(
           "Tidak dapat menghapus sumber dana yang memiliki transaksi. Hapus transaksi terlebih dahulu."
@@ -86,20 +95,32 @@ export function AccountDetailDialog({
         setIsDeleting(false);
         return;
       }
-
-      // Delete the account
+ 
+      // Update cache secara optimis (Hapus dari list)
+      queryClient.setQueryData<Account[]>(["accounts"], (old) => {
+        if (!old) return old;
+        return old.filter((acc) => acc.id !== account.id);
+      });
+ 
+      // Tutup dialog segera
+      onOpenChange(false);
+ 
+      // Jalankan penghapusan di server
       const { error } = await supabase
         .from("accounts")
         .delete()
         .eq("id", account.id);
-
+ 
       if (error) throw error;
-
+ 
       await queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      onOpenChange(false); // Close the detail dialog
     } catch (error) {
       console.error("Error deleting account:", error);
-      setErrorMessage("Gagal menghapus sumber dana");
+      // Rollback jika gagal
+      if (previousAccounts) {
+        queryClient.setQueryData(["accounts"], previousAccounts);
+      }
+      setErrorMessage("Gagal menghapus sumber dana. Silakan coba lagi.");
     } finally {
       setIsDeleting(false);
       setShowDeleteAlert(false);
@@ -133,17 +154,17 @@ export function AccountDetailDialog({
       <div className="flex items-center gap-4">
         <div
           className="h-16 w-16 rounded-full flex items-center justify-center text-white shrink-0"
-          style={{ backgroundColor: account.color || "#94a3b8" }}
+          style={{ backgroundColor: currentAccount.color || "#94a3b8" }}
         >
           <AccountIcon className="h-8 w-8" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{account.name}</h3>
+          <h3 className="text-lg font-semibold">{currentAccount.name}</h3>
           <p className="text-sm text-muted-foreground">
-            {formatAccountType(account.type)}
+            {formatAccountType(currentAccount.type)}
           </p>
           <p className="text-2xl font-bold mt-2">
-            {formatCurrency(account.balance, profile?.currency)}
+            {formatCurrency(currentAccount.balance, profile?.currency)}
           </p>
         </div>
       </div>
@@ -266,17 +287,17 @@ export function AccountDetailDialog({
             <div className="flex items-center gap-4">
               <div
                 className="h-16 w-16 rounded-full flex items-center justify-center text-white shrink-0"
-                style={{ backgroundColor: account.color || "#94a3b8" }}
+                style={{ backgroundColor: currentAccount.color || "#94a3b8" }}
               >
                 <AccountIcon className="h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold">{account.name}</h3>
+                <h3 className="text-lg font-semibold">{currentAccount.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {formatAccountType(account.type)}
+                  {formatAccountType(currentAccount.type)}
                 </p>
                 <p className="text-2xl font-bold mt-2">
-                  {formatCurrency(account.balance, profile?.currency)}
+                  {formatCurrency(currentAccount.balance, profile?.currency)}
                 </p>
               </div>
             </div>
