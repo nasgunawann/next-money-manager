@@ -294,7 +294,7 @@ export function EditAccountDialog({
               <span className="sr-only">Close</span>
             </DrawerClose>
           </DrawerHeader>
-          <div className="pb-8">{FormContent}</div>
+          <div className="overflow-y-auto max-h-[calc(80vh-140px)] pb-12">{FormContent}</div>
         </DrawerContent>
       </Drawer>
       {errorDialog}

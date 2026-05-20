@@ -261,7 +261,7 @@ export function ManageCategoriesDialog({
             Lihat dan hapus kategori buatan Anda
           </DrawerDescription>
         </DrawerHeader>
-        <div className="pb-8 px-4">{Content}</div>
+        <div className="overflow-y-auto max-h-[calc(80vh-140px)] pb-12 px-4">{Content}</div>
       </DrawerContent>
     </Drawer>
   );

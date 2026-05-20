@@ -163,9 +163,26 @@ export function AddTransactionDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const numericAmount = numericInputToNumber(amount);
-    if (!numericAmount || !accountId || !date) return;
-    if (isTransfer && !targetAccountId) return;
-    if (!isTransfer && !categoryId) return;
+    if (!numericAmount || numericAmount <= 0) {
+      setErrorMessage("Jumlah transaksi harus lebih besar dari 0");
+      return;
+    }
+    if (!accountId) {
+      setErrorMessage("Silakan pilih sumber dana asal terlebih dahulu");
+      return;
+    }
+    if (isTransfer && !targetAccountId) {
+      setErrorMessage("Silakan pilih sumber dana tujuan terlebih dahulu");
+      return;
+    }
+    if (!isTransfer && !categoryId) {
+      setErrorMessage("Silakan pilih kategori transaksi terlebih dahulu");
+      return;
+    }
+    if (!date) {
+      setErrorMessage("Silakan pilih tanggal transaksi terlebih dahulu");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -960,7 +977,7 @@ export function AddTransactionDialog({
           <DrawerHeader className="text-left">
             <DrawerTitle>Tambah Transaksi</DrawerTitle>
           </DrawerHeader>
-          <div className="pb-8">{FormContent}</div>
+          <div className="overflow-y-auto max-h-[calc(80vh-120px)] pb-12">{FormContent}</div>
         </DrawerContent>
       </Drawer>
       {accountDrawer}

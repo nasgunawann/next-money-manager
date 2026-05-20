@@ -90,10 +90,27 @@ export function EditTransactionDialog({
       setDescription(transaction.description || "");
     }
   }, [transaction]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!transaction || !amount || !accountId || !date) return;
+    if (!transaction) return;
+
+    const numericAmount = numericInputToNumber(amount);
+    if (!numericAmount || numericAmount <= 0) {
+      toast.error("Jumlah transaksi harus lebih besar dari 0");
+      return;
+    }
+    if (!accountId) {
+      toast.error("Silakan pilih sumber dana terlebih dahulu");
+      return;
+    }
+    if (!isTransfer && !categoryId) {
+      toast.error("Silakan pilih kategori terlebih dahulu");
+      return;
+    }
+    if (!date) {
+      toast.error("Silakan pilih tanggal terlebih dahulu");
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -541,7 +558,7 @@ export function EditTransactionDialog({
           <DrawerHeader className="text-left">
             <DrawerTitle>Edit Transaksi</DrawerTitle>
           </DrawerHeader>
-          <div className="pb-8">{FormContent}</div>
+          <div className="overflow-y-auto max-h-[calc(80vh-120px)] pb-12">{FormContent}</div>
         </DrawerContent>
       </Drawer>
       {accountDrawer}

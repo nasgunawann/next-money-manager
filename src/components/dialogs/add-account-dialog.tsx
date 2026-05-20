@@ -398,7 +398,7 @@ export function AddAccountDialog({
               Buat akun baru untuk melacak keuangan Anda.
             </DrawerDescription>
           </DrawerHeader>
-          <div className="pb-8">{FormContent}</div>
+          <div className="overflow-y-auto max-h-[calc(80vh-140px)] pb-12">{FormContent}</div>
         </DrawerContent>
       </Drawer>
       {errorDialog}
